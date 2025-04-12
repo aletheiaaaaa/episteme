@@ -327,6 +327,7 @@ namespace episteme {
                 case ('r'): return PromoPiece::Rook;
                 case ('b'): return PromoPiece::Bishop;
                 case ('n'): return PromoPiece::Knight;
+                default: break;
             }
         };
 

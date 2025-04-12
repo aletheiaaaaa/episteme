@@ -1,20 +1,6 @@
 #include "uci.h"
 
 namespace episteme {
-    int parse(const std::string& cmd) {
-        std::string keyword = cmd.substr(0, cmd.find(' '));
-        search::Parameters params;
-
-        if (keyword == "uci") uci();
-        else if (keyword == "isready") isReady();
-        else if (keyword == "position") position(cmd.substr(cmd.find(" ")+1), params);
-        else if (keyword == "go") go(cmd.substr(cmd.find(' ')+1), params);
-        else if (keyword == "ucinewgame") uciNewGame(params);
-        else if (keyword == "quit") return 0;
-        else std::cout << "invalid command";
-
-        return 0;
-    }
 
     auto uci() {
         std::cout << "id name Episteme \nid author Carbon";
@@ -29,7 +15,6 @@ namespace episteme {
         std::string token;
 
         std::string fen;
-        int i = 0;
         for (int i = 0; i < 6 && iss >> token; ++i) {
             if (!fen.empty()) fen += " ";
             fen += token;
@@ -62,9 +47,27 @@ namespace episteme {
             else if (token == "binc") params.inc[1] = std::stoi(token);
             else std::cout << "invalid command";
         }
+
+        search::Worker worker;
+        worker.parameters = params;
+        worker.run();
     }
 
     auto uciNewGame(search::Parameters params) {
         params = {};
+    }
+
+    int parse(const std::string& cmd, search::Parameters& params) {
+        std::string keyword = cmd.substr(0, cmd.find(' '));
+
+        if (keyword == "uci") uci();
+        else if (keyword == "isready") isReady();
+        else if (keyword == "position") position(cmd.substr(cmd.find(" ")+1), params);
+        else if (keyword == "go") go(cmd.substr(cmd.find(' ')+1), params);
+        else if (keyword == "ucinewgame") uciNewGame(params);
+        else if (keyword == "quit") std::exit(0);
+        else std::cout << "invalid command";
+
+        return 0;
     }
 }

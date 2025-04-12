@@ -1,3 +1,5 @@
+#pragma once
+
 #include "chess/position.h"
 #include "search.h"
 
@@ -7,7 +9,7 @@
 #include <array>
 
 namespace episteme {
-    int parse(const std::string& cmd);
+    int parse(const std::string& cmd, search::Parameters& params);
 
     auto uci();
     auto isReady();

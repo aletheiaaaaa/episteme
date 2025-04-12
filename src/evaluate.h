@@ -1,3 +1,5 @@
+#pragma once
+
 #include "nnue.h"
 #include "./chess/position.h"
 #include "./utils/incbin.h"

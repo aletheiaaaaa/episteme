@@ -1,6 +1,6 @@
 #include "evaluate.h"
 
-INCBIN(NNUE, "./episteme_test_net.bin");;
+INCBIN(NNUE, "src/episteme_test_net.bin");;
 
 namespace episteme {
     using namespace nn;

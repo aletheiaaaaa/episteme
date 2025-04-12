@@ -74,37 +74,36 @@ namespace episteme {
     };
 
     struct AllowedCastles {
-        class RookPair {
-            public:
-                Square kingside{Square::None};
-                Square queenside{Square::None};
+        struct RookPair {
+            Square kingside{Square::None};
+            Square queenside{Square::None};
 
-                [[nodiscard]] inline bool isKingsideSet() const {
-                    if (kingside != Square::None) {
-                        return true;
-                    }
-                    return false;            
-                };
+            [[nodiscard]] inline bool isKingsideSet() const {
+                if (kingside != Square::None) {
+                    return true;
+                }
+                return false;            
+            };
 
-                [[nodiscard]] inline bool isQueensideSet() const {
-                    if (queenside != Square::None) {
-                        return true;
-                    }
-                    return false;
-                };
+            [[nodiscard]] inline bool isQueensideSet() const {
+                if (queenside != Square::None) {
+                    return true;
+                }
+                return false;
+            };
 
-                inline void clear() {
-                    kingside = Square::None; 
-                    queenside = Square::None;            
-                };
+            inline void clear() {
+                kingside = Square::None; 
+                queenside = Square::None;            
+            };
 
-                inline void unset(bool isKingside) {
-                    if (isKingside) {
-                        kingside = Square::None;
-                    } else {
-                        queenside = Square::None;
-                    }            
-                };
+            inline void unset(bool isKingside) {
+                if (isKingside) {
+                    kingside = Square::None;
+                } else {
+                    queenside = Square::None;
+                }            
+            };
         };
         std::array<RookPair, 2> rooks{};
     };

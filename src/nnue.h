@@ -1,3 +1,5 @@
+#pragma once
+
 #include "chess/core.h"
 
 #include <cstdint>
