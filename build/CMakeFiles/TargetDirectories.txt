@@ -1,0 +1,3 @@
+/home/yash/Desktop/Valhalla/build/CMakeFiles/valhalla.exe.dir
+/home/yash/Desktop/Valhalla/build/CMakeFiles/edit_cache.dir
+/home/yash/Desktop/Valhalla/build/CMakeFiles/rebuild_cache.dir

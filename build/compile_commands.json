@@ -1,0 +1,32 @@
+[
+{
+  "directory": "/home/yash/Desktop/Valhalla/build",
+  "command": "/usr/bin/c++   -Wall -Wextra -O3 -flto -std=gnu++20 -o CMakeFiles/valhalla.exe.dir/src/main.cpp.o -c /home/yash/Desktop/Valhalla/src/main.cpp",
+  "file": "/home/yash/Desktop/Valhalla/src/main.cpp",
+  "output": "CMakeFiles/valhalla.exe.dir/src/main.cpp.o"
+},
+{
+  "directory": "/home/yash/Desktop/Valhalla/build",
+  "command": "/usr/bin/c++   -Wall -Wextra -O3 -flto -std=gnu++20 -o CMakeFiles/valhalla.exe.dir/src/chess/position.cpp.o -c /home/yash/Desktop/Valhalla/src/chess/position.cpp",
+  "file": "/home/yash/Desktop/Valhalla/src/chess/position.cpp",
+  "output": "CMakeFiles/valhalla.exe.dir/src/chess/position.cpp.o"
+},
+{
+  "directory": "/home/yash/Desktop/Valhalla/build",
+  "command": "/usr/bin/c++   -Wall -Wextra -O3 -flto -std=gnu++20 -o CMakeFiles/valhalla.exe.dir/src/chess/move.cpp.o -c /home/yash/Desktop/Valhalla/src/chess/move.cpp",
+  "file": "/home/yash/Desktop/Valhalla/src/chess/move.cpp",
+  "output": "CMakeFiles/valhalla.exe.dir/src/chess/move.cpp.o"
+},
+{
+  "directory": "/home/yash/Desktop/Valhalla/build",
+  "command": "/usr/bin/c++   -Wall -Wextra -O3 -flto -std=gnu++20 -o CMakeFiles/valhalla.exe.dir/src/chess/movegen.cpp.o -c /home/yash/Desktop/Valhalla/src/chess/movegen.cpp",
+  "file": "/home/yash/Desktop/Valhalla/src/chess/movegen.cpp",
+  "output": "CMakeFiles/valhalla.exe.dir/src/chess/movegen.cpp.o"
+},
+{
+  "directory": "/home/yash/Desktop/Valhalla/build",
+  "command": "/usr/bin/c++   -Wall -Wextra -O3 -flto -std=gnu++20 -o CMakeFiles/valhalla.exe.dir/src/chess/perft.cpp.o -c /home/yash/Desktop/Valhalla/src/chess/perft.cpp",
+  "file": "/home/yash/Desktop/Valhalla/src/chess/perft.cpp",
+  "output": "CMakeFiles/valhalla.exe.dir/src/chess/perft.cpp.o"
+}
+]
