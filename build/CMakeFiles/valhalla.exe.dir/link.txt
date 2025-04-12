@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wall -Wextra -O3 -flto CMakeFiles/valhalla.exe.dir/src/main.cpp.o CMakeFiles/valhalla.exe.dir/src/chess/position.cpp.o CMakeFiles/valhalla.exe.dir/src/chess/move.cpp.o CMakeFiles/valhalla.exe.dir/src/chess/movegen.cpp.o CMakeFiles/valhalla.exe.dir/src/chess/perft.cpp.o -o valhalla.exe
