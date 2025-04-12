@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.10.0)
+project(valhalla)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -fsanitize=address -fsanitize=undefined")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+set(CMAKE_CXX_STANDARD 20)
+set(SRC "${CMAKE_SOURCE_DIR}/src")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+add_executable(valhalla.exe "${SRC}/main.cpp" "${SRC}/chess/position.cpp" "${SRC}/chess/move.cpp" "${SRC}/chess/movegen.cpp" "${SRC}/chess/perft.cpp")
