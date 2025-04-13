@@ -81,10 +81,10 @@ namespace valhalla {
         double seconds = duration.count() / 1000.0;
         double nps = nodes / (seconds > 0 ? seconds : 1.0);  // avoid divide-by-zero
 
-        std::cout << "Depth: " << depth << "\n";
-        std::cout << "Nodes: " << nodes << "\n";
-        std::cout << "Time:  " << std::fixed << std::setprecision(3) << seconds << "s\n";
-        std::cout << "NPS:   " << static_cast<uint64_t>(nps) << "\n";
+        std::cout << "Depth: " << depth << " | ";
+        std::cout << "Nodes: " << nodes << " | ";
+        std::cout << "Time: " << std::fixed << std::setprecision(3) << seconds << " | ";
+        std::cout << "NPS: " << static_cast<uint64_t>(nps) << "\n";
     }
 
 }

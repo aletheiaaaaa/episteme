@@ -2,6 +2,8 @@
 
 #include "position.h"
 #include <unordered_set>
+#include <bit>
+#include <random>
 
 namespace valhalla {
     class MoveList {

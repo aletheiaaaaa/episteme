@@ -12,7 +12,7 @@ namespace valhalla {
             allowedCastles.rooks[c].queenside = Square::None;
         }
 
-        stm = false;
+        stm = colorIdx(Color::White);
         halfClock = 0;
         fullNumber = 0;
         enPassant = Square::None;
@@ -324,5 +324,4 @@ namespace valhalla {
         fullNumber = prev.fullNumber;
         enPassant = prev.enPassant;
     }
-
 }

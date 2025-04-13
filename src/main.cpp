@@ -12,7 +12,6 @@ using namespace valhalla;
 int main(){
     Position position;
     position.fromStartPos();
-    std::cout << position.toFEN() << std::endl;
     for (int i = 1; i <= 6; i++) {
         timePerft(position, i);
     }

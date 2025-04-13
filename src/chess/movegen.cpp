@@ -1,8 +1,4 @@
 #include "movegen.h"
-#include <bit>
-#include <random>
-#include <iostream>
-#include <cassert>
 
 namespace valhalla {
     std::array<uint64_t, 64> fillKingAttacks() {
@@ -266,7 +262,7 @@ namespace valhalla {
                 attacksBB = getAttacks(fromSq, position) & ~usBB;
             } else {
                 attacksBB = getAttacks(fromSq) & ~usBB;
-            }    
+            }
             while (attacksBB != 0) {
                 Square toSq = sqFromIdx(std::countr_zero(attacksBB));
                 moveList.addMove({fromSq, toSq});
