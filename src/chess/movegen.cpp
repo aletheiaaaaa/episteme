@@ -357,7 +357,7 @@ namespace valhalla {
         size_t end = std::max(sqIdx(rookSrc), sqIdx(kingSrc));
 
         for (size_t sq = (start + 1); sq <= (end - 1); sq++) {
-            Piece piece = position.mailbox()[sq];
+            Piece piece = position.mailbox(sq);
             if (piece != Piece::None) {
                 return;
             }

@@ -16,8 +16,8 @@ namespace valhalla {
         generateAllMoves(moveList, position);
         uint64_t moveCount = 0;
 
-        for (size_t i = 0; i < moveList.getCount(); i++) {
-            position.makeMove(moveList.getList()[i]);
+        for (size_t i = 0; i < moveList.count(); i++) {
+            position.makeMove(moveList.list(i));
         
             uint64_t kingBB = position.bitboard(pieceTypeIdx(PieceType::King)) & position.bitboard(colorIdx(position.nSTM()) + position.COLOR_OFFSET);
                 
@@ -42,14 +42,14 @@ namespace valhalla {
     
         uint64_t total = 0;
     
-        for (size_t i = 0; i < moveList.getCount(); ++i) {
-            Move move = moveList.getList()[i];
+        for (size_t i = 0; i < moveList.count(); ++i) {
+            Move move = moveList.list(i);
             position.makeMove(move);
     
             uint64_t kingBB = position.bitboard(pieceTypeIdx(PieceType::King)) & position.bitboard(colorIdx(position.nSTM()) + position.COLOR_OFFSET);
 
             if (kingBB == 0) {
-                std::cerr << "KingBB is zero after move: " << moveList.getList()[i].toString() << "\nFEN: " << position.toFEN() << "\nMove idx: " << i << "\n";
+                std::cerr << "KingBB is zero after move: " << move.toString() << "\nFEN: " << position.toFEN() << "\nMove idx: " << i << "\n";
             }
     
             bool illegal = isSquareAttacked(sqFromIdx(std::countr_zero(kingBB)), position, position.STM());

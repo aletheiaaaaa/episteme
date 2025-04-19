@@ -9,24 +9,24 @@ namespace valhalla {
     class MoveList {
         public:
             inline void addMove(const Move& move) {
-                list[count] = move;
-                count++;
+                theList[theCount] = move;
+                theCount++;
             }
         
             inline void clearMoves() {
-                count = 0;
+                theCount = 0;
             }
         
-            [[nodiscard]] inline uint32_t getCount() const {
-                return count;
+            [[nodiscard]] inline uint32_t count() const {
+                return theCount;
             }
         
-            [[nodiscard]] inline const std::array<Move, 256>& getList() const {
-                return list;
+            [[nodiscard]] inline const Move list(int index) const {
+                return theList[index];
             }
         private:
-        std::array<Move, 256> list;
-        uint32_t count = 0;
+        std::array<Move, 256> theList;
+        uint32_t theCount = 0;
     };
 
     struct PawnAttacks {

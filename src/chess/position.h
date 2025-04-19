@@ -50,8 +50,8 @@ namespace valhalla {
                 return allowedCastles;
             }
         
-            [[nodiscard]] inline  std::array<Piece, 64> mailbox() const {
-                return theMailbox;
+            [[nodiscard]] inline Piece mailbox(int index) const {
+                return theMailbox[index];
             }
                 
             void fromFEN(std::string_view FEN);
