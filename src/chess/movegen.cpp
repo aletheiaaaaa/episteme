@@ -346,7 +346,7 @@ namespace valhalla {
 
         Square rookSrc = isKingside ? position.castlingRights().rooks[colorIdx(stm)].kingside : position.castlingRights().rooks[colorIdx(stm)].queenside;
 
-        if (isSquareAttacked(kingSrc, position, position.nSTM())) {
+        if (isSquareAttacked(kingSrc, position, position.NTM())) {
             return;
         }
 
@@ -364,7 +364,7 @@ namespace valhalla {
         }
 
         for (size_t sq = kingStart; sq <= kingEnd; sq++) {
-            if ((sq != sqIdx(kingSrc)) && isSquareAttacked(sqFromIdx(sq), position, position.nSTM())) {
+            if ((sq != sqIdx(kingSrc)) && isSquareAttacked(sqFromIdx(sq), position, position.NTM())) {
                 return;
             }
         }

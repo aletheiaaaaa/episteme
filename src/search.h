@@ -1,4 +1,6 @@
 #include "./movegen.h"
+#include "evaluate.h"
+
 #include <cstdint>
 
 namespace valhalla {

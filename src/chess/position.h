@@ -22,6 +22,10 @@ namespace valhalla {
         public:
             Position();
 
+            [[nodiscard]] inline std::array<uint64_t, 8> bitboardAll() const {
+                return bitboards;
+            }
+
             [[nodiscard]] inline uint64_t bitboard(int index) const {
                 return bitboards[index];
             }
@@ -30,7 +34,7 @@ namespace valhalla {
                 return static_cast<Color>(stm);
             }
         
-            [[nodiscard]] inline Color nSTM() const {
+            [[nodiscard]] inline Color NTM() const {
                 return static_cast<Color>(!stm);
             }
         
@@ -53,11 +57,16 @@ namespace valhalla {
             [[nodiscard]] inline Piece mailbox(int index) const {
                 return theMailbox[index];
             }
-                
+
+            [[nodiscard]] inline std::array<Piece, 64> mailboxAll() const {
+                return theMailbox;
+            }
+
+            
             void fromFEN(std::string_view FEN);
             std::string toFEN() const; 
             void fromStartPos();
-            void makeMove(const Move &move);
+            void makeMove(const Move& move);
             void unmakeMove();
 
         public:

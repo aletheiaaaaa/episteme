@@ -134,6 +134,13 @@ namespace valhalla {
         return static_cast<Piece>(2 * static_cast<uint16_t>(pieceType) + static_cast<uint16_t>(color));
     }
 
+    [[nodiscard]] inline int16_t pieceSquare(Piece piece, Square square) {
+        if (piece == Piece::None) {
+            return -1;
+        };
+        return static_cast<int16_t>(color(piece)) * 384 + static_cast<int16_t>(pieceType(piece)) * 64 + static_cast<int16_t>(square);
+    }
+
     [[nodiscard]] inline Square sqFromIdx(size_t index) {
         return static_cast<Square>(index);
     }
