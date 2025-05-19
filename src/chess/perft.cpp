@@ -1,6 +1,6 @@
 #include "perft.h"
 
-namespace valhalla {
+namespace episteme {
     Position fen2Position(std::string_view FEN) {
         Position position;
         position.fromFEN(FEN);

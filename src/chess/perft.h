@@ -7,7 +7,7 @@
 #include <chrono>
 #include <iomanip>
 
-namespace valhalla {
+namespace episteme {
     Position fen2Position(std::string_view FEN);
     uint64_t perft(Position &position, int32_t depth);
     void splitPerft(Position &position, int32_t depth);

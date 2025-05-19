@@ -2,7 +2,7 @@
 
 INCBIN(NNUE, "./valhalla_test_net.bin");;
 
-namespace valhalla {
+namespace episteme {
     NNUE nnue = *reinterpret_cast<const NNUE*>(gNNUEData);
 
     int32_t evaluate(Position position) {

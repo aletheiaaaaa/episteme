@@ -1,21 +1,21 @@
 #include "position.h"
 
-namespace valhalla {
+namespace episteme {
 
     Position::Position() {
-        bitboards.fill(0);
-        theMailbox.fill(Piece::None);
+        state.bitboard.fill(0);
+        state.mailbox.fill(Piece::None);
         positionHistory.reserve(1024);
 
         for (int c = 0; c < 2; ++c) {
-            allowedCastles.rooks[c].kingside = Square::None;
-            allowedCastles.rooks[c].queenside = Square::None;
+            state.allowedCastles.rooks[c].kingside = Square::None;
+            state.allowedCastles.rooks[c].queenside = Square::None;
         }
 
-        stm = colorIdx(Color::White);
-        halfClock = 0;
-        fullNumber = 0;
-        enPassant = Square::None;
+        state.stm = colorIdx(Color::White);
+        state.halfClock = 0;
+        state.fullNumber = 0;
+        state.enPassant = Square::None;
     }
 
     void Position::fromFEN(std::string_view FEN) {
@@ -41,43 +41,34 @@ namespace valhalla {
                     Piece piece = pieceTypeWithColor(type, color);
                     uint64_t sq = (uint64_t)1 << squareIdx;
 
-                    bitboards[pieceTypeIdx(type)] ^= sq;
-                    bitboards[colorIdx(color) + COLOR_OFFSET] ^= sq;
-                    theMailbox[squareIdx] = piece;
+                    state.bitboard[pieceTypeIdx(type)] ^= sq;
+                    state.bitboard[colorIdx(color) + COLOR_OFFSET] ^= sq;
+                    state.mailbox[squareIdx] = piece;
                 }
                 ++squareIdx;
             }
         }
 
-        stm = (tokens[1] == "w") ? 0 : 1;
+        state.stm = (tokens[1] == "w") ? 0 : 1;
 
         if (tokens[2] != "-") {
             for (char c : tokens[2]) {
                 switch (c) {
-                    case 'K': allowedCastles.rooks[colorIdx(Color::White)].kingside = Square::H1; break;
-                    case 'Q': allowedCastles.rooks[colorIdx(Color::White)].queenside = Square::A1; break;
-                    case 'k': allowedCastles.rooks[colorIdx(Color::Black)].kingside = Square::H8; break;
-                    case 'q': allowedCastles.rooks[colorIdx(Color::Black)].queenside = Square::A8; break;
+                    case 'K': state.allowedCastles.rooks[colorIdx(Color::White)].kingside = Square::H1; break;
+                    case 'Q': state.allowedCastles.rooks[colorIdx(Color::White)].queenside = Square::A1; break;
+                    case 'k': state.allowedCastles.rooks[colorIdx(Color::Black)].kingside = Square::H8; break;
+                    case 'q': state.allowedCastles.rooks[colorIdx(Color::Black)].queenside = Square::A8; break;
                 }
             }
         }
 
         if (tokens[3] != "-") {
-            enPassant = static_cast<Square>((tokens[3][0] - 'a') * 8 + (tokens[3][1] - '1'));
+            state.enPassant = static_cast<Square>((tokens[3][0] - 'a') * 8 + (tokens[3][1] - '1'));
         }
 
-        halfClock = std::stoi(tokens[4]);
-        fullNumber = std::stoi(tokens[5]);
+        state.halfClock = std::stoi(tokens[4]);
+        state.fullNumber = std::stoi(tokens[5]);
 
-        PositionState state = {
-            .bitboards = bitboards,
-            .theMailbox = theMailbox,
-            .allowedCastles = allowedCastles,
-            .stm = stm,
-            .halfClock = halfClock,
-            .fullNumber = fullNumber,
-            .enPassant = enPassant
-        };
         positionHistory.push_back(state);
     }
 
@@ -87,7 +78,7 @@ namespace valhalla {
         for (int rank = 7; rank >= 0; --rank) {
             int empty = 0;
             for (int file = 0; file < 8; ++file) {
-                Piece piece = theMailbox[rank * 8 + file];
+                Piece piece = state.mailbox[rank * 8 + file];
                 if (piece == Piece::None) {
                     ++empty;
                 } else {
@@ -116,102 +107,91 @@ namespace valhalla {
                 fen += '/';
         }
     
-        fen += (stm == static_cast<bool>(Color::White)) ? " w " : " b ";
+        fen += (state.stm == static_cast<bool>(Color::White)) ? " w " : " b ";
     
         std::string castling;
-        if (allowedCastles.rooks[colorIdx(Color::White)].isKingsideSet()) castling += 'K';
-        if (allowedCastles.rooks[colorIdx(Color::White)].isQueensideSet()) castling += 'Q';
-        if (allowedCastles.rooks[colorIdx(Color::Black)].isKingsideSet()) castling += 'k';
-        if (allowedCastles.rooks[colorIdx(Color::Black)].isQueensideSet()) castling += 'q';
+        if (state.allowedCastles.rooks[colorIdx(Color::White)].isKingsideSet()) castling += 'K';
+        if (state.allowedCastles.rooks[colorIdx(Color::White)].isQueensideSet()) castling += 'Q';
+        if (state.allowedCastles.rooks[colorIdx(Color::Black)].isKingsideSet()) castling += 'k';
+        if (state.allowedCastles.rooks[colorIdx(Color::Black)].isQueensideSet()) castling += 'q';
         fen += (castling.empty() ? "-" : castling) + " ";
     
-        fen += (enPassant == Square::None ? "-" : Move(enPassant, enPassant).toString().substr(2)) + " ";
+        fen += (state.enPassant == Square::None ? "-" : Move(state.enPassant, state.enPassant).toString().substr(2)) + " ";
     
-        fen += std::to_string(halfClock) + " " + std::to_string(fullNumber);
+        fen += std::to_string(state.halfClock) + " " + std::to_string(state.fullNumber);
     
         return fen;
     }    
 
     void Position::fromStartPos() {
-        PositionState state;
+        state.bitboard[pieceTypeIdx(PieceType::Pawn)]   = 0x00FF00000000FF00;
+        state.bitboard[pieceTypeIdx(PieceType::Knight)] = 0x4200000000000042;
+        state.bitboard[pieceTypeIdx(PieceType::Bishop)] = 0x2400000000000024;
+        state.bitboard[pieceTypeIdx(PieceType::Rook)]   = 0x8100000000000081;
+        state.bitboard[pieceTypeIdx(PieceType::Queen)]  = 0x0800000000000008;
+        state.bitboard[pieceTypeIdx(PieceType::King)]   = 0x1000000000000010;
 
-        bitboards[pieceTypeIdx(PieceType::Pawn)]   = 0x00FF00000000FF00;
-        bitboards[pieceTypeIdx(PieceType::Knight)] = 0x4200000000000042;
-        bitboards[pieceTypeIdx(PieceType::Bishop)] = 0x2400000000000024;
-        bitboards[pieceTypeIdx(PieceType::Rook)]   = 0x8100000000000081;
-        bitboards[pieceTypeIdx(PieceType::Queen)]  = 0x0800000000000008;
-        bitboards[pieceTypeIdx(PieceType::King)]   = 0x1000000000000010;
-
-        bitboards[colorIdx(Color::White) + COLOR_OFFSET] = 0x000000000000FFFF;
-        bitboards[colorIdx(Color::Black) + COLOR_OFFSET] = 0xFFFF000000000000;
+        state.bitboard[colorIdx(Color::White) + COLOR_OFFSET] = 0x000000000000FFFF;
+        state.bitboard[colorIdx(Color::Black) + COLOR_OFFSET] = 0xFFFF000000000000;
 
         auto setupRank = [&](int rank, Color color) {
-            theMailbox[sqIdx(static_cast<Square>(rank * 8 + 0))] = pieceTypeWithColor(PieceType::Rook, color);
-            theMailbox[sqIdx(static_cast<Square>(rank * 8 + 1))] = pieceTypeWithColor(PieceType::Knight, color);
-            theMailbox[sqIdx(static_cast<Square>(rank * 8 + 2))] = pieceTypeWithColor(PieceType::Bishop, color);
-            theMailbox[sqIdx(static_cast<Square>(rank * 8 + 3))] = pieceTypeWithColor(PieceType::Queen, color);
-            theMailbox[sqIdx(static_cast<Square>(rank * 8 + 4))] = pieceTypeWithColor(PieceType::King, color);
-            theMailbox[sqIdx(static_cast<Square>(rank * 8 + 5))] = pieceTypeWithColor(PieceType::Bishop, color);
-            theMailbox[sqIdx(static_cast<Square>(rank * 8 + 6))] = pieceTypeWithColor(PieceType::Knight, color);
-            theMailbox[sqIdx(static_cast<Square>(rank * 8 + 7))] = pieceTypeWithColor(PieceType::Rook, color);
+            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 0))] = pieceTypeWithColor(PieceType::Rook, color);
+            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 1))] = pieceTypeWithColor(PieceType::Knight, color);
+            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 2))] = pieceTypeWithColor(PieceType::Bishop, color);
+            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 3))] = pieceTypeWithColor(PieceType::Queen, color);
+            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 4))] = pieceTypeWithColor(PieceType::King, color);
+            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 5))] = pieceTypeWithColor(PieceType::Bishop, color);
+            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 6))] = pieceTypeWithColor(PieceType::Knight, color);
+            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 7))] = pieceTypeWithColor(PieceType::Rook, color);
         };
 
         setupRank(0, Color::White);
         setupRank(7, Color::Black);
 
         for (int file = 0; file < 8; ++file) {
-            theMailbox[sqIdx(static_cast<Square>(8 + file))] = Piece::WhitePawn;
-            theMailbox[sqIdx(static_cast<Square>(48 + file))] = Piece::BlackPawn;
+            state.mailbox[sqIdx(static_cast<Square>(8 + file))] = Piece::WhitePawn;
+            state.mailbox[sqIdx(static_cast<Square>(48 + file))] = Piece::BlackPawn;
         }
 
-        halfClock = 0;
-        fullNumber = 1;
+        state.halfClock = 0;
+        state.fullNumber = 1;
 
-        allowedCastles.rooks[colorIdx(Color::White)].kingside  = Square::H1;
-        allowedCastles.rooks[colorIdx(Color::White)].queenside = Square::A1;
-        allowedCastles.rooks[colorIdx(Color::Black)].kingside  = Square::H8;
-        allowedCastles.rooks[colorIdx(Color::Black)].queenside = Square::A8;
+        state.allowedCastles.rooks[colorIdx(Color::White)].kingside  = Square::H1;
+        state.allowedCastles.rooks[colorIdx(Color::White)].queenside = Square::A1;
+        state.allowedCastles.rooks[colorIdx(Color::Black)].kingside  = Square::H8;
+        state.allowedCastles.rooks[colorIdx(Color::Black)].queenside = Square::A8;
 
-        state = {
-            .bitboards = bitboards,
-            .theMailbox = theMailbox,
-            .allowedCastles = allowedCastles,
-            .stm = stm,
-            .halfClock = halfClock,
-            .fullNumber = fullNumber,
-            .enPassant = enPassant
-        };
         positionHistory.push_back(state);
     }
 
     void Position::makeMove(const Move& move) {
-        Piece& src = theMailbox[sqIdx(move.fromSquare())];
-        Piece& dst = theMailbox[sqIdx(move.toSquare())];
+        Piece& src = state.mailbox[sqIdx(move.fromSquare())];
+        Piece& dst = state.mailbox[sqIdx(move.toSquare())];
         uint64_t bbSrc = (uint64_t)1 << sqIdx(move.fromSquare());
         uint64_t bbDst = (uint64_t)1 << sqIdx(move.toSquare());
         Color side = STM();
         auto us = colorIdx(side);
         auto them = colorIdx(flipColor(side));
 
-        enPassant = Square::None;
+        state.enPassant = Square::None;
 
         if (pieceType(src) == PieceType::Pawn || dst != Piece::None) {
-            halfClock = 0;
+            state.halfClock = 0;
         } else {
-            halfClock++;
+            state.halfClock++;
         }
 
         if (side == Color::Black) {
-            fullNumber++;
+            state.fullNumber++;
         }
 
         switch (move.moveType()) {
             case MoveType::Normal: {
                 if (dst != Piece::None) {
-                    bitboards[pieceTypeIdx(pieceType(dst))] ^= bbDst;
-                    bitboards[them + COLOR_OFFSET] ^= bbDst;
+                    state.bitboard[pieceTypeIdx(pieceType(dst))] ^= bbDst;
+                    state.bitboard[them + COLOR_OFFSET] ^= bbDst;
                     if (pieceType(dst) == PieceType::Rook) {
-                        auto& rooks = allowedCastles.rooks[them];
+                        auto& rooks = state.allowedCastles.rooks[them];
                         if (move.toSquare() == rooks.kingside) {
                             rooks.unset(true);
                         } else if (move.toSquare() == rooks.queenside) {
@@ -221,10 +201,10 @@ namespace valhalla {
                 }
 
                 if (pieceType(src) == PieceType::King) {
-                    auto& rooks = allowedCastles.rooks[us];
+                    auto& rooks = state.allowedCastles.rooks[us];
                     rooks.clear();
                 } else if (pieceType(src) == PieceType::Rook) {
-                    auto& rooks = allowedCastles.rooks[us];
+                    auto& rooks = state.allowedCastles.rooks[us];
                     if (move.fromSquare() == rooks.kingside) {
                         rooks.unset(true);
                     } else if (move.fromSquare() == rooks.queenside) {
@@ -235,35 +215,35 @@ namespace valhalla {
                 if (pieceType(src) == PieceType::Pawn &&
                     std::abs(sqIdx(move.fromSquare()) - sqIdx(move.toSquare())) == DOUBLE_PUSH) {
                     int epOffset = (side == Color::White) ? -8 : 8;
-                    enPassant = sqFromIdx(sqIdx(move.toSquare()) + epOffset);
+                    state.enPassant = sqFromIdx(sqIdx(move.toSquare()) + epOffset);
                 }
 
-                bitboards[pieceTypeIdx(pieceType(src))] ^= bbSrc ^ bbDst;
-                bitboards[us + COLOR_OFFSET] ^= bbSrc ^ bbDst;
+                state.bitboard[pieceTypeIdx(pieceType(src))] ^= bbSrc ^ bbDst;
+                state.bitboard[us + COLOR_OFFSET] ^= bbSrc ^ bbDst;
                 dst = src;
                 break;
             }
 
             case MoveType::Castling: {
                 bool kingSide = bbDst > bbSrc;
-                Square rookSrc = kingSide ? allowedCastles.rooks[us].kingside : allowedCastles.rooks[us].queenside;
+                Square rookSrc = kingSide ? state.allowedCastles.rooks[us].kingside : state.allowedCastles.rooks[us].queenside;
                 Square rookDst = (side == Color::White)
                     ? (kingSide ? Square::F1 : Square::D1)
                     : (kingSide ? Square::F8 : Square::D8);
                 uint64_t bbRookSrc = (uint64_t)1 << sqIdx(rookSrc);
                 uint64_t bbRookDst = (uint64_t)1 << sqIdx(rookDst);
 
-                bitboards[pieceTypeIdx(PieceType::Rook)] ^= bbRookSrc ^ bbRookDst;
-                bitboards[us + COLOR_OFFSET] ^= bbRookSrc ^ bbRookDst;
+                state.bitboard[pieceTypeIdx(PieceType::Rook)] ^= bbRookSrc ^ bbRookDst;
+                state.bitboard[us + COLOR_OFFSET] ^= bbRookSrc ^ bbRookDst;
 
-                theMailbox[sqIdx(rookSrc)] = Piece::None;
-                theMailbox[sqIdx(rookDst)] = pieceTypeWithColor(PieceType::Rook, side);
+                state.mailbox[sqIdx(rookSrc)] = Piece::None;
+                state.mailbox[sqIdx(rookDst)] = pieceTypeWithColor(PieceType::Rook, side);
 
                 dst = src;
 
-                bitboards[pieceTypeIdx(PieceType::King)] ^= bbSrc ^ bbDst;
-                bitboards[us + COLOR_OFFSET] ^= bbSrc ^ bbDst;
-                allowedCastles.rooks[us].clear();
+                state.bitboard[pieceTypeIdx(PieceType::King)] ^= bbSrc ^ bbDst;
+                state.bitboard[us + COLOR_OFFSET] ^= bbSrc ^ bbDst;
+                state.allowedCastles.rooks[us].clear();
                 break;
             }
 
@@ -272,26 +252,26 @@ namespace valhalla {
                 int captureIdx = sqIdx(move.toSquare()) + epOffset;
                 uint64_t bbCap = (uint64_t)1 << captureIdx;
 
-                bitboards[pieceTypeIdx(PieceType::Pawn)] ^= bbSrc ^ bbDst ^ bbCap;
-                bitboards[us + COLOR_OFFSET] ^= bbSrc ^ bbDst;
-                bitboards[them + COLOR_OFFSET] ^= bbCap;
+                state.bitboard[pieceTypeIdx(PieceType::Pawn)] ^= bbSrc ^ bbDst ^ bbCap;
+                state.bitboard[us + COLOR_OFFSET] ^= bbSrc ^ bbDst;
+                state.bitboard[them + COLOR_OFFSET] ^= bbCap;
 
-                theMailbox[captureIdx] = Piece::None;
+                state.mailbox[captureIdx] = Piece::None;
                 dst = src;
                 break;
             }
 
             case MoveType::Promotion: {
                 if (dst != Piece::None) {
-                    bitboards[pieceTypeIdx(pieceType(dst))] ^= bbDst;
-                    bitboards[them + COLOR_OFFSET] ^= bbDst;
+                    state.bitboard[pieceTypeIdx(pieceType(dst))] ^= bbDst;
+                    state.bitboard[them + COLOR_OFFSET] ^= bbDst;
                 }
 
                 PieceType promo = move.promoPieceType();
-                bitboards[pieceTypeIdx(promo)] ^= bbDst;
-                bitboards[pieceTypeIdx(PieceType::Pawn)] ^= bbSrc;
+                state.bitboard[pieceTypeIdx(promo)] ^= bbDst;
+                state.bitboard[pieceTypeIdx(PieceType::Pawn)] ^= bbSrc;
 
-                bitboards[us + COLOR_OFFSET] ^= bbSrc ^ bbDst;
+                state.bitboard[us + COLOR_OFFSET] ^= bbSrc ^ bbDst;
 
                 dst = pieceTypeWithColor(promo, side);
                 break;
@@ -299,29 +279,18 @@ namespace valhalla {
         }
 
         src = Piece::None;
-        stm = !stm;
+        state.stm = !state.stm;
 
-        positionHistory.emplace_back(PositionState{
-            bitboards,
-            theMailbox,
-            allowedCastles,
-            stm,
-            halfClock,
-            fullNumber,
-            enPassant
-        });
+        positionHistory.emplace_back(state);
     }
 
     void Position::unmakeMove() {
         positionHistory.pop_back();
         const PositionState& prev = positionHistory.back();
+        state = prev;
+    }
 
-        bitboards = prev.bitboards;
-        theMailbox = prev.theMailbox;
-        allowedCastles = prev.allowedCastles;
-        stm = prev.stm;
-        halfClock = prev.halfClock;
-        fullNumber = prev.fullNumber;
-        enPassant = prev.enPassant;
+    Move fromUCI(Position position, std::string string) {
+        
     }
 }

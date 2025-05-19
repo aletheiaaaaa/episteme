@@ -2,6 +2,6 @@
 #include "./chess/position.h"
 #include "./utils/incbin.h"
 
-namespace valhalla {
-    int32_t eval(Position position);
+namespace episteme {
+    int32_t evaluate(Position position);
 }

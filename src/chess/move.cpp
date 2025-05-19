@@ -1,6 +1,6 @@
 #include "move.h"
 
-namespace valhalla {
+namespace episteme {
     Move::Move() {
         moveData = 0x0000;
     }

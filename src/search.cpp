@@ -1,6 +1,6 @@
 #include "search.h"
 
-namespace valhalla {
+namespace episteme {
     bool makeMove(Position& position, const Move& move) {
         position.makeMove(move);
 
@@ -32,7 +32,7 @@ namespace valhalla {
 
             int32_t score = -search(position, depth - 1, -beta, -alpha);
             unmakeMove(position);
-    
+
             if (score > best) {
                 best = score;
             }

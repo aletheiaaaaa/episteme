@@ -5,7 +5,7 @@
 #include <bit>
 #include <random>
 
-namespace valhalla {
+namespace episteme {
     class MoveList {
         public:
             inline void addMove(const Move& move) {

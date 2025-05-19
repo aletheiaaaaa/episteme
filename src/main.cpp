@@ -7,7 +7,7 @@
 #include <chrono>
 #include <iomanip>
 
-using namespace valhalla;
+using namespace episteme;
 
 int main(){
     Position position;

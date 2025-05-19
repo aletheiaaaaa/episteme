@@ -8,10 +8,10 @@
 #include <cstdint>
 #include <cstdlib>
 
-namespace valhalla {
+namespace episteme {
     struct PositionState {
-        std::array<uint64_t, 8> bitboards;
-        std::array<Piece, 64> theMailbox;
+        std::array<uint64_t, 8> bitboard;
+        std::array<Piece, 64> mailbox;
         AllowedCastles allowedCastles;
         bool stm;
         uint8_t halfClock;
@@ -23,43 +23,43 @@ namespace valhalla {
             Position();
 
             [[nodiscard]] inline std::array<uint64_t, 8> bitboardAll() const {
-                return bitboards;
+                return state.bitboard;
             }
 
             [[nodiscard]] inline uint64_t bitboard(int index) const {
-                return bitboards[index];
+                return state.bitboard[index];
             }
         
             [[nodiscard]] inline Color STM() const {
-                return static_cast<Color>(stm);
+                return static_cast<Color>(state.stm);
             }
         
             [[nodiscard]] inline Color NTM() const {
-                return static_cast<Color>(!stm);
+                return static_cast<Color>(!state.stm);
             }
         
             [[nodiscard]] inline uint8_t halfMoveClock() const {
-                return halfClock; 
+                return state.halfClock; 
             }
         
             [[nodiscard]] inline uint32_t fullMoveNumber() const {
-                return fullNumber;
+                return state.fullNumber;
             }
         
             [[nodiscard]] inline Square epSquare() const {
-                return enPassant;    
+                return state.enPassant;    
             }
         
             [[nodiscard]] inline AllowedCastles castlingRights() const {
-                return allowedCastles;
+                return state.allowedCastles;
             }
         
             [[nodiscard]] inline Piece mailbox(int index) const {
-                return theMailbox[index];
+                return state.mailbox[index];
             }
 
             [[nodiscard]] inline std::array<Piece, 64> mailboxAll() const {
-                return theMailbox;
+                return state.mailbox;
             }
 
             
@@ -73,13 +73,9 @@ namespace valhalla {
             static const uint16_t COLOR_OFFSET = 6;
 
         private:
-            std::array<uint64_t, 8> bitboards;
-            std::array<Piece, 64> theMailbox;
             std::vector<PositionState> positionHistory;
-            AllowedCastles allowedCastles;
-            bool stm;
-            uint8_t halfClock;
-            uint32_t fullNumber;
-            Square enPassant;
+            PositionState state;
     };
+
+    Move fromUCI(Position position, std::string string);
 }

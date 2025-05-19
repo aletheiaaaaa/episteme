@@ -1,6 +1,6 @@
 #include "nnue.h"
 
-namespace valhalla {
+namespace episteme {
 
     Accumulator NNUE::l0Propagate(const std::array<Piece, 64>& mailbox) {
         Accumulator out = {
@@ -31,8 +31,8 @@ namespace valhalla {
             .ntm = {}
         };
         for (int i = 0; i < 1024; i++) {
-            out.stm[i] = pow(std::clamp(static_cast<int>(accum.stm[i]), 0, 1), 2);
-            out.ntm[i] = pow(std::clamp(static_cast<int>(accum.ntm[i]), 0, 1), 2);
+            out.stm[i] = pow(std::clamp(static_cast<int>(accum.stm[i]), 0, 255), 2);
+            out.ntm[i] = pow(std::clamp(static_cast<int>(accum.ntm[i]), 0, 255), 2);
         }
         return out;
     }

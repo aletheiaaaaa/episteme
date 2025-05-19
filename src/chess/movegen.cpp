@@ -1,6 +1,6 @@
 #include "movegen.h"
 
-namespace valhalla {
+namespace episteme {
     std::array<uint64_t, 64> fillKingAttacks() {
         std::array<uint64_t, 64> kingAttacks;
         kingAttacks.fill(0);

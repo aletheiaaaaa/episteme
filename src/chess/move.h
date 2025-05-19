@@ -4,7 +4,7 @@
 #include <array>
 #include <string>
 
-namespace valhalla {
+namespace episteme {
     enum class MoveType : uint16_t {
         Normal, Castling, EnPassant, Promotion, 
         None
