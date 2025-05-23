@@ -1,6 +1,7 @@
 #include "search.h"
 
-namespace episteme {
+namespace episteme::search {
+
     bool makeMove(Position& position, const Move& move) {
         position.makeMove(move);
 
@@ -12,7 +13,7 @@ namespace episteme {
         position.unmakeMove();
     }
 
-    int32_t search(Position& position, uint16_t depth, int32_t alpha, int32_t beta) {
+    int32_t main(Position& position, uint16_t depth, int32_t alpha, int32_t beta) {
         if (depth <= 0) {
             return evaluate(position);
         }
@@ -30,7 +31,7 @@ namespace episteme {
                 continue;
             }
 
-            int32_t score = -search(position, depth - 1, -beta, -alpha);
+            int32_t score = -main(position, depth - 1, -beta, -alpha);
             unmakeMove(position);
 
             if (score > best) {
@@ -48,4 +49,5 @@ namespace episteme {
 
         return best;
     }
+
 }

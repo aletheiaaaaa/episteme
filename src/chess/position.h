@@ -50,8 +50,8 @@ namespace episteme {
                 return state.enPassant;    
             }
         
-            [[nodiscard]] inline AllowedCastles castlingRights() const {
-                return state.allowedCastles;
+            [[nodiscard]] inline AllowedCastles::RookPair castlingRights(Color stm) const {
+                return state.allowedCastles.rooks[colorIdx(stm)];
             }
         
             [[nodiscard]] inline Piece mailbox(int index) const {
@@ -77,5 +77,5 @@ namespace episteme {
             PositionState state;
     };
 
-    Move fromUCI(Position position, std::string string);
+    Move fromUCI(const Position& position, const std::string& move);
 }

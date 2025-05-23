@@ -290,7 +290,49 @@ namespace episteme {
         state = prev;
     }
 
-    Move fromUCI(Position position, std::string string) {
+    Move fromUCI(const Position& position, const std::string& move) {
+        std::string_view srcStr = move.substr(0, 2);
+        std::string_view dstStr = move.substr(2, 2);
+
+        auto str2Sq = [](std::string_view square) {
+            int file = square[0] - 'a';
+            int rank = square[1] - '1';
+            return static_cast<Square>(rank * 8 + file);
+        };
+
+        Square src = str2Sq(srcStr);
+        Square dst = str2Sq(dstStr);
+
+        auto isCastling = [&]() {
+            Color stm = position.STM();
+            if (pieceType(position.mailbox(sqIdx(src))) != PieceType::King) {
+                return false;
+            }
         
+            Square kingside = (stm == Color::White) ? Square::G1 : Square::G8;
+            Square queenside = (stm == Color::White) ? Square::C1 : Square::C8;
+        
+            bool kingsideCastle = (dst == kingside) && position.castlingRights(stm).isKingsideSet();
+            bool queensideCastle = (dst == queenside) && position.castlingRights(stm).isQueensideSet();
+        
+            return (kingsideCastle || queensideCastle);
+        };
+
+        bool isPromo = (move.length() == 5);
+        bool isEnPassant = (pieceType(position.mailbox(sqIdx(src))) == PieceType::Pawn) && (dst == position.epSquare());
+
+        auto char2Piece = [&](char promo) {
+            switch (promo) {
+                case ('q'): return PromoPiece::Queen;
+                case ('r'): return PromoPiece::Rook;
+                case ('b'): return PromoPiece::Bishop;
+                case ('n'): return PromoPiece::Knight;
+            }
+        };
+
+        if (isCastling()) return Move(src, dst, MoveType::Castling);
+        else if (isEnPassant) return Move(src, dst, MoveType::EnPassant);
+        else if (isPromo) return Move(src, dst, MoveType::Promotion, char2Piece(move.at(4)));
+        else return Move(src, dst);
     }
 }

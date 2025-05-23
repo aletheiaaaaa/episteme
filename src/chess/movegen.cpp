@@ -344,7 +344,7 @@ namespace episteme {
         Square kingSrc = sqFromIdx(std::countr_zero(kingBB));
         Square kingDst = kingEnds[colorIdx(stm)][isKingside];
 
-        Square rookSrc = isKingside ? position.castlingRights().rooks[colorIdx(stm)].kingside : position.castlingRights().rooks[colorIdx(stm)].queenside;
+        Square rookSrc = isKingside ? position.castlingRights(stm).kingside : position.castlingRights(stm).queenside;
 
         if (isSquareAttacked(kingSrc, position, position.NTM())) {
             return;
@@ -385,8 +385,8 @@ namespace episteme {
             generateEnPassant(moveList, position);
         }
 
-        Square kingsideCastle = position.castlingRights().rooks[colorIdx(position.STM())].kingside;
-        Square queensideCastle = position.castlingRights().rooks[colorIdx(position.STM())].queenside;
+        Square kingsideCastle = position.castlingRights(position.STM()).kingside;
+        Square queensideCastle = position.castlingRights(position.STM()).queenside;
 
         if (kingsideCastle != Square::None) {
             generateCastles(moveList, position, true);

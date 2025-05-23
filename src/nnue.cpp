@@ -1,6 +1,6 @@
 #include "nnue.h"
 
-namespace episteme {
+namespace episteme::nn {
 
     Accumulator NNUE::l0Propagate(const std::array<Piece, 64>& mailbox) {
         Accumulator out = {

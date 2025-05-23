@@ -1,4 +1,5 @@
 #include "chess/position.h"
+#include "search.h"
 
 #include <string>
 #include <sstream>
@@ -10,8 +11,7 @@ namespace episteme {
 
     auto uci();
     auto isReady();
-    auto position(const std::string& params);
-    auto go(const std::string& params);
-    auto uciNewGame();
-    auto quit();
+    auto position(const std::string& args, search::Parameters params);
+    auto go(const std::string& args, search::Parameters params);
+    auto uciNewGame(search::Parameters params);
 }

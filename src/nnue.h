@@ -5,7 +5,7 @@
 #include <array>
 #include <algorithm>
 
-namespace episteme {
+namespace episteme::nn {
     struct Accumulator {
         std::array<int16_t, 1024> stm;
         std::array<int16_t, 1024> ntm;

@@ -1,8 +1,10 @@
 #include "evaluate.h"
 
-INCBIN(NNUE, "./valhalla_test_net.bin");;
+INCBIN(NNUE, "./episteme_test_net.bin");;
 
 namespace episteme {
+    using namespace nn;
+
     NNUE nnue = *reinterpret_cast<const NNUE*>(gNNUEData);
 
     int32_t evaluate(Position position) {
