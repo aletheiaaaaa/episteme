@@ -41,7 +41,7 @@ namespace episteme::search {
             unmakeMove(position);
 
             if (abort) return 0;
-
+    
             if (score > best) {
                 best = score;
             }
