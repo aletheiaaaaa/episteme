@@ -12,29 +12,20 @@
 
 using namespace episteme;
 
-// int main(int argc, char *argv[]) {
-//     search::Parameters params = {};
+int main(int argc, char *argv[]) {
+    search::Parameters params = {};
 
-//     if (argc > 1) {
-//         for (int i = 1; i < argc; i++) {
-//             parse(argv[i], params);
-//         }
-//         return 0;
-//     }
-
-//     std::string line;
-//     while (std::getline(std::cin, line)) {
-//         parse(line, params);
-//     }
-    
-//     return 0;
-// }
-
-int main(){
-    Position position;
-    position.fromStartPos();
-    for (int i = 1; i <= 6; i++) {
-        timePerft(position, i);
+    if (argc > 1) {
+        for (int i = 1; i < argc; i++) {
+            parse(argv[i], params);
+        }
+        return 0;
     }
+
+    std::string line;
+    while (std::getline(std::cin, line)) {
+        parse(line, params);
+    }
+    
     return 0;
 }

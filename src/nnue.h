@@ -15,9 +15,9 @@ namespace episteme::nn {
 
     class NNUE {
         public:
-            Accumulator l0Propagate(const std::array<Piece, 64>& mailbox);
-            Accumulator l0Activate(const Accumulator& accum);
-            int16_t l1Propagate(const Accumulator& accum); 
+            Accumulator l0Propagate(const std::array<Piece, 64>& mailbox) const;
+            Accumulator l0Activate(const Accumulator& accum) const;
+            int16_t l1Propagate(const Accumulator& accum) const; 
 
         private:
             std::array<std::array<std::array<int16_t, 768>, 1024>, 2> l0Weights;

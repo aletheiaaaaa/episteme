@@ -3,57 +3,63 @@
 namespace episteme {
 
     auto uci() {
-        std::cout << "id name Episteme \nid author Carbon";
+        std::cout << "id name Episteme \nid author aletheia\nuciok\n";
     }
 
     auto isReady() {
         std::cout << "readyok\n";
     }
 
-    auto position(const std::string& args, search::Parameters params) {
+    auto position(const std::string& args, search::Parameters& params) {
+        Position position;
         std::istringstream iss(args);
         std::string token;
 
-        std::string fen;
-        for (int i = 0; i < 6 && iss >> token; ++i) {
-            if (!fen.empty()) fen += " ";
-            fen += token;
+        iss >> token;
+
+        if (token == "startpos") {
+            position.fromStartPos();
+
+        } else if (token == "fen") {    
+            std::string fen;
+            for (int i = 0; i < 6 && iss >> token; ++i) {
+                if (!fen.empty()) fen += " ";
+                fen += token;
+            }
+            position.fromFEN(fen);
+
+        } else {
+            std::cout << "invalid command\n";
         }
 
-        Position position;
-        position.fromFEN(fen);
-
-        if (iss >> token) {
-            if (token == "move") {
-                while (iss >> token) {
-                    position.makeMove(fromUCI(position, token));
-                }
-            } else {
-                std::cout << "invalid command";
+        if (iss >> token && token == "moves") {
+            while (iss >> token) {
+                position.makeMove(fromUCI(position, token));
             }
         }
 
         params.position = position;
+
     }
 
-    auto go(const std::string& args, search::Parameters params) {
+    auto go(const std::string& args, search::Parameters& params) {
         std::istringstream iss(args);
         std::string token;
 
         while (iss >> token) {
-            if (token == "wtime") params.time[0] = std::stoi(token);
-            else if (token == "btime") params.time[1] = std::stoi(token);
-            else if (token == "winc") params.inc[0] = std::stoi(token);
-            else if (token == "binc") params.inc[1] = std::stoi(token);
-            else std::cout << "invalid command";
+            if (token == "wtime" && iss >> token) params.time[0] = std::stoi(token);
+            else if (token == "btime" && iss >> token) params.time[1] = std::stoi(token);
+            else if (token == "winc" && iss >> token) params.inc[0] = std::stoi(token);
+            else if (token == "binc" && iss >> token) params.inc[1] = std::stoi(token);
+            else std::cout << "invalid command\n"; break;
         }
 
         search::Worker worker;
         worker.parameters = params;
-        worker.run();
+        std::cout << worker.run().second.toString() << std::endl;
     }
 
-    auto uciNewGame(search::Parameters params) {
+    auto uciNewGame(search::Parameters& params) {
         params = {};
     }
 
@@ -66,7 +72,7 @@ namespace episteme {
         else if (keyword == "go") go(cmd.substr(cmd.find(' ')+1), params);
         else if (keyword == "ucinewgame") uciNewGame(params);
         else if (keyword == "quit") std::exit(0);
-        else std::cout << "invalid command";
+        else std::cout << "invalid command\n";
 
         return 0;
     }

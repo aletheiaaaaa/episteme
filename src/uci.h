@@ -13,7 +13,7 @@ namespace episteme {
 
     auto uci();
     auto isReady();
-    auto position(const std::string& args, search::Parameters params);
-    auto go(const std::string& args, search::Parameters params);
-    auto uciNewGame(search::Parameters params);
+    auto position(const std::string& args, search::Parameters& params);
+    auto go(const std::string& args, search::Parameters& params);
+    auto uciNewGame(search::Parameters& params);
 }

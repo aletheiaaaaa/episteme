@@ -2,7 +2,7 @@
 
 namespace episteme::nn {
 
-    Accumulator NNUE::l0Propagate(const std::array<Piece, 64>& mailbox) {
+    Accumulator NNUE::l0Propagate(const std::array<Piece, 64>& mailbox) const {
         Accumulator out = {
             .stm = {},
             .ntm = {}
@@ -25,7 +25,7 @@ namespace episteme::nn {
         return out;
     }
 
-    Accumulator NNUE::l0Activate(const Accumulator& accum) {
+    Accumulator NNUE::l0Activate(const Accumulator& accum) const {
         Accumulator out = {
             .stm = {},
             .ntm = {}
@@ -37,7 +37,7 @@ namespace episteme::nn {
         return out;
     }
 
-    int16_t NNUE::l1Propagate(const Accumulator& accum) {
+    int16_t NNUE::l1Propagate(const Accumulator& accum) const {
         int16_t out = 0;
         for (int i = 0; i < 1024; i++) {
             out += l1Weights[0][i] * accum.stm[i];

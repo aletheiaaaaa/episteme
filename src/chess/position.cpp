@@ -291,10 +291,10 @@ namespace episteme {
     }
 
     Move fromUCI(const Position& position, const std::string& move) {
-        std::string_view srcStr = move.substr(0, 2);
-        std::string_view dstStr = move.substr(2, 2);
+        std::string srcStr = move.substr(0, 2);
+        std::string dstStr = move.substr(2, 2);
 
-        auto str2Sq = [](std::string_view square) {
+        auto str2Sq = [](std::string square) {
             int file = square[0] - 'a';
             int rank = square[1] - '1';
             return static_cast<Square>(rank * 8 + file);
@@ -305,9 +305,7 @@ namespace episteme {
 
         auto isCastling = [&]() {
             Color stm = position.STM();
-            if (pieceType(position.mailbox(sqIdx(src))) != PieceType::King) {
-                return false;
-            }
+            if (pieceType(position.mailbox(sqIdx(src))) != PieceType::King) return false;
         
             Square kingside = (stm == Color::White) ? Square::G1 : Square::G8;
             Square queenside = (stm == Color::White) ? Square::C1 : Square::C8;
