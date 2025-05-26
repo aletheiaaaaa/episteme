@@ -46,7 +46,6 @@ namespace episteme::search {
 
     struct Worker {
         Parameters parameters;
-        bool abort;
 
         int32_t search(Position& position, Line& PV, uint16_t depth, int32_t alpha, int32_t beta, steady_clock::time_point end);
         std::pair<int32_t, Move> run();

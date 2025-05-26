@@ -15,6 +15,7 @@ namespace episteme::search {
     }
 
     int32_t Worker::search(Position& position, Line& PV, uint16_t depth, int32_t alpha, int32_t beta, steady_clock::time_point end) {
+        bool abort;
         if (steady_clock::now() >= end) {
             abort = true;
             return 0;
