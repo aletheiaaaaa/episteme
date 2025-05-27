@@ -1,33 +1,34 @@
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++23 -I./src -I./src/chess -I./src/utils -g -O3 -flto
+CXXFLAGS = -Wall -Wextra -std=c++17 -I./src -I./src/chess -I./src/utils -g
 
-# Source and build directories
+# Directories
 SRC_DIR = src
 OBJ_DIR = build/obj
 BIN_DIR = build
 
-# Target executable
-TARGET = $(BIN_DIR)/episteme
+# Executable (can be overridden: make EXE=custom_name)
+EXE ?= episteme
+TARGET = $(BIN_DIR)/$(EXE)
 
-# Find all .cpp files recursively in src/
+# Source and object files
 SRCS := $(shell find $(SRC_DIR) -name '*.cpp')
 OBJS := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 
 # Default target
 all: $(TARGET)
 
-# Link all object files into the final binary
+# Link object files
 $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-# Compile .cpp files to .o files
+# Compile sources
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Clean build artifacts
+# Cleanup
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
 

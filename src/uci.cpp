@@ -3,7 +3,10 @@
 namespace episteme {
 
     auto uci() {
-        std::cout << "id name Episteme \nid author aletheia\nuciok\n";
+        std::cout << "id name Episteme \nid author aletheia\n";
+        std::cout << "option name Hash type spin default 1 min 1 max 1\n";
+        std::cout << "option name Threads type 1 spin default 1 min 1 max 1\n";
+        std::cout << "uciok\n";
     }
 
     auto isReady() {
