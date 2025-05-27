@@ -199,7 +199,7 @@ namespace episteme {
 
     PawnAttacks getPawnAttacksHelper(const Position& position, Color stm, bool isPseudo) {
         uint64_t usBB = position.bitboard(colorIdx(stm) + position.COLOR_OFFSET);
-        uint64_t themBB = position.bitboard(colorIdx(flipColor(stm)) + position.COLOR_OFFSET);
+        uint64_t themBB = position.bitboard(colorIdx(flip(stm)) + position.COLOR_OFFSET);
         uint64_t pawnBB = position.bitboard(pieceTypeIdx(PieceType::Pawn)) & usBB;
         
         uint64_t occupied = usBB | (isPseudo ? 0ULL : themBB);  // only filter themBB if not pseudo

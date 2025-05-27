@@ -171,7 +171,7 @@ namespace episteme {
         uint64_t bbDst = (uint64_t)1 << sqIdx(move.toSquare());
         Color side = STM();
         auto us = colorIdx(side);
-        auto them = colorIdx(flipColor(side));
+        auto them = colorIdx(flip(side));
 
         state.enPassant = Square::None;
 

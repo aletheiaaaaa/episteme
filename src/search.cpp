@@ -15,9 +15,9 @@ namespace episteme::search {
     }
 
     int32_t Worker::search(Position& position, Line& PV, uint16_t depth, int32_t alpha, int32_t beta, steady_clock::time_point end) {
-        bool abort;
+        bool stop = false;
         if (steady_clock::now() >= end) {
-            abort = true;
+            stop = true;
             return 0;
         };
 
@@ -41,7 +41,7 @@ namespace episteme::search {
             int32_t score = -search(position, candidate, depth - 1, -beta, -alpha, end);
             unmakeMove(position);
 
-            if (abort) return 0;
+            if (stop) return 0;
     
             if (score > best) {
                 best = score;
@@ -61,7 +61,7 @@ namespace episteme::search {
     }
 
     std::pair<int32_t, Move> Worker::run() {
-        int32_t result = 0;
+        int32_t result = -1;
 
         Line PV = {};
         Position position = parameters.position;
@@ -69,7 +69,7 @@ namespace episteme::search {
         int32_t inc = parameters.inc[colorIdx(position.STM())];
 
         auto start = steady_clock::now();
-        auto end = start + duration_cast<milliseconds>(duration<double>(time / 20 + inc / 2));
+        auto end = start + milliseconds(time / 20 + inc / 2);
 
         for (int depth = 1; depth < MAX_SEARCH_PLY; depth++) {
             if (steady_clock::now() >= end) break;

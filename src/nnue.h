@@ -6,11 +6,12 @@
 #include <cmath>
 #include <array>
 #include <algorithm>
+#include <memory>
 
 namespace episteme::nn {
     struct Accumulator {
-        std::array<int16_t, 1024> stm;
-        std::array<int16_t, 1024> ntm;
+        std::array<int32_t, 1024> stm;
+        std::array<int32_t, 1024> ntm;
     };
 
     class NNUE {
@@ -20,9 +21,14 @@ namespace episteme::nn {
             int16_t l1Propagate(const Accumulator& accum) const; 
 
         private:
-            std::array<std::array<std::array<int16_t, 768>, 1024>, 2> l0Weights;
-            std::array<std::array<int16_t, 1024>, 2> l0Biases;
-            std::array<std::array<int16_t, 1024>, 2> l1Weights;
-            int16_t l1Bias;
+            using L0Weights = std::array<std::array<int16_t, 768>, 1024>;
+            using L0Biases = std::array<int16_t, 1024>;
+            using L1Weights = std::array<std::array<int16_t, 1024>, 2>;
+            using L1Bias = int16_t;
+
+            L0Weights l0Weights;
+            L0Biases l0Biases;
+            L1Weights l1Weights;
+            L1Bias l1Bias;
     };
 }

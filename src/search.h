@@ -22,7 +22,7 @@ namespace episteme::search {
 
     struct Line {
         size_t length = 0;
-        std::array<Move, MAX_SEARCH_PLY + 1> moves;
+        std::array<Move, MAX_SEARCH_PLY + 1> moves = {};
         
         inline void clear() {
             length = 0;
