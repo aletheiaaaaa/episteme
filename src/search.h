@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <chrono>
 #include <algorithm>
+#include <iostream>
+#include <optional>
 
 namespace episteme::search {
     using namespace std::chrono;
@@ -44,10 +46,16 @@ namespace episteme::search {
         }
     };
 
-    struct Worker {
-        Parameters parameters;
 
-        int32_t search(Position& position, Line& PV, uint16_t depth, int32_t alpha, int32_t beta, steady_clock::time_point end);
-        std::pair<int32_t, Move> run();
+    class Worker {
+        public:
+            int32_t search(Position& position, Line& PV, uint16_t depth, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end);
+            std::pair<int32_t, Move> run(const Parameters& params);
+            void bench();
+        private:
+            Parameters parameters;
+            uint64_t nodes;
     };
+
+    bool isLegal(const Position& position);
 }

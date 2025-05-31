@@ -1,6 +1,6 @@
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++17 -I./src -I./src/chess -I./src/utils -g
+CXXFLAGS = -std=c++23 -O3 -flto 
 
 # Directories
 SRC_DIR = src

@@ -5,5 +5,5 @@
 #include "./utils/incbin.h"
 
 namespace episteme {
-    int32_t evaluate(Position position);
+    int32_t evaluate(Position& position);
 }

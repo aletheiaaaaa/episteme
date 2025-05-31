@@ -14,6 +14,6 @@ set(SRC "${CMAKE_SOURCE_DIR}/src")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_executable(episteme "${SRC}/chess/position.cpp" "${SRC}/chess/move.cpp" "${SRC}/chess/movegen.cpp" "${SRC}/chess/perft.cpp" "${SRC}/evaluate.cpp" "${SRC}/nnue.cpp" "${SRC}/search.cpp" "${SRC}/uci.cpp" "${SRC}/main.cpp")
 
-set(EVAL_BIN "${SRC}/episteme_test_net.bin")
+set(EVAL_BIN "${CMAKE_SOURCE_DIR}/episteme_test_net.bin")
 
 target_compile_definitions(episteme PRIVATE EVALFILE="${EVAL_BIN}")

@@ -10,18 +10,17 @@
 
 namespace episteme::nn {
     struct Accumulator {
-        std::array<int32_t, 1024> stm;
-        std::array<int32_t, 1024> ntm;
+        std::array<int32_t, 1024> stm = {};
+        std::array<int32_t, 1024> ntm = {};
     };
 
     class NNUE {
         public:
-            Accumulator l0Propagate(const std::array<Piece, 64>& mailbox) const;
-            Accumulator l0Activate(const Accumulator& accum) const;
-            int16_t l1Propagate(const Accumulator& accum) const; 
+            Accumulator l0Forward(const std::array<Piece, 64>& mailbox) const;
+            int16_t l1Forward(const Accumulator& accum) const; 
 
         private:
-            using L0Weights = std::array<std::array<int16_t, 768>, 1024>;
+            using L0Weights = std::array<std::array<int16_t, 1024>, 768>;
             using L0Biases = std::array<int16_t, 1024>;
             using L1Weights = std::array<std::array<int16_t, 1024>, 2>;
             using L1Bias = int16_t;

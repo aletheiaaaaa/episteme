@@ -9,6 +9,10 @@ namespace episteme {
         std::cout << "uciok\n";
     }
 
+    // auto setOption(const std::string& args, search::Parameters& params) {
+
+    // }
+
     auto isReady() {
         std::cout << "readyok\n";
     }
@@ -54,12 +58,14 @@ namespace episteme {
             else if (token == "btime" && iss >> token) params.time[1] = std::stoi(token);
             else if (token == "winc" && iss >> token) params.inc[0] = std::stoi(token);
             else if (token == "binc" && iss >> token) params.inc[1] = std::stoi(token);
-            else std::cout << "invalid command\n"; break;
+            else {
+                std::cout << "invalid command\n"; 
+                break;
+            }
         }
 
         search::Worker worker;
-        worker.parameters = params;
-        std::cout << worker.run().second.toString() << std::endl;
+        std::cout << worker.run(params).second.toString() << std::endl;
     }
 
     auto uciNewGame(search::Parameters& params) {
@@ -70,9 +76,11 @@ namespace episteme {
         std::string keyword = cmd.substr(0, cmd.find(' '));
 
         if (keyword == "uci") uci();
+        // else if (keyword == "setoption") setOption(cmd.substr(cmd.find(" ")+1), params);
+        else if (keyword == "setoption") return 0;
         else if (keyword == "isready") isReady();
         else if (keyword == "position") position(cmd.substr(cmd.find(" ")+1), params);
-        else if (keyword == "go") go(cmd.substr(cmd.find(' ')+1), params);
+        else if (keyword == "go") go(cmd.substr(cmd.find(" ")+1), params);
         else if (keyword == "ucinewgame") uciNewGame(params);
         else if (keyword == "quit") std::exit(0);
         else std::cout << "invalid command\n";
