@@ -1,28 +1,28 @@
 #include "nnue.h"
 
 namespace episteme::nn {
-    Accumulator NNUE::l0Forward(const std::array<Piece, 64>& mailbox) const {
+    Accumulator NNUE::l0_forward(const std::array<Piece, 64>& mailbox) const {
         Accumulator out;
 
         for (uint8_t i = 0; i < 64; i++) {
-            int stm = pieceSquare(mailbox[i], sqFromIdx(i), false);
-            int ntm = pieceSquare(mailbox[i], sqFromIdx(i ^ 56), true);
+            int stm = piecesquare(mailbox[i], sq_from_idx(i), false);
+            int ntm = piecesquare(mailbox[i], sq_from_idx(i ^ 56), true);
 
             if (stm != -1) {
                 for (int j = 0; j < 1024; j++) {
-                    out.stm[j] += l0Weights[stm][j];
+                    out.stm[j] += l0_weights[stm][j];
                 }
             }
             if (ntm != -1) {
                 for (int j = 0; j < 1024; j++) {
-                    out.ntm[j] += l0Weights[stm][j];
+                    out.ntm[j] += l0_weights[stm][j];
                 }
             }
         }
         
         for (int i = 0; i < 1024; i++) {
-            out.stm[i] += l0Biases[i];
-            out.ntm[i] += l0Biases[i];
+            out.stm[i] += l0_biases[i];
+            out.ntm[i] += l0_biases[i];
         }
 
         for (int i = 0; i < 1024; i++) {
@@ -35,13 +35,13 @@ namespace episteme::nn {
         return out;
     }
 
-    int16_t NNUE::l1Forward(const Accumulator& accum) const {
+    int16_t NNUE::l1_forward(const Accumulator& accum) const {
         int16_t out = 0;
         for (int i = 0; i < 1024; i++) {
-            out += l1Weights[0][i] * accum.stm[i];
-            out += l1Weights[1][i] * accum.ntm[i];
+            out += l1_weights[0][i] * accum.stm[i];
+            out += l1_weights[1][i] * accum.ntm[i];
         }
-        out += l1Bias;
+        out += l1_bias;
         return out;
     }
 }

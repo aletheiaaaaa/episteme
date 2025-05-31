@@ -34,6 +34,10 @@ namespace episteme::search {
             int32_t score = -search(position, candidate, depth - 1, -beta, -alpha, end);
             position.unmakeMove();
 
+            if (position.mailbox(sqIdx(move.toSquare())) != Piece::None) {
+                int 
+            }
+
             if (end && steady_clock::now() >= *end) return 0;
     
             if (score > best) {
@@ -78,7 +82,7 @@ namespace episteme::search {
         for (std::string fen : fens) {
             Line PV = {};
             Position position;
-            position.fromFEN(fen);
+            position.from_FEN(fen);
             nodes = 0;
 
             auto start = steady_clock::now();

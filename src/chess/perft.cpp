@@ -1,9 +1,9 @@
 #include "perft.h"
 
 namespace episteme {
-    Position fen2Position(std::string_view FEN) {
+    Position fen_to_position(std::string_view FEN) {
         Position position;
-        position.fromFEN(FEN);
+        position.from_FEN(FEN);
         return position;
     }
 
@@ -12,59 +12,59 @@ namespace episteme {
             return 1;
         }
 
-        MoveList moveList;
-        generateAllMoves(moveList, position);
-        uint64_t moveCount = 0;
+        MoveList move_list;
+        generate_all_moves(move_list, position);
+        uint64_t move_count = 0;
 
-        for (size_t i = 0; i < moveList.count(); i++) {
-            position.makeMove(moveList.list(i));
+        for (size_t i = 0; i < move_list.count(); i++) {
+            position.make_move(move_list.list(i));
         
-            uint64_t kingBB = position.bitboard(pieceTypeIdx(PieceType::King)) & position.bitboard(colorIdx(position.NTM()) + position.COLOR_OFFSET);
+            uint64_t king_bb = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(position.NTM()) + position.COLOR_OFFSET);
                 
-            if (!isSquareAttacked(sqFromIdx(std::countr_zero(kingBB)), position, position.STM())) {
-                moveCount += perft(position, depth - 1);
+            if (!is_square_attacked(sq_from_idx(std::countr_zero(king_bb)), position, position.STM())) {
+                move_count += perft(position, depth - 1);
             }
         
-            position.unmakeMove();
+            position.unmake_move();
         }
         
-        return moveCount;
+        return move_count;
     }
 
-    void splitPerft(Position& position, int32_t depth) {
+    void split_perft(Position& position, int32_t depth) {
         if (depth <= 0) {
             std::cerr << "Depth must be greater than 0\n";
             return;
         }
     
-        MoveList moveList;
-        generateAllMoves(moveList, position);
+        MoveList move_list;
+        generate_all_moves(move_list, position);
     
         uint64_t total = 0;
     
-        for (size_t i = 0; i < moveList.count(); ++i) {
-            Move move = moveList.list(i);
-            position.makeMove(move);
+        for (size_t i = 0; i < move_list.count(); ++i) {
+            Move move = move_list.list(i);
+            position.make_move(move);
     
-            uint64_t kingBB = position.bitboard(pieceTypeIdx(PieceType::King)) & position.bitboard(colorIdx(position.NTM()) + position.COLOR_OFFSET);
+            uint64_t king_bb = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(position.NTM()) + position.COLOR_OFFSET);
     
-            bool illegal = isSquareAttacked(sqFromIdx(std::countr_zero(kingBB)), position, position.STM());
+            bool illegal = is_square_attacked(sq_from_idx(std::countr_zero(king_bb)), position, position.STM());
     
             uint64_t nodes = 0;
             if (!illegal) {
                 nodes = perft(position, depth - 1);
                 total += nodes;
-                std::cout << move.toString() << ": " << nodes << "\n";
+                std::cout << move.to_string() << ": " << nodes << "\n";
             }
     
-            position.unmakeMove();
+            position.unmake_move();
         }
     
         std::cout << "Total nodes: " << total << "\n";
     }
     
 
-    void timePerft(Position& position, int32_t depth) {
+    void time_perft(Position& position, int32_t depth) {
         using namespace std::chrono;
 
         auto start = steady_clock::now();

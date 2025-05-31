@@ -12,8 +12,8 @@ namespace episteme {
     const NNUE* nnue = reinterpret_cast<const NNUE*>(gNNUEData);
 
     int32_t evaluate(Position& position) {
-        Accumulator accum = nnue->l0Forward(position.mailboxAll());
-        int16_t out = nnue->l1Forward(accum);
+        Accumulator accum = nnue->l0_forward(position.mailbox_all());
+        int16_t out = nnue->l1_forward(accum);
         return out;
     }
 }

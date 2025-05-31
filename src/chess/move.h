@@ -6,7 +6,7 @@
 
 namespace episteme {
     enum class MoveType : uint16_t {
-        Normal, Castling, EnPassant, Promotion, 
+        Normal, Castling, En_Passant, Promotion, 
         None
     };
 
@@ -18,30 +18,31 @@ namespace episteme {
     class Move {
         public:
             Move();
-            Move(Square fromSquare, Square toSquare, MoveType moveType = MoveType::Normal, PromoPiece promoPiece = PromoPiece::None);
+            Move(Square from_square, Square to_square, MoveType move_type = MoveType::Normal, PromoPiece promo_piece = PromoPiece::None);
 
-            [[nodiscard]] inline Square fromSquare() const {
-                return static_cast<Square>(moveData & 0b111111);
+            [[nodiscard]] inline Square from_square() const {
+                return static_cast<Square>(move_data & 0b111111);
             }
         
-            [[nodiscard]] inline Square toSquare() const {
-                return static_cast<Square>((moveData >> 6) & 0b111111);
+            [[nodiscard]] inline Square to_square() const {
+                return static_cast<Square>((move_data >> 6) & 0b111111);
             }
         
-            [[nodiscard]] inline MoveType moveType() const {
-                return static_cast<MoveType>((moveData >> 12) & 0b11);
+            [[nodiscard]] inline MoveType move_type() const {
+                return static_cast<MoveType>((move_data >> 12) & 0b11);
             }
         
-            [[nodiscard]] inline PromoPiece promoPiece() const {
-                return static_cast<PromoPiece>((moveData >> 14) & 0b11);
+            [[nodiscard]] inline PromoPiece promo_piece() const {
+                return static_cast<PromoPiece>((move_data >> 14) & 0b11);
             }
         
-            [[nodiscard]] inline PieceType promoPieceType() const {
-                return static_cast<PieceType>(((moveData >> 14) & 0b11) + 1);
+            [[nodiscard]] inline PieceType promo_piece_type() const {
+                return static_cast<PieceType>(((move_data >> 14) & 0b11) + 1);
             }
         
-            std::string toString() const;
+            std::string to_string() const;
         private:
-            uint16_t moveData;
+            uint16_t move_data;
+            int16_t mvv_lva;
     };
 }

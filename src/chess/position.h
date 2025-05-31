@@ -9,20 +9,20 @@
 #include <cstdlib>
 
 namespace episteme {
-    struct PositionState {
+    struct Position_State {
         std::array<uint64_t, 8> bitboard;
         std::array<Piece, 64> mailbox;
-        AllowedCastles allowedCastles;
+        AllowedCastles allowed_castles;
         bool stm;
-        uint8_t halfClock;
-        uint32_t fullNumber;
-        Square enPassant = Square::None;
+        uint8_t half_clock;
+        uint32_t full_number;
+        Square en_passant = Square::None;
     };
     class Position {
         public:
             Position();
 
-            [[nodiscard]] inline std::array<uint64_t, 8> bitboardAll() const {
+            [[nodiscard]] inline std::array<uint64_t, 8> bitboard_all() const {
                 return state.bitboard;
             }
 
@@ -38,44 +38,44 @@ namespace episteme {
                 return static_cast<Color>(!state.stm);
             }
         
-            [[nodiscard]] inline uint8_t halfMoveClock() const {
-                return state.halfClock; 
+            [[nodiscard]] inline uint8_t half_move_clock() const {
+                return state.half_clock; 
             }
         
-            [[nodiscard]] inline uint32_t fullMoveNumber() const {
-                return state.fullNumber;
+            [[nodiscard]] inline uint32_t full_move_number() const {
+                return state.full_number;
             }
         
-            [[nodiscard]] inline Square epSquare() const {
-                return state.enPassant;    
+            [[nodiscard]] inline Square ep_square() const {
+                return state.en_passant;    
             }
         
-            [[nodiscard]] inline AllowedCastles::RookPair castlingRights(Color stm) const {
-                return state.allowedCastles.rooks[colorIdx(stm)];
+            [[nodiscard]] inline AllowedCastles::RookPair castling_rights(Color stm) const {
+                return state.allowed_castles.rooks[color_idx(stm)];
             }
         
             [[nodiscard]] inline Piece mailbox(int index) const {
                 return state.mailbox[index];
             }
 
-            [[nodiscard]] inline std::array<Piece, 64> mailboxAll() const {
+            [[nodiscard]] inline std::array<Piece, 64> mailbox_all() const {
                 return state.mailbox;
             }
 
             
-            void fromFEN(std::string_view FEN);
-            std::string toFEN() const; 
-            void fromStartPos();
-            void makeMove(const Move& move);
-            void unmakeMove();
+            void from_FEN(std::string_view FEN);
+            std::string to_fEN() const; 
+            void from_start_pos();
+            void make_move(const Move& move);
+            void unmake_move();
 
         public:
             static const uint16_t COLOR_OFFSET = 6;
 
         private:
-            std::vector<PositionState> positionHistory;
-            PositionState state;
+            std::vector<Position_State> position_history;
+            Position_State state;
     };
 
-    Move fromUCI(const Position& position, const std::string& move);
+    Move from_UCI(const Position& position, const std::string& move);
 }

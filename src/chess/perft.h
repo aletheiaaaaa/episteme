@@ -8,8 +8,8 @@
 #include <iomanip>
 
 namespace episteme {
-    Position fen2Position(std::string_view FEN);
+    Position fen_to_position(std::string_view FEN);
     uint64_t perft(Position &position, int32_t depth);
-    void splitPerft(Position &position, int32_t depth);
-    void timePerft(Position& position, int32_t depth);
+    void split_perft(Position &position, int32_t depth);
+    void time_perft(Position& position, int32_t depth);
 }

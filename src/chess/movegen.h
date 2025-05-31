@@ -8,29 +8,29 @@
 namespace episteme {
     class MoveList {
         public:
-            inline void addMove(const Move& move) {
-                theList[theCount] = move;
-                theCount++;
+            inline void add_move(const Move& move) {
+                the_list[the_count] = move;
+                the_count++;
             }
         
-            inline void clearMoves() {
-                theCount = 0;
+            inline void clear_moves() {
+                the_count = 0;
             }
         
             [[nodiscard]] inline uint32_t count() const {
-                return theCount;
+                return the_count;
             }
         
             [[nodiscard]] inline const Move list(int index) const {
-                return theList[index];
+                return the_list[index];
             }
         private:
-        std::array<Move, 256> theList;
-        uint32_t theCount = 0;
+        std::array<Move, 256> the_list;
+        uint32_t the_count = 0;
     };
 
     struct PawnAttacks {
-        uint64_t push1st, push2nd, leftCaptures, rightCaptures;
+        uint64_t push1st, push2nd, left_captures, right_captures;
     };
 
     constexpr std::array<uint64_t, 64> BISHOP_MAGICS = {
@@ -167,25 +167,25 @@ namespace episteme {
         0x1000010020c28412,
     };
 
-    [[nodiscard]] std::array<uint64_t, 64> fillKingAttacks();
-    [[nodiscard]] std::array<uint64_t, 64> fillKnightAttacks();
-    [[nodiscard]] std::array<uint64_t, 64> fillBishopMasks();
-    [[nodiscard]] std::array<uint64_t, 64> fillRookMasks();
+    [[nodiscard]] std::array<uint64_t, 64> fill_king_attacks();
+    [[nodiscard]] std::array<uint64_t, 64> fill_knight_attacks();
+    [[nodiscard]] std::array<uint64_t, 64> fill_bishop_masks();
+    [[nodiscard]] std::array<uint64_t, 64> fill_rook_masks();
 
-    [[nodiscard]] uint64_t slowBishopAttacks(Square square, uint64_t blockers);
-    [[nodiscard]] uint64_t slowRookAttacks(Square square, uint64_t blockers);
+    [[nodiscard]] uint64_t slow_bishop_attacks(Square square, uint64_t blockers);
+    [[nodiscard]] uint64_t slow_rook_attacks(Square square, uint64_t blockers);
     
-    [[nodiscard]] bool isSquareAttacked(Square square, const Position& position, Color stm);
+    [[nodiscard]] bool is_square_attacked(Square square, const Position& position, Color stm);
 
     extern const std::array<uint64_t, 64> KING_ATTACKS;
     extern const std::array<uint64_t, 64> KNIGHT_ATTACKS;
 
-    [[nodiscard]] inline uint64_t getKingAttacks(Square square) {
-        return KING_ATTACKS[sqIdx(square)];
+    [[nodiscard]] inline uint64_t get_king_attacks(Square square) {
+        return KING_ATTACKS[sq_idx(square)];
     }
 
-    [[nodiscard]] inline uint64_t getKnightAttacks(Square square) {
-        return KNIGHT_ATTACKS[sqIdx(square)];
+    [[nodiscard]] inline uint64_t get_knight_attacks(Square square) {
+        return KNIGHT_ATTACKS[sq_idx(square)];
     }
 
     extern const std::array<uint64_t, 64> ROOK_MASKS;
@@ -194,65 +194,65 @@ namespace episteme {
     extern const std::array<std::array<uint64_t, 4096>, 64> ROOK_ATTACKS;
     extern const std::array<std::array<uint64_t, 512>, 64> BISHOP_ATTACKS;
 
-    [[nodiscard]] inline uint64_t getRookAttacks(Square square, const Position& position) {
-        size_t sq = sqIdx(square);
-        uint64_t blockers = (position.bitboard(colorIdx(Color::White) + position.COLOR_OFFSET) | position.bitboard(colorIdx(Color::Black) + position.COLOR_OFFSET));
-        uint64_t relBlockers = (blockers & ROOK_MASKS[sq]);
-        uint64_t data = relBlockers * ROOK_MAGICS[sq];
+    [[nodiscard]] inline uint64_t get_rook_attacks(Square square, const Position& position) {
+        size_t sq = sq_idx(square);
+        uint64_t blockers = (position.bitboard(color_idx(Color::White) + position.COLOR_OFFSET) | position.bitboard(color_idx(Color::Black) + position.COLOR_OFFSET));
+        uint64_t rel_blockers = (blockers & ROOK_MASKS[sq]);
+        uint64_t data = rel_blockers * ROOK_MAGICS[sq];
         uint64_t idx = data >> (64 - 12);
         return ROOK_ATTACKS[sq][idx];
     }
 
-    [[nodiscard]] inline uint64_t getBishopAttacks(Square square, const Position& position) {
-        size_t sq = sqIdx(square);
-        uint64_t blockers = (position.bitboard(colorIdx(Color::White) + position.COLOR_OFFSET) | position.bitboard(colorIdx(Color::Black) + position.COLOR_OFFSET));
-        uint64_t relBlockers = (blockers & BISHOP_MASKS[sq]);
-        uint64_t data = relBlockers * BISHOP_MAGICS[sq];
+    [[nodiscard]] inline uint64_t get_bishop_attacks(Square square, const Position& position) {
+        size_t sq = sq_idx(square);
+        uint64_t blockers = (position.bitboard(color_idx(Color::White) + position.COLOR_OFFSET) | position.bitboard(color_idx(Color::Black) + position.COLOR_OFFSET));
+        uint64_t rel_blockers = (blockers & BISHOP_MASKS[sq]);
+        uint64_t data = rel_blockers * BISHOP_MAGICS[sq];
         uint64_t idx = data >> (64 - 9);
         return BISHOP_ATTACKS[sq][idx];
     }
 
-    [[nodiscard]] inline uint64_t getQueenAttacks(Square square, const Position& position) {
-        return (getBishopAttacks(square, position) | getRookAttacks(square, position));
+    [[nodiscard]] inline uint64_t get_queen_attacks(Square square, const Position& position) {
+        return (get_bishop_attacks(square, position) | get_rook_attacks(square, position));
     }
 
-    extern PawnAttacks getPawnAttacksHelper(const Position& position, Color stm, bool isPseudo);
+    extern PawnAttacks get_pawn_attacks_helper(const Position& position, Color stm, bool is_pseudo);
 
-    [[nodiscard]] inline PawnAttacks getPawnAttacks(const Position& position, Color stm) {
-        return getPawnAttacksHelper(position, stm, false);
+    [[nodiscard]] inline PawnAttacks get_pawn_attacks(const Position& position, Color stm) {
+        return get_pawn_attacks_helper(position, stm, false);
     }
     
-    [[nodiscard]] inline PawnAttacks getPawnPseudoAttacks(const Position& position, Color stm) {
-        return getPawnAttacksHelper(position, stm, true);
+    [[nodiscard]] inline PawnAttacks get_pawn_pseudo_attacks(const Position& position, Color stm) {
+        return get_pawn_attacks_helper(position, stm, true);
     }    
 
-    void generatePawnMoves(MoveList &moveList, const Position &position);
+    void generate_pawn_moves(MoveList &move_list, const Position &position);
 
     template<PieceType PT, typename F>
-    extern void generatePieceMoves(MoveList& moveList, const Position& position, F getAttacks);
+    extern void generate_piece_moves(MoveList& move_list, const Position& position, F get_attacks);
 
-    inline void generateKnightMoves(MoveList& moveList, const Position& position) {
-        generatePieceMoves<PieceType::Knight>(moveList, position, getKnightAttacks);
+    inline void generate_knight_moves(MoveList& move_list, const Position& position) {
+        generate_piece_moves<PieceType::Knight>(move_list, position, get_knight_attacks);
     }
 
-    inline void generateBishopMoves(MoveList& moveList, const Position& position) {
-        generatePieceMoves<PieceType::Bishop>(moveList, position, getBishopAttacks);
+    inline void generate_bishop_moves(MoveList& move_list, const Position& position) {
+        generate_piece_moves<PieceType::Bishop>(move_list, position, get_bishop_attacks);
     }
 
-    inline void generateRookMoves(MoveList& moveList, const Position& position) {
-        generatePieceMoves<PieceType::Rook>(moveList, position, getRookAttacks);
+    inline void generate_rook_moves(MoveList& move_list, const Position& position) {
+        generate_piece_moves<PieceType::Rook>(move_list, position, get_rook_attacks);
     }
 
-    inline void generateQueenMoves(MoveList& moveList, const Position& position) {
-        generatePieceMoves<PieceType::Queen>(moveList, position, getQueenAttacks);
+    inline void generate_queen_moves(MoveList& move_list, const Position& position) {
+        generate_piece_moves<PieceType::Queen>(move_list, position, get_queen_attacks);
     }
 
-    inline void generateKingMoves(MoveList& moveList, const Position& position) {
-        generatePieceMoves<PieceType::King>(moveList, position, getKingAttacks);
+    inline void generate_king_moves(MoveList& move_list, const Position& position) {
+        generate_piece_moves<PieceType::King>(move_list, position, get_king_attacks);
     }
 
-    void generateEnPassant(MoveList &moveList, const Position &position);
-    void generateCastles(MoveList &moveList, const Position &position, bool isKingside);
+    void generate_en_passant(MoveList &move_list, const Position &position);
+    void generate_castles(MoveList &move_list, const Position &position, bool is_kingside);
 
-    void generateAllMoves(MoveList &moveList, const Position &position);
+    void generate_all_moves(MoveList &move_list, const Position &position);
 }

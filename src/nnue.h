@@ -16,8 +16,8 @@ namespace episteme::nn {
 
     class NNUE {
         public:
-            Accumulator l0Forward(const std::array<Piece, 64>& mailbox) const;
-            int16_t l1Forward(const Accumulator& accum) const; 
+            Accumulator l0_forward(const std::array<Piece, 64>& mailbox) const;
+            int16_t l1_forward(const Accumulator& accum) const; 
 
         private:
             using L0Weights = std::array<std::array<int16_t, 1024>, 768>;
@@ -25,9 +25,9 @@ namespace episteme::nn {
             using L1Weights = std::array<std::array<int16_t, 1024>, 2>;
             using L1Bias = int16_t;
 
-            L0Weights l0Weights;
-            L0Biases l0Biases;
-            L1Weights l1Weights;
-            L1Bias l1Bias;
+            L0Weights l0_weights;
+            L0Biases l0_biases;
+            L1Weights l1_weights;
+            L1Bias l1_bias;
     };
 }

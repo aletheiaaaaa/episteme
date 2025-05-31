@@ -5,20 +5,20 @@ namespace episteme {
     Position::Position() {
         state.bitboard.fill(0);
         state.mailbox.fill(Piece::None);
-        positionHistory.reserve(1024);
+        position_history.reserve(1024);
 
         for (int c = 0; c < 2; ++c) {
-            state.allowedCastles.rooks[c].kingside = Square::None;
-            state.allowedCastles.rooks[c].queenside = Square::None;
+            state.allowed_castles.rooks[c].kingside = Square::None;
+            state.allowed_castles.rooks[c].queenside = Square::None;
         }
 
-        state.stm = colorIdx(Color::White);
-        state.halfClock = 0;
-        state.fullNumber = 0;
-        state.enPassant = Square::None;
+        state.stm = color_idx(Color::White);
+        state.half_clock = 0;
+        state.full_number = 0;
+        state.en_passant = Square::None;
     }
 
-    void Position::fromFEN(std::string_view FEN) {
+    void Position::from_FEN(std::string_view FEN) {
         std::array<std::string, 6> tokens;
         size_t i = 0;
 
@@ -27,25 +27,25 @@ namespace episteme {
             tokens[i++] = std::string(token.begin(), token.end());
         }
 
-        size_t squareIdx = 56;
+        size_t square_idx = 56;
         for (char c : tokens[0]) {
             if (c == '/') {
-                squareIdx -= 16;
+                square_idx -= 16;
             } else if (std::isdigit(c)) {
-                squareIdx += c - '0';
+                square_idx += c - '0';
             } else {
-                auto it = pieceMap.find(c);
-                if (it != pieceMap.end()) {
+                auto it = piece_map.find(c);
+                if (it != piece_map.end()) {
                     PieceType type = it->second.first;
                     Color color = it->second.second;
-                    Piece piece = pieceTypeWithColor(type, color);
-                    uint64_t sq = (uint64_t)1 << squareIdx;
+                    Piece piece = piece_type_with_color(type, color);
+                    uint64_t sq = (uint64_t)1 << square_idx;
 
-                    state.bitboard[pieceTypeIdx(type)] ^= sq;
-                    state.bitboard[colorIdx(color) + COLOR_OFFSET] ^= sq;
-                    state.mailbox[squareIdx] = piece;
+                    state.bitboard[piece_type_idx(type)] ^= sq;
+                    state.bitboard[color_idx(color) + COLOR_OFFSET] ^= sq;
+                    state.mailbox[square_idx] = piece;
                 }
-                ++squareIdx;
+                ++square_idx;
             }
         }
 
@@ -54,25 +54,25 @@ namespace episteme {
         if (tokens[2] != "-") {
             for (char c : tokens[2]) {
                 switch (c) {
-                    case 'K': state.allowedCastles.rooks[colorIdx(Color::White)].kingside = Square::H1; break;
-                    case 'Q': state.allowedCastles.rooks[colorIdx(Color::White)].queenside = Square::A1; break;
-                    case 'k': state.allowedCastles.rooks[colorIdx(Color::Black)].kingside = Square::H8; break;
-                    case 'q': state.allowedCastles.rooks[colorIdx(Color::Black)].queenside = Square::A8; break;
+                    case 'K': state.allowed_castles.rooks[color_idx(Color::White)].kingside = Square::H1; break;
+                    case 'Q': state.allowed_castles.rooks[color_idx(Color::White)].queenside = Square::A1; break;
+                    case 'k': state.allowed_castles.rooks[color_idx(Color::Black)].kingside = Square::H8; break;
+                    case 'q': state.allowed_castles.rooks[color_idx(Color::Black)].queenside = Square::A8; break;
                 }
             }
         }
 
         if (tokens[3] != "-") {
-            state.enPassant = static_cast<Square>((tokens[3][0] - 'a') * 8 + (tokens[3][1] - '1'));
+            state.en_passant = static_cast<Square>((tokens[3][0] - 'a') * 8 + (tokens[3][1] - '1'));
         }
 
-        state.halfClock = std::stoi(tokens[4]);
-        state.fullNumber = std::stoi(tokens[5]);
+        state.half_clock = std::stoi(tokens[4]);
+        state.full_number = std::stoi(tokens[5]);
 
-        positionHistory.push_back(state);
+        position_history.push_back(state);
     }
 
-    std::string Position::toFEN() const {
+    std::string Position::to_fEN() const {
         std::string fen;
     
         for (int rank = 7; rank >= 0; --rank) {
@@ -87,7 +87,7 @@ namespace episteme {
                         empty = 0;
                     }
                     char c;
-                    PieceType pt = pieceType(piece);
+                    PieceType pt = piece_type(piece);
                     Color col = color(piece);
                     switch (pt) {
                         case PieceType::Pawn:   c = 'p'; break;
@@ -110,170 +110,170 @@ namespace episteme {
         fen += (state.stm == static_cast<bool>(Color::White)) ? " w " : " b ";
     
         std::string castling;
-        if (state.allowedCastles.rooks[colorIdx(Color::White)].isKingsideSet()) castling += 'K';
-        if (state.allowedCastles.rooks[colorIdx(Color::White)].isQueensideSet()) castling += 'Q';
-        if (state.allowedCastles.rooks[colorIdx(Color::Black)].isKingsideSet()) castling += 'k';
-        if (state.allowedCastles.rooks[colorIdx(Color::Black)].isQueensideSet()) castling += 'q';
+        if (state.allowed_castles.rooks[color_idx(Color::White)].is_kingside_set()) castling += 'K';
+        if (state.allowed_castles.rooks[color_idx(Color::White)].is_queenside_set()) castling += 'Q';
+        if (state.allowed_castles.rooks[color_idx(Color::Black)].is_kingside_set()) castling += 'k';
+        if (state.allowed_castles.rooks[color_idx(Color::Black)].is_queenside_set()) castling += 'q';
         fen += (castling.empty() ? "-" : castling) + " ";
     
-        fen += (state.enPassant == Square::None ? "-" : Move(state.enPassant, state.enPassant).toString().substr(2)) + " ";
+        fen += (state.en_passant == Square::None ? "-" : Move(state.en_passant, state.en_passant).to_string().substr(2)) + " ";
     
-        fen += std::to_string(state.halfClock) + " " + std::to_string(state.fullNumber);
+        fen += std::to_string(state.half_clock) + " " + std::to_string(state.full_number);
     
         return fen;
     }    
 
-    void Position::fromStartPos() {
-        state.bitboard[pieceTypeIdx(PieceType::Pawn)]   = 0x00FF00000000FF00;
-        state.bitboard[pieceTypeIdx(PieceType::Knight)] = 0x4200000000000042;
-        state.bitboard[pieceTypeIdx(PieceType::Bishop)] = 0x2400000000000024;
-        state.bitboard[pieceTypeIdx(PieceType::Rook)]   = 0x8100000000000081;
-        state.bitboard[pieceTypeIdx(PieceType::Queen)]  = 0x0800000000000008;
-        state.bitboard[pieceTypeIdx(PieceType::King)]   = 0x1000000000000010;
+    void Position::from_start_pos() {
+        state.bitboard[piece_type_idx(PieceType::Pawn)]   = 0x00FF00000000FF00;
+        state.bitboard[piece_type_idx(PieceType::Knight)] = 0x4200000000000042;
+        state.bitboard[piece_type_idx(PieceType::Bishop)] = 0x2400000000000024;
+        state.bitboard[piece_type_idx(PieceType::Rook)]   = 0x8100000000000081;
+        state.bitboard[piece_type_idx(PieceType::Queen)]  = 0x0800000000000008;
+        state.bitboard[piece_type_idx(PieceType::King)]   = 0x1000000000000010;
 
-        state.bitboard[colorIdx(Color::White) + COLOR_OFFSET] = 0x000000000000FFFF;
-        state.bitboard[colorIdx(Color::Black) + COLOR_OFFSET] = 0xFFFF000000000000;
+        state.bitboard[color_idx(Color::White) + COLOR_OFFSET] = 0x000000000000FFFF;
+        state.bitboard[color_idx(Color::Black) + COLOR_OFFSET] = 0xFFFF000000000000;
 
-        auto setupRank = [&](int rank, Color color) {
-            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 0))] = pieceTypeWithColor(PieceType::Rook, color);
-            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 1))] = pieceTypeWithColor(PieceType::Knight, color);
-            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 2))] = pieceTypeWithColor(PieceType::Bishop, color);
-            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 3))] = pieceTypeWithColor(PieceType::Queen, color);
-            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 4))] = pieceTypeWithColor(PieceType::King, color);
-            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 5))] = pieceTypeWithColor(PieceType::Bishop, color);
-            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 6))] = pieceTypeWithColor(PieceType::Knight, color);
-            state.mailbox[sqIdx(static_cast<Square>(rank * 8 + 7))] = pieceTypeWithColor(PieceType::Rook, color);
+        auto setup_rank = [&](int rank, Color color) {
+            state.mailbox[sq_idx(static_cast<Square>(rank * 8 + 0))] = piece_type_with_color(PieceType::Rook, color);
+            state.mailbox[sq_idx(static_cast<Square>(rank * 8 + 1))] = piece_type_with_color(PieceType::Knight, color);
+            state.mailbox[sq_idx(static_cast<Square>(rank * 8 + 2))] = piece_type_with_color(PieceType::Bishop, color);
+            state.mailbox[sq_idx(static_cast<Square>(rank * 8 + 3))] = piece_type_with_color(PieceType::Queen, color);
+            state.mailbox[sq_idx(static_cast<Square>(rank * 8 + 4))] = piece_type_with_color(PieceType::King, color);
+            state.mailbox[sq_idx(static_cast<Square>(rank * 8 + 5))] = piece_type_with_color(PieceType::Bishop, color);
+            state.mailbox[sq_idx(static_cast<Square>(rank * 8 + 6))] = piece_type_with_color(PieceType::Knight, color);
+            state.mailbox[sq_idx(static_cast<Square>(rank * 8 + 7))] = piece_type_with_color(PieceType::Rook, color);
         };
 
-        setupRank(0, Color::White);
-        setupRank(7, Color::Black);
+        setup_rank(0, Color::White);
+        setup_rank(7, Color::Black);
 
         for (int file = 0; file < 8; ++file) {
-            state.mailbox[sqIdx(static_cast<Square>(8 + file))] = Piece::WhitePawn;
-            state.mailbox[sqIdx(static_cast<Square>(48 + file))] = Piece::BlackPawn;
+            state.mailbox[sq_idx(static_cast<Square>(8 + file))] = Piece::White_Pawn;
+            state.mailbox[sq_idx(static_cast<Square>(48 + file))] = Piece::Black_Pawn;
         }
 
-        state.halfClock = 0;
-        state.fullNumber = 1;
+        state.half_clock = 0;
+        state.full_number = 1;
 
-        state.allowedCastles.rooks[colorIdx(Color::White)].kingside  = Square::H1;
-        state.allowedCastles.rooks[colorIdx(Color::White)].queenside = Square::A1;
-        state.allowedCastles.rooks[colorIdx(Color::Black)].kingside  = Square::H8;
-        state.allowedCastles.rooks[colorIdx(Color::Black)].queenside = Square::A8;
+        state.allowed_castles.rooks[color_idx(Color::White)].kingside  = Square::H1;
+        state.allowed_castles.rooks[color_idx(Color::White)].queenside = Square::A1;
+        state.allowed_castles.rooks[color_idx(Color::Black)].kingside  = Square::H8;
+        state.allowed_castles.rooks[color_idx(Color::Black)].queenside = Square::A8;
 
-        positionHistory.push_back(state);
+        position_history.push_back(state);
     }
 
-    void Position::makeMove(const Move& move) {
-        Piece& src = state.mailbox[sqIdx(move.fromSquare())];
-        Piece& dst = state.mailbox[sqIdx(move.toSquare())];
-        uint64_t bbSrc = (uint64_t)1 << sqIdx(move.fromSquare());
-        uint64_t bbDst = (uint64_t)1 << sqIdx(move.toSquare());
+    void Position::make_move(const Move& move) {
+        Piece& src = state.mailbox[sq_idx(move.from_square())];
+        Piece& dst = state.mailbox[sq_idx(move.to_square())];
+        uint64_t bb_src = (uint64_t)1 << sq_idx(move.from_square());
+        uint64_t bb_dst = (uint64_t)1 << sq_idx(move.to_square());
         Color side = STM();
-        auto us = colorIdx(side);
-        auto them = colorIdx(flip(side));
+        auto us = color_idx(side);
+        auto them = color_idx(flip(side));
 
-        state.enPassant = Square::None;
+        state.en_passant = Square::None;
 
-        if (pieceType(src) == PieceType::Pawn || dst != Piece::None) {
-            state.halfClock = 0;
+        if (piece_type(src) == PieceType::Pawn || dst != Piece::None) {
+            state.half_clock = 0;
         } else {
-            state.halfClock++;
+            state.half_clock++;
         }
 
         if (side == Color::Black) {
-            state.fullNumber++;
+            state.full_number++;
         }
 
-        switch (move.moveType()) {
+        switch (move.move_type()) {
             case MoveType::Normal: {
                 if (dst != Piece::None) {
-                    state.bitboard[pieceTypeIdx(pieceType(dst))] ^= bbDst;
-                    state.bitboard[them + COLOR_OFFSET] ^= bbDst;
-                    if (pieceType(dst) == PieceType::Rook) {
-                        auto& rooks = state.allowedCastles.rooks[them];
-                        if (move.toSquare() == rooks.kingside) {
+                    state.bitboard[piece_type_idx(piece_type(dst))] ^= bb_dst;
+                    state.bitboard[them + COLOR_OFFSET] ^= bb_dst;
+                    if (piece_type(dst) == PieceType::Rook) {
+                        auto& rooks = state.allowed_castles.rooks[them];
+                        if (move.to_square() == rooks.kingside) {
                             rooks.unset(true);
-                        } else if (move.toSquare() == rooks.queenside) {
+                        } else if (move.to_square() == rooks.queenside) {
                             rooks.unset(false);
                         }
                     }
                 }
 
-                if (pieceType(src) == PieceType::King) {
-                    auto& rooks = state.allowedCastles.rooks[us];
+                if (piece_type(src) == PieceType::King) {
+                    auto& rooks = state.allowed_castles.rooks[us];
                     rooks.clear();
-                } else if (pieceType(src) == PieceType::Rook) {
-                    auto& rooks = state.allowedCastles.rooks[us];
-                    if (move.fromSquare() == rooks.kingside) {
+                } else if (piece_type(src) == PieceType::Rook) {
+                    auto& rooks = state.allowed_castles.rooks[us];
+                    if (move.from_square() == rooks.kingside) {
                         rooks.unset(true);
-                    } else if (move.fromSquare() == rooks.queenside) {
+                    } else if (move.from_square() == rooks.queenside) {
                         rooks.unset(false);
                     }
                 }
 
-                if (pieceType(src) == PieceType::Pawn &&
-                    std::abs(sqIdx(move.fromSquare()) - sqIdx(move.toSquare())) == DOUBLE_PUSH) {
-                    int epOffset = (side == Color::White) ? -8 : 8;
-                    state.enPassant = sqFromIdx(sqIdx(move.toSquare()) + epOffset);
+                if (piece_type(src) == PieceType::Pawn &&
+                    std::abs(sq_idx(move.from_square()) - sq_idx(move.to_square())) == DOUBLE_PUSH) {
+                    int ep_offset = (side == Color::White) ? -8 : 8;
+                    state.en_passant = sq_from_idx(sq_idx(move.to_square()) + ep_offset);
                 }
 
-                state.bitboard[pieceTypeIdx(pieceType(src))] ^= bbSrc ^ bbDst;
-                state.bitboard[us + COLOR_OFFSET] ^= bbSrc ^ bbDst;
+                state.bitboard[piece_type_idx(piece_type(src))] ^= bb_src ^ bb_dst;
+                state.bitboard[us + COLOR_OFFSET] ^= bb_src ^ bb_dst;
                 dst = src;
                 break;
             }
 
             case MoveType::Castling: {
-                bool kingSide = bbDst > bbSrc;
-                Square rookSrc = kingSide ? state.allowedCastles.rooks[us].kingside : state.allowedCastles.rooks[us].queenside;
-                Square rookDst = (side == Color::White)
-                    ? (kingSide ? Square::F1 : Square::D1)
-                    : (kingSide ? Square::F8 : Square::D8);
-                uint64_t bbRookSrc = (uint64_t)1 << sqIdx(rookSrc);
-                uint64_t bbRookDst = (uint64_t)1 << sqIdx(rookDst);
+                bool king_side = bb_dst > bb_src;
+                Square rook_src = king_side ? state.allowed_castles.rooks[us].kingside : state.allowed_castles.rooks[us].queenside;
+                Square rook_dst = (side == Color::White)
+                    ? (king_side ? Square::F1 : Square::D1)
+                    : (king_side ? Square::F8 : Square::D8);
+                uint64_t bb_rook_src = (uint64_t)1 << sq_idx(rook_src);
+                uint64_t bb_rook_dst = (uint64_t)1 << sq_idx(rook_dst);
 
-                state.bitboard[pieceTypeIdx(PieceType::Rook)] ^= bbRookSrc ^ bbRookDst;
-                state.bitboard[us + COLOR_OFFSET] ^= bbRookSrc ^ bbRookDst;
+                state.bitboard[piece_type_idx(PieceType::Rook)] ^= bb_rook_src ^ bb_rook_dst;
+                state.bitboard[us + COLOR_OFFSET] ^= bb_rook_src ^ bb_rook_dst;
 
-                state.mailbox[sqIdx(rookSrc)] = Piece::None;
-                state.mailbox[sqIdx(rookDst)] = pieceTypeWithColor(PieceType::Rook, side);
+                state.mailbox[sq_idx(rook_src)] = Piece::None;
+                state.mailbox[sq_idx(rook_dst)] = piece_type_with_color(PieceType::Rook, side);
 
                 dst = src;
 
-                state.bitboard[pieceTypeIdx(PieceType::King)] ^= bbSrc ^ bbDst;
-                state.bitboard[us + COLOR_OFFSET] ^= bbSrc ^ bbDst;
-                state.allowedCastles.rooks[us].clear();
+                state.bitboard[piece_type_idx(PieceType::King)] ^= bb_src ^ bb_dst;
+                state.bitboard[us + COLOR_OFFSET] ^= bb_src ^ bb_dst;
+                state.allowed_castles.rooks[us].clear();
                 break;
             }
 
-            case MoveType::EnPassant: {
-                int epOffset = (side == Color::White) ? -8 : 8;
-                int captureIdx = sqIdx(move.toSquare()) + epOffset;
-                uint64_t bbCap = (uint64_t)1 << captureIdx;
+            case MoveType::En_Passant: {
+                int ep_offset = (side == Color::White) ? -8 : 8;
+                int capture_idx = sq_idx(move.to_square()) + ep_offset;
+                uint64_t bb_cap = (uint64_t)1 << capture_idx;
 
-                state.bitboard[pieceTypeIdx(PieceType::Pawn)] ^= bbSrc ^ bbDst ^ bbCap;
-                state.bitboard[us + COLOR_OFFSET] ^= bbSrc ^ bbDst;
-                state.bitboard[them + COLOR_OFFSET] ^= bbCap;
+                state.bitboard[piece_type_idx(PieceType::Pawn)] ^= bb_src ^ bb_dst ^ bb_cap;
+                state.bitboard[us + COLOR_OFFSET] ^= bb_src ^ bb_dst;
+                state.bitboard[them + COLOR_OFFSET] ^= bb_cap;
 
-                state.mailbox[captureIdx] = Piece::None;
+                state.mailbox[capture_idx] = Piece::None;
                 dst = src;
                 break;
             }
 
             case MoveType::Promotion: {
                 if (dst != Piece::None) {
-                    state.bitboard[pieceTypeIdx(pieceType(dst))] ^= bbDst;
-                    state.bitboard[them + COLOR_OFFSET] ^= bbDst;
+                    state.bitboard[piece_type_idx(piece_type(dst))] ^= bb_dst;
+                    state.bitboard[them + COLOR_OFFSET] ^= bb_dst;
                 }
 
-                PieceType promo = move.promoPieceType();
-                state.bitboard[pieceTypeIdx(promo)] ^= bbDst;
-                state.bitboard[pieceTypeIdx(PieceType::Pawn)] ^= bbSrc;
+                PieceType promo = move.promo_piece_type();
+                state.bitboard[piece_type_idx(promo)] ^= bb_dst;
+                state.bitboard[piece_type_idx(PieceType::Pawn)] ^= bb_src;
 
-                state.bitboard[us + COLOR_OFFSET] ^= bbSrc ^ bbDst;
+                state.bitboard[us + COLOR_OFFSET] ^= bb_src ^ bb_dst;
 
-                dst = pieceTypeWithColor(promo, side);
+                dst = piece_type_with_color(promo, side);
                 break;
             }
         }
@@ -281,18 +281,18 @@ namespace episteme {
         src = Piece::None;
         state.stm = !state.stm;
 
-        positionHistory.emplace_back(state);
+        position_history.emplace_back(state);
     }
 
-    void Position::unmakeMove() {
-        positionHistory.pop_back();
-        const PositionState& prev = positionHistory.back();
+    void Position::unmake_move() {
+        position_history.pop_back();
+        const Position_State& prev = position_history.back();
         state = prev;
     }
 
-    Move fromUCI(const Position& position, const std::string& move) {
-        std::string srcStr = move.substr(0, 2);
-        std::string dstStr = move.substr(2, 2);
+    Move from_uCI(const Position& position, const std::string& move) {
+        std::string src_str = move.substr(0, 2);
+        std::string dst_str = move.substr(2, 2);
 
         auto str2Sq = [](std::string square) {
             int file = square[0] - 'a';
@@ -300,24 +300,24 @@ namespace episteme {
             return static_cast<Square>(rank * 8 + file);
         };
 
-        Square src = str2Sq(srcStr);
-        Square dst = str2Sq(dstStr);
+        Square src = str2Sq(src_str);
+        Square dst = str2Sq(dst_str);
 
-        auto isCastling = [&]() {
+        auto is_castling = [&]() {
             Color stm = position.STM();
-            if (pieceType(position.mailbox(sqIdx(src))) != PieceType::King) return false;
+            if (piece_type(position.mailbox(sq_idx(src))) != PieceType::King) return false;
         
             Square kingside = (stm == Color::White) ? Square::G1 : Square::G8;
             Square queenside = (stm == Color::White) ? Square::C1 : Square::C8;
         
-            bool kingsideCastle = (dst == kingside) && position.castlingRights(stm).isKingsideSet();
-            bool queensideCastle = (dst == queenside) && position.castlingRights(stm).isQueensideSet();
+            bool kingside_castle = (dst == kingside) && position.castling_rights(stm).is_kingside_set();
+            bool queenside_castle = (dst == queenside) && position.castling_rights(stm).is_queenside_set();
         
-            return (kingsideCastle || queensideCastle);
+            return (kingside_castle || queenside_castle);
         };
 
-        bool isPromo = (move.length() == 5);
-        bool isEnPassant = (pieceType(position.mailbox(sqIdx(src))) == PieceType::Pawn) && (dst == position.epSquare());
+        bool is_promo = (move.length() == 5);
+        bool is_en_passant = (piece_type(position.mailbox(sq_idx(src))) == PieceType::Pawn) && (dst == position.ep_square());
 
         auto char2Piece = [&](char promo) {
             switch (promo) {
@@ -329,9 +329,9 @@ namespace episteme {
             }
         };
 
-        if (isCastling()) return Move(src, dst, MoveType::Castling);
-        else if (isEnPassant) return Move(src, dst, MoveType::EnPassant);
-        else if (isPromo) return Move(src, dst, MoveType::Promotion, char2Piece(move.at(4)));
+        if (is_castling()) return Move(src, dst, MoveType::Castling);
+        else if (is_en_passant) return Move(src, dst, MoveType::En_Passant);
+        else if (is_promo) return Move(src, dst, MoveType::Promotion, char2Piece(move.at(4)));
         else return Move(src, dst);
     }
 }

@@ -1,148 +1,148 @@
 #include "movegen.h"
 
 namespace episteme {
-    std::array<uint64_t, 64> fillKingAttacks() {
-        std::array<uint64_t, 64> kingAttacks;
-        kingAttacks.fill(0);
+    std::array<uint64_t, 64> fill_king_attacks() {
+        std::array<uint64_t, 64> king_attacks;
+        king_attacks.fill(0);
         for (int i = 0; i < 64; i++) {
             uint64_t square = (uint64_t)1 << i;
-            uint64_t pattern = shiftNorth(square) | shiftNorth(shiftEast(square)) 
-                | shiftEast(square) | shiftSouth(shiftEast(square)) 
-                | shiftSouth(square)  | shiftSouth(shiftWest(square)) 
-                | shiftWest(square)  | shiftNorth(shiftWest(square));
-            kingAttacks[i] = pattern;
+            uint64_t pattern = shift_north(square) | shift_north(shift_east(square)) 
+                | shift_east(square) | shift_south(shift_east(square)) 
+                | shift_south(square)  | shift_south(shift_west(square)) 
+                | shift_west(square)  | shift_north(shift_west(square));
+            king_attacks[i] = pattern;
         }
-        return kingAttacks;
+        return king_attacks;
     }
 
-    std::array<uint64_t, 64> fillKnightAttacks() {
-        std::array<uint64_t, 64> knightAttacks;
-        knightAttacks.fill(0);
+    std::array<uint64_t, 64> fill_knight_attacks() {
+        std::array<uint64_t, 64> knight_attacks;
+        knight_attacks.fill(0);
         for (int i = 0; i < 64; i++) {
             uint64_t square = (uint64_t)1 << i;
-            uint64_t pattern = shiftWest(shiftNorth(shiftNorth(square))) | shiftEast(shiftNorth(shiftNorth(square)))
-                | shiftNorth(shiftEast(shiftEast(square)))  | shiftSouth(shiftEast(shiftEast(square)))
-                | shiftEast(shiftSouth(shiftSouth(square))) | shiftWest(shiftSouth(shiftSouth(square)))
-                | shiftSouth(shiftWest(shiftWest(square)))  | shiftNorth(shiftWest(shiftWest(square)));
-            knightAttacks[i] = pattern;
+            uint64_t pattern = shift_west(shift_north(shift_north(square))) | shift_east(shift_north(shift_north(square)))
+                | shift_north(shift_east(shift_east(square)))  | shift_south(shift_east(shift_east(square)))
+                | shift_east(shift_south(shift_south(square))) | shift_west(shift_south(shift_south(square)))
+                | shift_south(shift_west(shift_west(square)))  | shift_north(shift_west(shift_west(square)));
+            knight_attacks[i] = pattern;
         }
-        return knightAttacks;
+        return knight_attacks;
     }
 
-    const std::array<uint64_t, 64> KING_ATTACKS = fillKingAttacks();
-    const std::array<uint64_t, 64> KNIGHT_ATTACKS = fillKnightAttacks();
+    const std::array<uint64_t, 64> KING_ATTACKS = fill_king_attacks();
+    const std::array<uint64_t, 64> KNIGHT_ATTACKS = fill_knight_attacks();
 
-    std::array<uint64_t, 64> fillRookMasks() {
-        std::array<uint64_t, 64> rookMasks;
-        rookMasks.fill(0);
+    std::array<uint64_t, 64> fill_rook_masks() {
+        std::array<uint64_t, 64> rook_masks;
+        rook_masks.fill(0);
         for (int i = 0; i < 64; i++) {
             uint64_t square = 0;
             square |= ((uint64_t)0x7E << 8 * (i / 8)) | ((uint64_t)0x1010101010100 << (i % 8));
             square &= ~((uint64_t)1 << i);
-            rookMasks[i] = square;
+            rook_masks[i] = square;
         }
-        return rookMasks;
+        return rook_masks;
     }
 
-    std::array<uint64_t, 64> fillBishopMasks() {
-        std::array<uint64_t, 64> bishopMasks;
-        bishopMasks.fill(0); 
+    std::array<uint64_t, 64> fill_bishop_masks() {
+        std::array<uint64_t, 64> bishop_masks;
+        bishop_masks.fill(0); 
         for (int i = 0; i < 64; i++) {
             uint64_t diagonal = 0x8040201008040201;
-            uint64_t antiDiagonal = 0x0102040810204080;
+            uint64_t anti_diagonal = 0x0102040810204080;
             uint64_t square = 0;
             int shift = (i / 8) - (i % 8);
-            int antiShift = (i % 8) - (7 - (i / 8));
+            int anti_shift = (i % 8) - (7 - (i / 8));
             diagonal = (shift > 0) ? (diagonal << (shift * 8)) : (diagonal >> -(shift * 8));
-            antiDiagonal = (antiShift > 0) ? (antiDiagonal << (antiShift * 8)) : (antiDiagonal >> -(antiShift * 8));
-            square |= (diagonal | antiDiagonal);
+            anti_diagonal = (anti_shift > 0) ? (anti_diagonal << (anti_shift * 8)) : (anti_diagonal >> -(anti_shift * 8));
+            square |= (diagonal | anti_diagonal);
             square &= ~((uint64_t)1 << i);
-            bishopMasks[i] = square & ~(0xFF818181818181FF);
+            bishop_masks[i] = square & ~(0xFF818181818181FF);
         }
-        return bishopMasks;
+        return bishop_masks;
     }
 
-    const std::array<uint64_t, 64> ROOK_MASKS = fillRookMasks();
-    const std::array<uint64_t, 64> BISHOP_MASKS = fillBishopMasks();
+    const std::array<uint64_t, 64> ROOK_MASKS = fill_rook_masks();
+    const std::array<uint64_t, 64> BISHOP_MASKS = fill_bishop_masks();
 
-    uint64_t slowRookAttacks(Square square, uint64_t blockers) {
-        uint64_t rookAttacks = 0;
-        size_t sq = sqIdx(square);
-        uint64_t sqBB = (uint64_t)1 << sq;
+    uint64_t slow_rook_attacks(Square square, uint64_t blockers) {
+        uint64_t rook_attacks = 0;
+        size_t sq = sq_idx(square);
+        uint64_t sq_bb = (uint64_t)1 << sq;
 
-        auto generateRay = [sqBB, &rookAttacks, &blockers](auto shiftDir) {
-            uint64_t attackBB = sqBB;
+        auto generate_ray = [sq_bb, &rook_attacks, &blockers](auto shift_dir) {
+            uint64_t attack_bb = sq_bb;
             do {
-                attackBB = shiftDir(attackBB);
-                rookAttacks |= attackBB;
-            } while (attackBB && !(attackBB & blockers));
+                attack_bb = shift_dir(attack_bb);
+                rook_attacks |= attack_bb;
+            } while (attack_bb && !(attack_bb & blockers));
         };
 
-        generateRay(shiftNorth);
-        generateRay(shiftEast);
-        generateRay(shiftSouth);
-        generateRay(shiftWest);
+        generate_ray(shift_north);
+        generate_ray(shift_east);
+        generate_ray(shift_south);
+        generate_ray(shift_west);
 
-        return rookAttacks;
+        return rook_attacks;
     }
     
-    uint64_t slowBishopAttacks(Square square, uint64_t blockers) {
-        uint64_t bishopAttacks = 0;
-        size_t sq = sqIdx(square);
-        uint64_t sqBB = (uint64_t)1 << sq;
+    uint64_t slow_bishop_attacks(Square square, uint64_t blockers) {
+        uint64_t bishop_attacks = 0;
+        size_t sq = sq_idx(square);
+        uint64_t sq_bb = (uint64_t)1 << sq;
 
-        auto generateRay = [sqBB, &bishopAttacks, &blockers](auto shiftDir1, auto shiftDir2) {
-            uint64_t attackBB = sqBB;
+        auto generate_ray = [sq_bb, &bishop_attacks, &blockers](auto shift_dir1, auto shift_dir2) {
+            uint64_t attack_bb = sq_bb;
             do {
-                attackBB = shiftDir2(shiftDir1(attackBB));
-                bishopAttacks |= attackBB;
-            } while (attackBB && !(attackBB & blockers));
+                attack_bb = shift_dir2(shift_dir1(attack_bb));
+                bishop_attacks |= attack_bb;
+            } while (attack_bb && !(attack_bb & blockers));
         };
 
-        generateRay(shiftNorth, shiftEast);
-        generateRay(shiftSouth, shiftEast);
-        generateRay(shiftSouth, shiftWest);
-        generateRay(shiftNorth, shiftWest);
+        generate_ray(shift_north, shift_east);
+        generate_ray(shift_south, shift_east);
+        generate_ray(shift_south, shift_west);
+        generate_ray(shift_north, shift_west);
 
-        return bishopAttacks;
+        return bishop_attacks;
     }
         
     template<size_t NUM_BITS, typename F>
-    std::array<uint64_t, (1 << NUM_BITS)> fillSqAttack (Square square, std::array<uint64_t, 64> MASKS, F slowAttacks) {
+    std::array<uint64_t, (1 << NUM_BITS)> fill_sq_attack (Square square, std::array<uint64_t, 64> MASKS, F slow_attacks) {
         constexpr size_t ARR_SIZE = 1 << NUM_BITS;
         std::array<uint64_t, ARR_SIZE> attacks; 
-        uint64_t mask = MASKS[sqIdx(square)];
+        uint64_t mask = MASKS[sq_idx(square)];
 
         uint64_t submask = 0;
-        size_t numMoves = 0;
+        size_t num_moves = 0;
         do {
-            attacks[numMoves] = slowAttacks(square, submask);
+            attacks[num_moves] = slow_attacks(square, submask);
             submask = (submask - mask) & mask;
-            numMoves++;
+            num_moves++;
         } while (submask);
 
-        while (numMoves < ARR_SIZE) {
-            attacks[numMoves] = 0;
-            numMoves++; 
+        while (num_moves < ARR_SIZE) {
+            attacks[num_moves] = 0;
+            num_moves++; 
         }
 
         return attacks;
     }
 
     template<size_t NUM_BITS, typename F>
-    std::pair<uint64_t, std::array<uint64_t, 1 << NUM_BITS>> findMagics(Square square, std::array<uint64_t, 64> MASKS, F slowAttacks) {
+    std::pair<uint64_t, std::array<uint64_t, 1 << NUM_BITS>> find_magics(Square square, std::array<uint64_t, 64> MASKS, F slow_attacks) {
         constexpr size_t ARR_SIZE = 1 << NUM_BITS;
-        auto attacks = fillSqAttack<NUM_BITS>(square, MASKS, slowAttacks);
+        auto attacks = fill_sq_attack<NUM_BITS>(square, MASKS, slow_attacks);
         std::array<uint64_t, ARR_SIZE> submasks;
-        std::array<uint64_t, ARR_SIZE> usedIndices;
-        uint64_t mask = MASKS[sqIdx(square)];
+        std::array<uint64_t, ARR_SIZE> used_indices;
+        uint64_t mask = MASKS[sq_idx(square)];
 
         uint64_t submask = 0;
-        int numMoves = 0;
+        int num_moves = 0;
         do {
-            submasks[numMoves] = submask;
+            submasks[num_moves] = submask;
             submask = (submask - mask) & mask;
-            numMoves++;
+            num_moves++;
         } while (submask);
 
         std::mt19937 gen(42);
@@ -150,26 +150,26 @@ namespace episteme {
         bool fail;
         uint64_t magic;
         do {
-            usedIndices.fill(0);
+            used_indices.fill(0);
             magic = dist(gen) & dist(gen) & dist(gen);
             fail = false;
-            for (int i = 0; (!fail) && (i < numMoves); i++) {
-                const auto magicIdx = (submasks[i] * magic) >> (64 - NUM_BITS);
-                if (usedIndices[magicIdx] == 0) {
-                    usedIndices[magicIdx] = attacks[i];
-                } else if (usedIndices[magicIdx] != attacks[i]) {
+            for (int i = 0; (!fail) && (i < num_moves); i++) {
+                const auto magic_idx = (submasks[i] * magic) >> (64 - NUM_BITS);
+                if (used_indices[magic_idx] == 0) {
+                    used_indices[magic_idx] = attacks[i];
+                } else if (used_indices[magic_idx] != attacks[i]) {
                     fail = true;
                 }
             }
         } while (fail);
 
-        return {magic, usedIndices};
+        return {magic, used_indices};
     }
 
     template<size_t NUM_BITS, typename F>
-    std::array<std::array<uint64_t, (1 << NUM_BITS)>, 64> fillAttacks(const std::array<uint64_t, 64>& MAGICS, const std::array<uint64_t, 64>& MASKS, F slowAttacks) {
+    std::array<std::array<uint64_t, (1 << NUM_BITS)>, 64> fill_attacks(const std::array<uint64_t, 64>& MAGICS, const std::array<uint64_t, 64>& MASKS, F slow_attacks) {
         constexpr size_t ARR_SIZE = 1 << NUM_BITS;
-        std::array<std::array<uint64_t, ARR_SIZE>, 64> attackTables{};
+        std::array<std::array<uint64_t, ARR_SIZE>, 64> attack_tables{};
     
         for (int sq = 0; sq < 64; ++sq) {
             const uint64_t mask = MASKS[sq];
@@ -177,74 +177,74 @@ namespace episteme {
             uint64_t submask = 0;
             do {
                 const uint64_t index = (submask * MAGICS[sq]) >> (64 - NUM_BITS);
-                table[index] = slowAttacks(sqFromIdx(sq), submask);
+                table[index] = slow_attacks(sq_from_idx(sq), submask);
                 submask = (submask - mask) & mask;
             } while (submask);
-            attackTables[sq] = table;
+            attack_tables[sq] = table;
         }
     
-        return attackTables;
+        return attack_tables;
     }
     
-    std::array<std::array<uint64_t, 4096>, 64> fillRookAttacks() {
-        return fillAttacks<12>(ROOK_MAGICS, ROOK_MASKS, slowRookAttacks);
+    std::array<std::array<uint64_t, 4096>, 64> fill_rook_attacks() {
+        return fill_attacks<12>(ROOK_MAGICS, ROOK_MASKS, slow_rook_attacks);
     }
 
-    std::array<std::array<uint64_t, 512>, 64> fillBishopAttacks() {
-        return fillAttacks<9>(BISHOP_MAGICS, BISHOP_MASKS, slowBishopAttacks);
+    std::array<std::array<uint64_t, 512>, 64> fill_bishop_attacks() {
+        return fill_attacks<9>(BISHOP_MAGICS, BISHOP_MASKS, slow_bishop_attacks);
     }
 
-    const std::array<std::array<uint64_t, 4096>, 64> ROOK_ATTACKS = fillRookAttacks();
-    const std::array<std::array<uint64_t, 512>, 64> BISHOP_ATTACKS = fillBishopAttacks();
+    const std::array<std::array<uint64_t, 4096>, 64> ROOK_ATTACKS = fill_rook_attacks();
+    const std::array<std::array<uint64_t, 512>, 64> BISHOP_ATTACKS = fill_bishop_attacks();
 
-    PawnAttacks getPawnAttacksHelper(const Position& position, Color stm, bool isPseudo) {
-        uint64_t usBB = position.bitboard(colorIdx(stm) + position.COLOR_OFFSET);
-        uint64_t themBB = position.bitboard(colorIdx(flip(stm)) + position.COLOR_OFFSET);
-        uint64_t pawnBB = position.bitboard(pieceTypeIdx(PieceType::Pawn)) & usBB;
+    PawnAttacks get_pawn_attacks_helper(const Position& position, Color stm, bool is_pseudo) {
+        uint64_t us_bb = position.bitboard(color_idx(stm) + position.COLOR_OFFSET);
+        uint64_t them_bb = position.bitboard(color_idx(flip(stm)) + position.COLOR_OFFSET);
+        uint64_t pawn_bb = position.bitboard(piece_type_idx(PieceType::Pawn)) & us_bb;
         
-        uint64_t occupied = usBB | (isPseudo ? 0ULL : themBB);  // only filter themBB if not pseudo
-        uint64_t capturesMask = isPseudo ? ~0ULL : themBB;
+        uint64_t occupied = us_bb | (is_pseudo ? 0ULL : them_bb);  // only filter them_bb if not pseudo
+        uint64_t captures_mask = is_pseudo ? ~0ULL : them_bb;
     
         PawnAttacks attacks;
     
         if (stm == Color::White) {
-            attacks.push1st = (pawnBB << 8) & ~occupied;
+            attacks.push1st = (pawn_bb << 8) & ~occupied;
             attacks.push2nd = ((attacks.push1st & RANK_3) << 8) & ~occupied;
-            attacks.leftCaptures = ((pawnBB & ~FILE_A) << 7) & capturesMask;
-            attacks.rightCaptures = ((pawnBB & ~FILE_H) << 9) & capturesMask;
+            attacks.left_captures = ((pawn_bb & ~FILE_A) << 7) & captures_mask;
+            attacks.right_captures = ((pawn_bb & ~FILE_H) << 9) & captures_mask;
         } else {
-            attacks.push1st = (pawnBB >> 8) & ~occupied;
+            attacks.push1st = (pawn_bb >> 8) & ~occupied;
             attacks.push2nd = ((attacks.push1st & RANK_6) >> 8) & ~occupied;
-            attacks.leftCaptures = ((pawnBB & ~FILE_A) >> 9) & capturesMask;
-            attacks.rightCaptures = ((pawnBB & ~FILE_H) >> 7) & capturesMask;
+            attacks.left_captures = ((pawn_bb & ~FILE_A) >> 9) & captures_mask;
+            attacks.right_captures = ((pawn_bb & ~FILE_H) >> 7) & captures_mask;
         }
     
         return attacks;
     }
 
-    bool isSquareAttacked(Square square, const Position& position, Color nstm) {
-        uint64_t squareBB = uint64_t(1) << sqIdx(square);
+    bool is_square_attacked(Square square, const Position& position, Color nstm) {
+        uint64_t square_bb = uint64_t(1) << sq_idx(square);
     
-        uint64_t themBB = position.bitboard(colorIdx(nstm) + position.COLOR_OFFSET);
+        uint64_t them_bb = position.bitboard(color_idx(nstm) + position.COLOR_OFFSET);
         
-        uint64_t knights = position.bitboard(pieceTypeIdx(PieceType::Knight));
-        uint64_t knightAttacks = getKnightAttacks(square) & knights & themBB;
+        uint64_t knights = position.bitboard(piece_type_idx(PieceType::Knight));
+        uint64_t knight_attacks = get_knight_attacks(square) & knights & them_bb;
 
-        uint64_t queens = position.bitboard(pieceTypeIdx(PieceType::Queen));
-        uint64_t bishopsAndQueens = position.bitboard(pieceTypeIdx(PieceType::Bishop)) | queens;
-        uint64_t bishopAttacks = getBishopAttacks(square, position) & bishopsAndQueens & themBB;
-        uint64_t rooksAndQueens = position.bitboard(pieceTypeIdx(PieceType::Rook)) | queens;
-        uint64_t rookAttacks = getRookAttacks(square, position) & rooksAndQueens & themBB;
+        uint64_t queens = position.bitboard(piece_type_idx(PieceType::Queen));
+        uint64_t bishops_and_queens = position.bitboard(piece_type_idx(PieceType::Bishop)) | queens;
+        uint64_t bishop_attacks = get_bishop_attacks(square, position) & bishops_and_queens & them_bb;
+        uint64_t rooks_and_queens = position.bitboard(piece_type_idx(PieceType::Rook)) | queens;
+        uint64_t rook_attacks = get_rook_attacks(square, position) & rooks_and_queens & them_bb;
         
-        uint64_t kings = position.bitboard(pieceTypeIdx(PieceType::King));
-        uint64_t kingAttacks = getKingAttacks(square) & kings & themBB;
+        uint64_t kings = position.bitboard(piece_type_idx(PieceType::King));
+        uint64_t king_attacks = get_king_attacks(square) & kings & them_bb;
     
-        if ((knightAttacks | bishopAttacks | rookAttacks | kingAttacks) != 0) {
+        if ((knight_attacks | bishop_attacks | rook_attacks | king_attacks) != 0) {
             return true;
         }
     
-        PawnAttacks pawnAttacks = getPawnPseudoAttacks(position, nstm);
-        if (((pawnAttacks.leftCaptures | pawnAttacks.rightCaptures) & squareBB) != 0) {
+        PawnAttacks pawn_attacks = get_pawn_pseudo_attacks(position, nstm);
+        if (((pawn_attacks.left_captures | pawn_attacks.right_captures) & square_bb) != 0) {
             return true;
         }
 
@@ -252,109 +252,109 @@ namespace episteme {
     }
     
     template<PieceType PT, typename F>
-    void generatePieceMoves(MoveList& moveList, const Position& position, F getAttacks) {
-        uint64_t usBB = position.bitboard(colorIdx(position.STM()) + position.COLOR_OFFSET);
-        uint64_t pieceBB = position.bitboard(pieceTypeIdx(PT)) & usBB;
-        while (pieceBB != 0) {
-            Square fromSq = sqFromIdx(std::countr_zero(pieceBB));
-            uint64_t attacksBB;
+    void generate_piece_moves(MoveList& move_list, const Position& position, F get_attacks) {
+        uint64_t us_bb = position.bitboard(color_idx(position.STM()) + position.COLOR_OFFSET);
+        uint64_t piece_bb = position.bitboard(piece_type_idx(PT)) & us_bb;
+        while (piece_bb != 0) {
+            Square from_sq = sq_from_idx(std::countr_zero(piece_bb));
+            uint64_t attacks_bb;
             if constexpr (std::is_invocable_r<uint64_t, F, Square, const Position&>::value) {
-                attacksBB = getAttacks(fromSq, position) & ~usBB;
+                attacks_bb = get_attacks(from_sq, position) & ~us_bb;
             } else {
-                attacksBB = getAttacks(fromSq) & ~usBB;
+                attacks_bb = get_attacks(from_sq) & ~us_bb;
             }
-            while (attacksBB != 0) {
-                Square toSq = sqFromIdx(std::countr_zero(attacksBB));
-                moveList.addMove({fromSq, toSq});
-                attacksBB &= attacksBB - 1;
+            while (attacks_bb != 0) {
+                Square to_sq = sq_from_idx(std::countr_zero(attacks_bb));
+                move_list.add_move({from_sq, to_sq});
+                attacks_bb &= attacks_bb - 1;
             }
-            pieceBB &= pieceBB - 1;
+            piece_bb &= piece_bb - 1;
         }
     }
 
-    void generatePawnMoves(MoveList& moveList, const Position& position) {
+    void generate_pawn_moves(MoveList& move_list, const Position& position) {
         Color stm = position.STM();
-        PawnAttacks attacks = getPawnAttacks(position, stm);
-        uint64_t promoRank = (stm == Color::White) ? (RANK_8) : (RANK_1);
-        constexpr std::array<size_t, 2> leftCaptureShift{ 7, 9 };
-        constexpr std::array<size_t, 2> rightCaptureShift{ 9, 7 };
-        constexpr size_t push1stShift = 8;
-        constexpr size_t push2ndShift = 16;
+        PawnAttacks attacks = get_pawn_attacks(position, stm);
+        uint64_t promo_rank = (stm == Color::White) ? (RANK_8) : (RANK_1);
+        constexpr std::array<size_t, 2> left_capture_shift{ 7, 9 };
+        constexpr std::array<size_t, 2> right_capture_shift{ 9, 7 };
+        constexpr size_t push1st_shift = 8;
+        constexpr size_t push2nd_shift = 16;
 
-        auto getFromSq = [stm](uint64_t attacksBB, size_t shift) {
+        auto get_from_sq = [stm](uint64_t attacks_bb, size_t shift) {
             if (stm == Color::White) {
-                return sqFromIdx(std::countr_zero(attacksBB) - shift);
+                return sq_from_idx(std::countr_zero(attacks_bb) - shift);
             } else {
-                return sqFromIdx(std::countr_zero(attacksBB) + shift);
+                return sq_from_idx(std::countr_zero(attacks_bb) + shift);
             }
         };
 
-        auto addMove = [promoRank, &moveList](Square fromSq, Square toSq) {
-            if ((((uint64_t)1 << sqIdx(toSq)) & promoRank) != 0) {
-                for (auto promoPiece : {PromoPiece::Knight, PromoPiece::Bishop, PromoPiece::Rook, PromoPiece::Queen}) {
-                    moveList.addMove({fromSq, toSq, MoveType::Promotion, promoPiece});
+        auto add_move = [promo_rank, &move_list](Square from_sq, Square to_sq) {
+            if ((((uint64_t)1 << sq_idx(to_sq)) & promo_rank) != 0) {
+                for (auto promo_piece : {PromoPiece::Knight, PromoPiece::Bishop, PromoPiece::Rook, PromoPiece::Queen}) {
+                    move_list.add_move({from_sq, to_sq, MoveType::Promotion, promo_piece});
                 }
             } else {
-                moveList.addMove({fromSq, toSq});
+                move_list.add_move({from_sq, to_sq});
             };
         };
 
-        auto attacks2Moves = [&](uint64_t attacksBB, size_t shift) {
-            while (attacksBB != 0) {
-                Square fromSq = getFromSq(attacksBB, shift);
-                Square toSq = sqFromIdx(std::countr_zero(attacksBB));
-                addMove(fromSq, toSq);
-                attacksBB &= attacksBB - 1;
+        auto attacks2Moves = [&](uint64_t attacks_bb, size_t shift) {
+            while (attacks_bb != 0) {
+                Square from_sq = get_from_sq(attacks_bb, shift);
+                Square to_sq = sq_from_idx(std::countr_zero(attacks_bb));
+                add_move(from_sq, to_sq);
+                attacks_bb &= attacks_bb - 1;
             }
         };
 
-        attacks2Moves(attacks.push1st, push1stShift);
-        attacks2Moves(attacks.push2nd, push2ndShift);
-        attacks2Moves(attacks.leftCaptures, leftCaptureShift[colorIdx(stm)]);
-        attacks2Moves(attacks.rightCaptures, rightCaptureShift[colorIdx(stm)]);
+        attacks2Moves(attacks.push1st, push1st_shift);
+        attacks2Moves(attacks.push2nd, push2nd_shift);
+        attacks2Moves(attacks.left_captures, left_capture_shift[color_idx(stm)]);
+        attacks2Moves(attacks.right_captures, right_capture_shift[color_idx(stm)]);
     }
 
-    void generateEnPassant(MoveList& moveList, const Position& position) {
-        Square epSq = position.epSquare();
+    void generate_en_passant(MoveList& move_list, const Position& position) {
+        Square ep_sq = position.ep_square();
         Color stm = position.STM();
-        uint64_t epBB = (uint64_t)1 << sqIdx(epSq);
-        uint64_t pawnBB = position.bitboard(pieceTypeIdx(PieceType::Pawn)) & position.bitboard(colorIdx(stm) + position.COLOR_OFFSET);
+        uint64_t ep_bb = (uint64_t)1 << sq_idx(ep_sq);
+        uint64_t pawn_bb = position.bitboard(piece_type_idx(PieceType::Pawn)) & position.bitboard(color_idx(stm) + position.COLOR_OFFSET);
 
-        uint64_t leftAttacks = (stm == Color::White) ? (((epBB & ~FILE_A) >> 9) & pawnBB) : (((epBB & ~FILE_A) << 7) & pawnBB);
-        uint64_t rightAttacks = (stm == Color::White) ? (((epBB & ~FILE_H) >> 7) & pawnBB) : (((epBB & ~FILE_H) << 9) & pawnBB);
+        uint64_t left_attacks = (stm == Color::White) ? (((ep_bb & ~FILE_A) >> 9) & pawn_bb) : (((ep_bb & ~FILE_A) << 7) & pawn_bb);
+        uint64_t right_attacks = (stm == Color::White) ? (((ep_bb & ~FILE_H) >> 7) & pawn_bb) : (((ep_bb & ~FILE_H) << 9) & pawn_bb);
 
-        if (leftAttacks != 0) {
-            Square fromSq = sqFromIdx(std::countr_zero(leftAttacks));
-            moveList.addMove({fromSq, epSq, MoveType::EnPassant});
+        if (left_attacks != 0) {
+            Square from_sq = sq_from_idx(std::countr_zero(left_attacks));
+            move_list.add_move({from_sq, ep_sq, MoveType::En_Passant});
         }
-        if (rightAttacks != 0) {
-            Square fromSq = sqFromIdx(std::countr_zero(rightAttacks));
-            moveList.addMove({fromSq, epSq, MoveType::EnPassant});
+        if (right_attacks != 0) {
+            Square from_sq = sq_from_idx(std::countr_zero(right_attacks));
+            move_list.add_move({from_sq, ep_sq, MoveType::En_Passant});
         }
     }
 
-    void generateCastles(MoveList& moveList, const Position& position, bool isKingside) {
+    void generate_castles(MoveList& move_list, const Position& position, bool is_kingside) {
         Color stm = position.STM();
-        uint64_t kingBB = position.bitboard(pieceTypeIdx(PieceType::King)) & position.bitboard(colorIdx(stm) + position.COLOR_OFFSET);
-        constexpr std::array<std::array<Square, 2>, 2> kingEnds = {{
+        uint64_t king_bb = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(stm) + position.COLOR_OFFSET);
+        constexpr std::array<std::array<Square, 2>, 2> king_ends = {{
             {Square::C1, Square::G1},
             {Square::C8, Square::G8}
         }};
 
-        Square kingSrc = sqFromIdx(std::countr_zero(kingBB));
-        Square kingDst = kingEnds[colorIdx(stm)][isKingside];
+        Square king_src = sq_from_idx(std::countr_zero(king_bb));
+        Square king_dst = king_ends[color_idx(stm)][is_kingside];
 
-        Square rookSrc = isKingside ? position.castlingRights(stm).kingside : position.castlingRights(stm).queenside;
+        Square rook_src = is_kingside ? position.castling_rights(stm).kingside : position.castling_rights(stm).queenside;
 
-        if (isSquareAttacked(kingSrc, position, position.NTM())) {
+        if (is_square_attacked(king_src, position, position.NTM())) {
             return;
         }
 
-        size_t kingStart = std::min(sqIdx(kingSrc), sqIdx(kingDst));
-        size_t kingEnd = std::max(sqIdx(kingSrc), sqIdx(kingDst));
+        size_t king_start = std::min(sq_idx(king_src), sq_idx(king_dst));
+        size_t king_end = std::max(sq_idx(king_src), sq_idx(king_dst));
 
-        size_t start = std::min(sqIdx(rookSrc), sqIdx(kingSrc));
-        size_t end = std::max(sqIdx(rookSrc), sqIdx(kingSrc));
+        size_t start = std::min(sq_idx(rook_src), sq_idx(king_src));
+        size_t end = std::max(sq_idx(rook_src), sq_idx(king_src));
 
         for (size_t sq = (start + 1); sq <= (end - 1); sq++) {
             Piece piece = position.mailbox(sq);
@@ -363,36 +363,36 @@ namespace episteme {
             }
         }
 
-        for (size_t sq = kingStart; sq <= kingEnd; sq++) {
-            if ((sq != sqIdx(kingSrc)) && isSquareAttacked(sqFromIdx(sq), position, position.NTM())) {
+        for (size_t sq = king_start; sq <= king_end; sq++) {
+            if ((sq != sq_idx(king_src)) && is_square_attacked(sq_from_idx(sq), position, position.NTM())) {
                 return;
             }
         }
 
-        moveList.addMove({kingSrc, kingDst, MoveType::Castling});
+        move_list.add_move({king_src, king_dst, MoveType::Castling});
     }
 
-    void generateAllMoves(MoveList& moveList, const Position& position) {
+    void generate_all_moves(MoveList& move_list, const Position& position) {
 
-        generatePawnMoves(moveList, position);
-        generateKnightMoves(moveList, position);
-        generateBishopMoves(moveList, position);
-        generateRookMoves(moveList, position);
-        generateQueenMoves(moveList, position);
-        generateKingMoves(moveList, position);
+        generate_pawn_moves(move_list, position);
+        generate_knight_moves(move_list, position);
+        generate_bishop_moves(move_list, position);
+        generate_rook_moves(move_list, position);
+        generate_queen_moves(move_list, position);
+        generate_king_moves(move_list, position);
 
-        if (position.epSquare() != Square::None) {
-            generateEnPassant(moveList, position);
+        if (position.ep_square() != Square::None) {
+            generate_en_passant(move_list, position);
         }
 
-        Square kingsideCastle = position.castlingRights(position.STM()).kingside;
-        Square queensideCastle = position.castlingRights(position.STM()).queenside;
+        Square kingside_castle = position.castling_rights(position.STM()).kingside;
+        Square queenside_castle = position.castling_rights(position.STM()).queenside;
 
-        if (kingsideCastle != Square::None) {
-            generateCastles(moveList, position, true);
+        if (kingside_castle != Square::None) {
+            generate_castles(move_list, position, true);
         }
-        if (queensideCastle != Square::None) {
-            generateCastles(moveList, position, false);
+        if (queenside_castle != Square::None) {
+            generate_castles(move_list, position, false);
         }
     }
 }

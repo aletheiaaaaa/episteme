@@ -2,18 +2,18 @@
 
 namespace episteme {
     Move::Move() {
-        moveData = 0x0000;
+        move_data = 0x0000;
     }
 
-    Move::Move(Square fromSquare, Square toSquare, MoveType moveType, PromoPiece promoPiece) {
-        moveData = static_cast<uint16_t>(fromSquare) 
-        | (static_cast<uint16_t>(toSquare) << 6) 
-        | (static_cast<uint16_t>(moveType) << 12)
-        | (static_cast<uint16_t>(promoPiece) << 14);
+    Move::Move(Square from_square, Square to_square, MoveType move_type, PromoPiece promo_piece) {
+        move_data = static_cast<uint16_t>(from_square) 
+        | (static_cast<uint16_t>(to_square) << 6) 
+        | (static_cast<uint16_t>(move_type) << 12)
+        | (static_cast<uint16_t>(promo_piece) << 14);
     }
 
-    std::string Move::toString() const {
-        auto squareToString = [](Square sq) -> std::string {
+    std::string Move::to_string() const {
+        auto square_to_string = [](Square sq) -> std::string {
             if (sq == Square::None) return "--";
             int idx = static_cast<int>(sq);
             char file = 'a' + (idx % 8);
@@ -21,20 +21,20 @@ namespace episteme {
             return std::string() + file + rank;
         };
     
-        std::string moveStr = squareToString(fromSquare()) + squareToString(toSquare());
+        std::string move_str = square_to_string(from_square()) + square_to_string(to_square());
     
-        if (moveType() == MoveType::Promotion) {
-            char promoChar;
-            switch (promoPieceType()) {
-                case PieceType::Knight: promoChar = 'n'; break;
-                case PieceType::Bishop: promoChar = 'b'; break;
-                case PieceType::Rook:   promoChar = 'r'; break;
-                case PieceType::Queen:  promoChar = 'q'; break;
+        if (move_type() == MoveType::Promotion) {
+            char promo_char;
+            switch (promo_piece_type()) {
+                case PieceType::Knight: promo_char = 'n'; break;
+                case PieceType::Bishop: promo_char = 'b'; break;
+                case PieceType::Rook:   promo_char = 'r'; break;
+                case PieceType::Queen:  promo_char = 'q'; break;
                 default: break;
             }
-            moveStr += promoChar;
+            move_str += promo_char;
         }
     
-        return moveStr;
+        return move_str;
     }    
 }
