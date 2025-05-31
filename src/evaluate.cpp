@@ -13,7 +13,7 @@ namespace episteme {
 
     int32_t evaluate(Position& position) {
         Accumulator accum = nnue->l0_forward(position.mailbox_all());
-        int16_t out = nnue->l1_forward(accum);
+        int32_t out = nnue->l1_forward(accum);
         return out;
     }
 }

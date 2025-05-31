@@ -8,12 +8,12 @@
 namespace episteme {
     class MoveList {
         public:
-            inline void add_move(const Move& move) {
+            inline void add(const Move& move) {
                 the_list[the_count] = move;
                 the_count++;
             }
         
-            inline void clear_moves() {
+            inline void clear() {
                 the_count = 0;
             }
         
@@ -30,7 +30,7 @@ namespace episteme {
     };
 
     struct PawnAttacks {
-        uint64_t push1st, push2nd, left_captures, right_captures;
+        uint64_t push_1st, push_2nd, left_captures, right_captures;
     };
 
     constexpr std::array<uint64_t, 64> BISHOP_MAGICS = {
@@ -251,8 +251,8 @@ namespace episteme {
         generate_piece_moves<PieceType::King>(move_list, position, get_king_attacks);
     }
 
-    void generate_en_passant(MoveList &move_list, const Position &position);
-    void generate_castles(MoveList &move_list, const Position &position, bool is_kingside);
+    void generate_en_passant(MoveList& move_list, const Position& position);
+    void generate_castles(MoveList& move_list, const Position& position, bool is_kingside);
 
-    void generate_all_moves(MoveList &move_list, const Position &position);
+    void generate_all_moves(MoveList& move_list, const Position& position);
 }

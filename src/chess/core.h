@@ -12,9 +12,11 @@ namespace episteme {
     };
 
     enum class File : uint16_t {
-        File_A, File_B, File_C, File_D, File_E, File_F, File_G, File_H, 
+        FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH, 
         None
     };
+
+    const std::array<int, 6> piece_vals = {0, 3, 3, 5, 9, -1}; 
 
     const uint64_t FILE_A = 0x0101010101010101;
     const uint64_t FILE_B = 0x0202020202020202;
@@ -49,12 +51,12 @@ namespace episteme {
     };
 
     enum class Piece : uint16_t {
-        White_Pawn,   Black_Pawn, 
-        White_Knight, Black_Knight,
-        White_Bishop, Black_Bishop,
-        White_Rook,   Black_Rook, 
-        White_Queen,  Black_Queen,
-        White_King,   Black_King,
+        WhitePawn,   BlackPawn, 
+        WhiteKnight, BlackKnight,
+        WhiteBishop, BlackBishop,
+        WhiteRook,   BlackRook, 
+        WhiteQueen,  BlackQueen,
+        WhiteKing,   BlackKing,
         None
     };
 
@@ -117,10 +119,6 @@ namespace episteme {
         {'q', {PieceType::Queen, Color::Black}}, {'k', {PieceType::King, Color::Black}}
     };
     
-    static const std::unordered_map<PieceType, int> piece_val = {
-        {PieceType::Pawn, 1}, {PieceType::Knight, 3}, {PieceType::Bishop, 3}, {PieceType::Rook, 5}, {PieceType::Queen, 9}
-    };
-
     [[nodiscard]] inline PieceType piece_type(Piece piece) {
         return static_cast<PieceType>(static_cast<uint16_t>(piece) >> 1);
     };

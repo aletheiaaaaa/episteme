@@ -149,8 +149,8 @@ namespace episteme {
         setup_rank(7, Color::Black);
 
         for (int file = 0; file < 8; ++file) {
-            state.mailbox[sq_idx(static_cast<Square>(8 + file))] = Piece::White_Pawn;
-            state.mailbox[sq_idx(static_cast<Square>(48 + file))] = Piece::Black_Pawn;
+            state.mailbox[sq_idx(static_cast<Square>(8 + file))] = Piece::WhitePawn;
+            state.mailbox[sq_idx(static_cast<Square>(48 + file))] = Piece::BlackPawn;
         }
 
         state.half_clock = 0;
@@ -247,7 +247,7 @@ namespace episteme {
                 break;
             }
 
-            case MoveType::En_Passant: {
+            case MoveType::EnPassant: {
                 int ep_offset = (side == Color::White) ? -8 : 8;
                 int capture_idx = sq_idx(move.to_square()) + ep_offset;
                 uint64_t bb_cap = (uint64_t)1 << capture_idx;
@@ -290,7 +290,7 @@ namespace episteme {
         state = prev;
     }
 
-    Move from_uCI(const Position& position, const std::string& move) {
+    Move from_UCI(const Position& position, const std::string& move) {
         std::string src_str = move.substr(0, 2);
         std::string dst_str = move.substr(2, 2);
 
@@ -330,7 +330,7 @@ namespace episteme {
         };
 
         if (is_castling()) return Move(src, dst, MoveType::Castling);
-        else if (is_en_passant) return Move(src, dst, MoveType::En_Passant);
+        else if (is_en_passant) return Move(src, dst, MoveType::EnPassant);
         else if (is_promo) return Move(src, dst, MoveType::Promotion, char2Piece(move.at(4)));
         else return Move(src, dst);
     }

@@ -208,13 +208,13 @@ namespace episteme {
         PawnAttacks attacks;
     
         if (stm == Color::White) {
-            attacks.push1st = (pawn_bb << 8) & ~occupied;
-            attacks.push2nd = ((attacks.push1st & RANK_3) << 8) & ~occupied;
+            attacks.push_1st = (pawn_bb << 8) & ~occupied;
+            attacks.push_2nd = ((attacks.push_1st & RANK_3) << 8) & ~occupied;
             attacks.left_captures = ((pawn_bb & ~FILE_A) << 7) & captures_mask;
             attacks.right_captures = ((pawn_bb & ~FILE_H) << 9) & captures_mask;
         } else {
-            attacks.push1st = (pawn_bb >> 8) & ~occupied;
-            attacks.push2nd = ((attacks.push1st & RANK_6) >> 8) & ~occupied;
+            attacks.push_1st = (pawn_bb >> 8) & ~occupied;
+            attacks.push_2nd = ((attacks.push_1st & RANK_6) >> 8) & ~occupied;
             attacks.left_captures = ((pawn_bb & ~FILE_A) >> 9) & captures_mask;
             attacks.right_captures = ((pawn_bb & ~FILE_H) >> 7) & captures_mask;
         }
@@ -265,7 +265,7 @@ namespace episteme {
             }
             while (attacks_bb != 0) {
                 Square to_sq = sq_from_idx(std::countr_zero(attacks_bb));
-                move_list.add_move({from_sq, to_sq});
+                move_list.add({from_sq, to_sq});
                 attacks_bb &= attacks_bb - 1;
             }
             piece_bb &= piece_bb - 1;
@@ -292,10 +292,10 @@ namespace episteme {
         auto add_move = [promo_rank, &move_list](Square from_sq, Square to_sq) {
             if ((((uint64_t)1 << sq_idx(to_sq)) & promo_rank) != 0) {
                 for (auto promo_piece : {PromoPiece::Knight, PromoPiece::Bishop, PromoPiece::Rook, PromoPiece::Queen}) {
-                    move_list.add_move({from_sq, to_sq, MoveType::Promotion, promo_piece});
+                    move_list.add({from_sq, to_sq, MoveType::Promotion, promo_piece});
                 }
             } else {
-                move_list.add_move({from_sq, to_sq});
+                move_list.add({from_sq, to_sq});
             };
         };
 
@@ -308,8 +308,8 @@ namespace episteme {
             }
         };
 
-        attacks2Moves(attacks.push1st, push1st_shift);
-        attacks2Moves(attacks.push2nd, push2nd_shift);
+        attacks2Moves(attacks.push_1st, push1st_shift);
+        attacks2Moves(attacks.push_2nd, push2nd_shift);
         attacks2Moves(attacks.left_captures, left_capture_shift[color_idx(stm)]);
         attacks2Moves(attacks.right_captures, right_capture_shift[color_idx(stm)]);
     }
@@ -325,11 +325,11 @@ namespace episteme {
 
         if (left_attacks != 0) {
             Square from_sq = sq_from_idx(std::countr_zero(left_attacks));
-            move_list.add_move({from_sq, ep_sq, MoveType::En_Passant});
+            move_list.add({from_sq, ep_sq, MoveType::EnPassant});
         }
         if (right_attacks != 0) {
             Square from_sq = sq_from_idx(std::countr_zero(right_attacks));
-            move_list.add_move({from_sq, ep_sq, MoveType::En_Passant});
+            move_list.add({from_sq, ep_sq, MoveType::EnPassant});
         }
     }
 
@@ -369,7 +369,7 @@ namespace episteme {
             }
         }
 
-        move_list.add_move({king_src, king_dst, MoveType::Castling});
+        move_list.add({king_src, king_dst, MoveType::Castling});
     }
 
     void generate_all_moves(MoveList& move_list, const Position& position) {

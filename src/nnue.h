@@ -7,17 +7,18 @@
 #include <array>
 #include <algorithm>
 #include <memory>
+#include <immintrin.h>
 
 namespace episteme::nn {
     struct Accumulator {
-        std::array<int32_t, 1024> stm = {};
-        std::array<int32_t, 1024> ntm = {};
+        std::array<int16_t, 1024> stm = {};
+        std::array<int16_t, 1024> ntm = {};
     };
 
     class NNUE {
         public:
             Accumulator l0_forward(const std::array<Piece, 64>& mailbox) const;
-            int16_t l1_forward(const Accumulator& accum) const; 
+            int32_t l1_forward(const Accumulator& accum) const; 
 
         private:
             using L0Weights = std::array<std::array<int16_t, 1024>, 768>;

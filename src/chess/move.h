@@ -6,7 +6,7 @@
 
 namespace episteme {
     enum class MoveType : uint16_t {
-        Normal, Castling, En_Passant, Promotion, 
+        Normal, Castling, EnPassant, Promotion, 
         None
     };
 
@@ -43,6 +43,5 @@ namespace episteme {
             std::string to_string() const;
         private:
             uint16_t move_data;
-            int16_t mvv_lva;
     };
 }

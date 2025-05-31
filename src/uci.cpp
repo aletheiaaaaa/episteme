@@ -25,7 +25,7 @@ namespace episteme {
         iss >> token;
 
         if (token == "startpos") {
-            position.fromStartPos();
+            position.from_start_pos();
 
         } else if (token == "fen") {    
             std::string fen;
@@ -33,7 +33,7 @@ namespace episteme {
                 if (!fen.empty()) fen += " ";
                 fen += token;
             }
-            position.fromFEN(fen);
+            position.from_FEN(fen);
 
         } else {
             std::cout << "invalid command\n";
@@ -41,7 +41,7 @@ namespace episteme {
 
         if (iss >> token && token == "moves") {
             while (iss >> token) {
-                position.makeMove(fromUCI(position, token));
+                position.make_move(from_UCI(position, token));
             }
         }
 
@@ -65,7 +65,7 @@ namespace episteme {
         }
 
         search::Worker worker;
-        std::cout << worker.run(params).second.toString() << std::endl;
+        std::cout << worker.run(params).second.to_string() << std::endl;
     }
 
     auto uciNewGame(search::Parameters& params) {
