@@ -6,18 +6,18 @@
 #include <cmath>
 #include <array>
 #include <algorithm>
-#include <memory>
+#include <cstring>
 #include <immintrin.h>
 
 namespace episteme::nn {
     struct Accumulator {
-        std::array<int16_t, 1024> stm = {};
-        std::array<int16_t, 1024> ntm = {};
+        alignas(32) std::array<int16_t, 1024> stm = {};
+        alignas(32) std::array<int16_t, 1024> ntm = {};
     };
 
     class NNUE {
         public:
-            Accumulator l0_forward(const std::array<Piece, 64>& mailbox) const;
+            Accumulator reset_accumulator(const std::array<Piece, 64>& mailbox) const;
             int32_t l1_forward(const Accumulator& accum) const; 
 
         private:
@@ -26,9 +26,9 @@ namespace episteme::nn {
             using L1Weights = std::array<std::array<int16_t, 1024>, 2>;
             using L1Bias = int16_t;
 
-            L0Weights l0_weights;
-            L0Biases l0_biases;
-            L1Weights l1_weights;
-            L1Bias l1_bias;
+            alignas(32) L0Weights l0_weights;
+            alignas(32) L0Biases l0_biases;
+            alignas(32) L1Weights l1_weights;
+            alignas(32) L1Bias l1_bias;
     };
 }
