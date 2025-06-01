@@ -1,6 +1,6 @@
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -std=c++23 -O3 -flto 
+CXXFLAGS = -std=c++23 -O3 -flto -mavx2
 
 # Directories
 SRC_DIR = src
