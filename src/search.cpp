@@ -106,7 +106,7 @@ namespace episteme::search {
         return {result, PV.moves[0]};
     }
 
-    void Worker::bench() {
+    void Worker::bench(int depth) {
         uint64_t total = 0;
         milliseconds elapsed = 0ms;
         for (std::string fen : fens) {
@@ -116,7 +116,7 @@ namespace episteme::search {
             nodes = 0;
 
             auto start = steady_clock::now();
-            int32_t _ = search(position, PV, 3, -INF, INF, std::nullopt);
+            int32_t _ = search(position, PV, depth, -INF, INF, std::nullopt);
             auto end = steady_clock::now();
 
             elapsed += duration_cast<milliseconds>(end - start);

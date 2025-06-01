@@ -7,7 +7,7 @@ namespace episteme {
         return position;
     }
 
-    uint64_t perft(Position& position, int32_t depth) {
+    uint64_t run_perft(Position& position, int32_t depth) {
         if (depth == 0) {
             return 1;
         }
@@ -22,7 +22,7 @@ namespace episteme {
             uint64_t king_bb = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(position.NTM()) + position.COLOR_OFFSET);
                 
             if (!is_square_attacked(sq_from_idx(std::countr_zero(king_bb)), position, position.STM())) {
-                move_count += perft(position, depth - 1);
+                move_count += run_perft(position, depth - 1);
             }
         
             position.unmake_move();
@@ -31,12 +31,7 @@ namespace episteme {
         return move_count;
     }
 
-    void split_perft(Position& position, int32_t depth) {
-        if (depth <= 0) {
-            std::cerr << "Depth must be greater than 0\n";
-            return;
-        }
-    
+    void split_perft(Position& position, int32_t depth) {    
         MoveList move_list;
         generate_all_moves(move_list, position);
     
@@ -52,7 +47,7 @@ namespace episteme {
     
             uint64_t nodes = 0;
             if (!illegal) {
-                nodes = perft(position, depth - 1);
+                nodes = run_perft(position, depth - 1);
                 total += nodes;
                 std::cout << move.to_string() << ": " << nodes << "\n";
             }
@@ -68,19 +63,14 @@ namespace episteme {
         using namespace std::chrono;
 
         auto start = steady_clock::now();
-
-        uint64_t nodes = perft(position, depth);
-
+        uint64_t nodes = run_perft(position, depth);
         auto end = steady_clock::now();
-        auto duration = duration_cast<milliseconds>(end - start);
 
+        auto duration = duration_cast<milliseconds>(end - start);
         double seconds = duration.count() / 1000.0;
         double nps = nodes / (seconds > 0 ? seconds : 1.0);  // avoid divide-by-zero
 
-        std::cout << "Depth: " << depth << " | ";
-        std::cout << "Nodes: " << nodes << " | ";
-        std::cout << "Time: " << std::fixed << std::setprecision(3) << seconds << " | ";
-        std::cout << "NPS: " << static_cast<uint64_t>(nps) << "\n";
+        std::cout << "nodes " << nodes << " nps " << static_cast<uint64_t>(nps) << std::endl;
     }
 
 }

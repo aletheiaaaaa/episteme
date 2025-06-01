@@ -9,7 +9,7 @@
 
 namespace episteme {
     Position fen_to_position(std::string_view FEN);
-    uint64_t perft(Position &position, int32_t depth);
+    uint64_t run_perft(Position &position, int32_t depth);
     void split_perft(Position &position, int32_t depth);
     void time_perft(Position& position, int32_t depth);
 }

@@ -22,22 +22,12 @@ int main(int argc, char *argv[]) {
             cmd += argv[i];
             if (i < argc - 1) cmd += ' ';
         }
+        parse(cmd, params);
 
-        if (cmd == "bench") {
-            search::Worker thread;
-            thread.bench();
-        } else {
-            parse(cmd, params);
-        }
     } else {
         std::string line;
         while (std::getline(std::cin, line)) {
-            if (line == "bench") {
-                search::Worker thread;
-                thread.bench();
-            } else {
-                parse(line, params);
-            }
+            parse(line, params);
         }    
     }
 

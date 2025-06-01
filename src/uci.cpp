@@ -13,7 +13,7 @@ namespace episteme {
 
     // }
 
-    auto isReady() {
+    auto isready() {
         std::cout << "readyok\n";
     }
 
@@ -68,8 +68,22 @@ namespace episteme {
         std::cout << worker.run(params).second.to_string() << std::endl;
     }
 
-    auto uciNewGame(search::Parameters& params) {
+    auto ucinewgame(search::Parameters& params) {
         params = {};
+    }
+    
+    auto bench(const std::string& args) {
+        int depth = std::stoi(args);
+        search::Worker worker;
+
+        worker.bench(depth);
+    }
+
+    auto perft(const std::string& args, search::Parameters& params) {
+        int depth = std::stoi(args);
+        Position& position = params.position;
+
+        time_perft(position, depth);
     }
 
     int parse(const std::string& cmd, search::Parameters& params) {
@@ -78,10 +92,12 @@ namespace episteme {
         if (keyword == "uci") uci();
         // else if (keyword == "setoption") setOption(cmd.substr(cmd.find(" ")+1), params);
         else if (keyword == "setoption") return 0;
-        else if (keyword == "isready") isReady();
+        else if (keyword == "isready") isready();
         else if (keyword == "position") position(cmd.substr(cmd.find(" ")+1), params);
         else if (keyword == "go") go(cmd.substr(cmd.find(" ")+1), params);
-        else if (keyword == "ucinewgame") uciNewGame(params);
+        else if (keyword == "ucinewgame") ucinewgame(params);
+        else if (keyword == "bench") bench(cmd.substr(cmd.find(' ')+1));
+        else if (keyword == "perft") perft(cmd.substr(cmd.find(' ')+1), params);
         else if (keyword == "quit") std::exit(0);
         else std::cout << "invalid command\n";
 

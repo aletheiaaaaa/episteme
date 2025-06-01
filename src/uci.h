@@ -1,6 +1,7 @@
 #pragma once
 
 #include "chess/position.h"
+#include "chess/perft.h"
 #include "search.h"
 
 #include <string>
@@ -13,8 +14,10 @@ namespace episteme {
 
     auto uci();
     // auto setOption(const std::string& args, search::Parameters params);
-    auto isReady();
+    auto isready();
     auto position(const std::string& args, search::Parameters& params);
     auto go(const std::string& args, search::Parameters& params);
-    auto uciNewGame(search::Parameters& params);
+    auto ucinewgame(search::Parameters& params);
+    auto bench(const std::string& args);
+    auto perft(const std::string& args, search::Parameters& params);
 }
