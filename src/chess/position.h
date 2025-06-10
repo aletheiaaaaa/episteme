@@ -9,7 +9,7 @@
 #include <cstdlib>
 
 namespace episteme {
-    struct Position_State {
+    struct PositionState {
         std::array<uint64_t, 8> bitboard;
         std::array<Piece, 64> mailbox;
         AllowedCastles allowed_castles;
@@ -73,8 +73,8 @@ namespace episteme {
             static const uint16_t COLOR_OFFSET = 6;
 
         private:
-            std::vector<Position_State> position_history;
-            Position_State state;
+            std::vector<PositionState> position_history;
+            PositionState state;
     };
 
     Move from_UCI(const Position& position, const std::string& move);

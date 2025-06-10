@@ -1,63 +1,110 @@
 #include "nnue.h"
+#include <iostream>
 
 namespace episteme::nn {
+    Accumulator NNUE::update_accumulator(const Position& position, const Move& move, Accumulator accum) const {
+        Square sq_src = move.from_square();
+        Square sq_dst = move.to_square();
+        std::array<Piece, 64> mailbox = position.mailbox_all();
 
-    Accumulator NNUE::reset_accumulator(const std::array<Piece, 64>& mailbox) const {
-        Accumulator out;
+        Piece pc_src = mailbox[sq_idx(sq_src)];
+        Piece pc_dst = mailbox[sq_idx(sq_dst)];
+
+        int src_stm = piecesquare(pc_src, sq_src, false);
+        int dst_stm = piecesquare(pc_src, sq_dst, false);
+        int src_ntm = piecesquare(pc_src, sq_src, true);
+        int dst_ntm = piecesquare(pc_src, sq_dst, true);
+
+        if (pc_dst != Piece::None){
+            int capt_stm = piecesquare(pc_dst, sq_dst, false);
+            int capt_ntm = piecesquare(pc_dst, sq_dst, true);
+
+            for (int i = 0; i < 1024; i++) {
+                accum.stm[i] -= l0_weights[capt_stm][i];
+                accum.ntm[i] -= l0_weights[capt_ntm][i];
+            }
+        } else if (move.move_type() == MoveType::Castling) {
+            Square rook_src, rook_dst;
+            bool is_kingside = sq_dst == Square::G1 || sq_dst == Square::G8;
+    
+            if (is_kingside) { 
+                rook_src = position.castling_rights(position.STM()).kingside;
+                rook_dst = (position.STM() == Color::White) ? Square::F1 : Square::F8;
+            } else { 
+                rook_src = position.castling_rights(position.STM()).queenside;
+                rook_dst = (position.STM() == Color::White) ? Square::D1 : Square::D8;
+            }
+            
+            Piece rook = mailbox[sq_idx(rook_src)];
+            
+            int rook_src_stm = piecesquare(rook, rook_src, false);
+            int rook_dst_stm = piecesquare(rook, rook_dst, false);
+            int rook_src_ntm = piecesquare(rook, rook_src, true);
+            int rook_dst_ntm = piecesquare(rook, rook_dst, true);
+            
+            for (int i = 0; i < 1024; i++) {
+                accum.stm[i] -= l0_weights[rook_src_stm][i];
+                accum.stm[i] += l0_weights[rook_dst_stm][i];
+                
+                accum.ntm[i] -= l0_weights[rook_src_ntm][i];
+                accum.ntm[i] += l0_weights[rook_dst_ntm][i];
+            }        
+        } else if (move.move_type() == MoveType::EnPassant) {
+            Square sq_ep = position.ep_square();
+            int idx_ep = (position.STM() == Color::White) ? (sq_idx(sq_ep) - 8) : (sq_idx(sq_ep) + 8);
+            Piece pc_ep = mailbox[idx_ep];
+
+            int capt_stm = piecesquare(pc_ep, sq_from_idx(idx_ep), false);
+            int capt_ntm = piecesquare(pc_ep, sq_from_idx(idx_ep), true);
+
+            for (int i = 0; i < 1024; i++) {
+                accum.stm[i] -= l0_weights[capt_stm][i];
+                accum.ntm[i] -= l0_weights[capt_ntm][i];
+            }
+        }
+
+        if (move.move_type() == MoveType::Promotion) {
+            dst_stm = piecesquare(piece_type_with_color(move.promo_piece_type(), position.STM()), sq_dst, false);
+            dst_ntm = piecesquare(piece_type_with_color(move.promo_piece_type(), position.STM()), sq_dst, true);
+        }
+
+        for (int i = 0; i < 1024; i++) {
+            accum.stm[i] -= l0_weights[src_stm][i];
+            accum.stm[i] += l0_weights[dst_stm][i];
+
+            accum.ntm[i] -= l0_weights[src_ntm][i];
+            accum.ntm[i] += l0_weights[dst_ntm][i];
+        }
+
+        return accum;
+    }
+
+    Accumulator NNUE::reset_accumulator(const Position& position) const {
+        Accumulator accum = {};
+        std::array<Piece, 64> mailbox = position.mailbox_all();
 
         for (uint8_t i = 0; i < 64; i++) {
             int stm = piecesquare(mailbox[i], sq_from_idx(i), false);
-            int ntm = piecesquare(mailbox[i], sq_from_idx(i ^ 56), true);
+            int ntm = piecesquare(mailbox[i], sq_from_idx(i), true);
 
             if (stm != -1) {
-                for (int j = 0; j < 1024; j += 64) {
-                    auto partial = [&](int offset) {
-                        __m256i vec = _mm256_load_si256(reinterpret_cast<const __m256i*>(&out.stm[j + offset]));
-                        __m256i l0w = _mm256_load_si256(reinterpret_cast<const __m256i*>(&l0_weights[stm][j + offset]));
-                        _mm256_storeu_si256((reinterpret_cast<__m256i*>(&out.stm[j + offset])) ,_mm256_add_epi16(vec, l0w));    
-                    };
-
-                    partial(0);
-                    partial(16);
-                    partial(32);
-                    partial(48);
+                for (int j = 0; j < 1024; j++) {
+                    accum.stm[j] += l0_weights[stm][j];
                 }
             }
-
             if (ntm != -1) {
-                for (int j = 0; j < 1024; j += 64) {
-                    auto partial = [&](int offset) {
-                        __m256i vec = _mm256_load_si256(reinterpret_cast<const __m256i*>(&out.ntm[j + offset]));
-                        __m256i l0w = _mm256_load_si256(reinterpret_cast<const __m256i*>(&l0_weights[ntm][j + offset]));
-                        _mm256_storeu_si256((reinterpret_cast<__m256i*>(&out.ntm[j + offset])) ,_mm256_add_epi16(vec, l0w));    
-                    };
-
-                    partial(0);
-                    partial(16);
-                    partial(32);
-                    partial(48);
+                for (int j = 0; j < 1024; j++) {
+                    accum.ntm[j] += l0_weights[ntm][j];
                 }
             }
         }
-
-        for (int i = 0; i < 1024; i += 64) {
-            auto partial = [&](int offset) {
-                __m256i stm = _mm256_load_si256(reinterpret_cast<const __m256i*>(&out.stm[i + offset]));
-                __m256i ntm = _mm256_load_si256(reinterpret_cast<const __m256i*>(&out.ntm[i + offset]));
-                __m256i l0b = _mm256_load_si256(reinterpret_cast<const __m256i*>(&l0_biases[i + offset]));
-
-                _mm256_storeu_si256((reinterpret_cast<__m256i*>(&out.stm[i + offset])), _mm256_add_epi16(stm, l0b));
-                _mm256_storeu_si256((reinterpret_cast<__m256i*>(&out.ntm[i + offset])), _mm256_add_epi16(ntm, l0b));
-            };
-
-
-            partial(0);
-            partial(16);
-            partial(32);
-            partial(48);
+        
+        for (int i = 0; i < 1024; i++) {
+            accum.stm[i] += l0_biases[i];
+            accum.ntm[i] += l0_biases[i];
         }
-
-        return out;
+        
+        return accum;
     }
 
     int32_t NNUE::l1_forward(const Accumulator& accum) const {
@@ -108,7 +155,11 @@ namespace episteme::nn {
         int32_t out_3 = hadd(temp_3);
 
         int32_t out = out_0 + out_1 + out_2 + out_3;
+
+        out /= QA;
         out += l1_bias;
+        out *= EVAL_SCALE;
+        out /= (QA * QB);
 
         return out;
     }

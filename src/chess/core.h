@@ -131,6 +131,10 @@ namespace episteme {
         return static_cast<Color>(!static_cast<bool>(color));
     }
 
+    [[nodiscard]] inline Square flip(Square square) {
+        return static_cast<Square>(static_cast<int16_t>(square) ^ 56);
+    }
+
     [[nodiscard]] inline Piece piece_type_with_color(PieceType piece_type, Color color) {
         return static_cast<Piece>(2 * static_cast<uint16_t>(piece_type) + static_cast<uint16_t>(color));
     }
@@ -141,7 +145,9 @@ namespace episteme {
         };
 
         Color stm  = flip_color ? flip(color(piece)) : color(piece);
-        return static_cast<int16_t>(stm) * 384 + static_cast<int16_t>(piece_type(piece)) * 64 + static_cast<int16_t>(square);
+        Square location = flip_color ? flip(square) : square;
+        
+        return static_cast<int16_t>(stm) * 384 + static_cast<int16_t>(piece_type(piece)) * 64 + static_cast<int16_t>(location);
     }
 
     [[nodiscard]] inline Square sq_from_idx(size_t index) {

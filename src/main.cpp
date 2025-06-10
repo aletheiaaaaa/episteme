@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     } else {
         std::string line;
         while (std::getline(std::cin, line)) {
-            parse(line, params);
+            parse(line, params);    
         }    
     }
 

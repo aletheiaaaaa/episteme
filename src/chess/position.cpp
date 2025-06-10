@@ -286,7 +286,7 @@ namespace episteme {
 
     void Position::unmake_move() {
         position_history.pop_back();
-        const Position_State& prev = position_history.back();
+        const PositionState& prev = position_history.back();
         state = prev;
     }
 

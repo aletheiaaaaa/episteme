@@ -94,6 +94,8 @@ namespace episteme::search {
             std::pair<int32_t, Move> run(const Parameters& params);
             void bench(int depth);
         private:
+            nn::Accumulator accumulator;
+            std::vector<nn::Accumulator> accum_history;
             Parameters parameters;
             uint64_t nodes;
     };

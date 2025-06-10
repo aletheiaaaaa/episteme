@@ -47,7 +47,7 @@ namespace episteme::search {
         if (end && steady_clock::now() >= *end) return 0;
 
         if (depth <= 0) {
-            return evaluate(position);
+            return eval::evaluate(accumulator);
         }
 
         ScoredList move_list = generate_scored_moves(position);
@@ -58,15 +58,25 @@ namespace episteme::search {
             pick_move(move_list, i);
             Move move = move_list.list(i).move;
 
+            accumulator = eval::update(position, move, accumulator);
+            accum_history.emplace_back(accumulator);
             position.make_move(move);
+
             if (!isLegal(position)) {
                 position.unmake_move();
+                accum_history.pop_back();
+                accumulator = accum_history.back();
+
                 continue;
             }
 
             nodes++;
+
             int32_t score = -search(position, candidate, depth - 1, -beta, -alpha, end);
+
             position.unmake_move();
+            accum_history.pop_back();
+            accumulator = accum_history.back();
             
             if (end && steady_clock::now() >= *end) return 0;
             
@@ -112,7 +122,10 @@ namespace episteme::search {
         for (std::string fen : fens) {
             Line PV = {};
             Position position;
+
             position.from_FEN(fen);
+            accumulator = eval::reset(position);
+            accum_history.emplace_back(accumulator);
             nodes = 0;
 
             auto start = steady_clock::now();
