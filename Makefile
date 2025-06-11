@@ -7,7 +7,12 @@ SRC_DIR = src
 OBJ_DIR = build/obj
 BIN_DIR = build
 
-EVALFILE ?=
+EVAL_DIR = /episteme_dev_net.bin
+
+ifndef EVALFILE
+	EVALFILE = $(EVAL_DIR)
+	DOWNLOAD_NET = true
+endif
 
 # Executable (can be overridden: make EXE=custom_name)
 EXE ?= episteme
