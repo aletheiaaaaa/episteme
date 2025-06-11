@@ -24,6 +24,6 @@ add_executable(episteme
     "${SRC}/main.cpp"
 )
 
-set(EVAL_BIN "${CMAKE_SOURCE_DIR}/episteme_test_net.bin")
+set(EVAL_BIN "${CMAKE_SOURCE_DIR}/episteme_dev_net.bin")
 
 target_compile_definitions(episteme PRIVATE EVALFILE="${EVAL_BIN}")

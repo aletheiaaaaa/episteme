@@ -73,14 +73,14 @@ namespace episteme {
     }
     
     auto bench(const std::string& args) {
-        int depth = std::stoi(args);
+        int depth = (args.empty()) ? 3 : std::stoi(args);
         search::Worker worker;
 
         worker.bench(depth);
     }
 
     auto perft(const std::string& args, search::Parameters& params) {
-        int depth = std::stoi(args);
+        int depth = (args.empty()) ? 6 : std::stoi(args);
         Position& position = params.position;
 
         time_perft(position, depth);
@@ -96,9 +96,19 @@ namespace episteme {
         else if (keyword == "position") position(cmd.substr(cmd.find(" ")+1), params);
         else if (keyword == "go") go(cmd.substr(cmd.find(" ")+1), params);
         else if (keyword == "ucinewgame") ucinewgame(params);
-        else if (keyword == "bench") bench(cmd.substr(cmd.find(' ')+1));
-        else if (keyword == "perft") perft(cmd.substr(cmd.find(' ')+1), params);
         else if (keyword == "quit") std::exit(0);
+
+        else if (keyword == "bench") {
+            size_t space = cmd.find(' ');
+            std::string arg = (space != std::string::npos) ? cmd.substr(space+1) : "";
+            bench(arg);
+        }
+        else if (keyword == "perft") {
+            size_t space = cmd.find(' ');
+            std::string arg = (space != std::string::npos) ? cmd.substr(space+1) : "";
+            perft(arg, params);
+        }
+
         else std::cout << "invalid command\n";
 
         return 0;
