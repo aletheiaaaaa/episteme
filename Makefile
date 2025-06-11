@@ -7,7 +7,7 @@ SRC_DIR = src
 OBJ_DIR = build/obj
 BIN_DIR = build
 
-EVALFILE = ./episteme_dev_net.bin
+EVALFILE = episteme_dev_net
 
 # Executable (can be overridden: make EXE=custom_name)
 EXE ?= episteme
