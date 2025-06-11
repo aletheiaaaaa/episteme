@@ -22,6 +22,7 @@ namespace episteme::nn {
                 accum.stm[i] -= l0_weights[capt_stm][i];
                 accum.ntm[i] -= l0_weights[capt_ntm][i];
             }
+
         } else if (move.move_type() == MoveType::Castling) {
             Square rook_src, rook_dst;
             bool is_kingside = sq_dst == Square::G1 || sq_dst == Square::G8;
@@ -47,7 +48,8 @@ namespace episteme::nn {
                 
                 accum.ntm[i] -= l0_weights[rook_src_ntm][i];
                 accum.ntm[i] += l0_weights[rook_dst_ntm][i];
-            }        
+            }
+
         } else if (move.move_type() == MoveType::EnPassant) {
             Square sq_ep = position.ep_square();
             int idx_ep = (position.STM() == Color::White) ? (sq_idx(sq_ep) - 8) : (sq_idx(sq_ep) + 8);
@@ -91,6 +93,7 @@ namespace episteme::nn {
                     accum.stm[j] += l0_weights[stm][j];
                 }
             }
+
             if (ntm != -1) {
                 for (int j = 0; j < 1024; j++) {
                     accum.ntm[j] += l0_weights[ntm][j];
