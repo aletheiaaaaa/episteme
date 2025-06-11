@@ -55,7 +55,7 @@ namespace episteme::search {
         if (end && steady_clock::now() >= *end) return 0;
 
         if (depth <= 0) {
-            return quiesce(position, alpha, beta, end);
+            return eval::evaluate(accumulator);
         }
 
         ScoredList move_list = generate_scored_moves(position);
@@ -101,64 +101,6 @@ namespace episteme::search {
                 }
             }
         };  
-
-        return best;
-    }
-
-    int32_t Worker::quiesce(Position& position, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end) {
-        if (end && steady_clock::now() >= *end) return 0;
-        
-        int32_t eval = eval::evaluate(accumulator);
-
-        int32_t best = eval;
-        if (best >= alpha) {
-            alpha = best;
-
-            if (best > beta) {
-                return best;
-            }
-        };
-
-        ScoredList captures_list = generate_scored_captures(position);
-
-        for (size_t i = 0; i < captures_list.count(); i++) {
-            pick_move(captures_list, i);
-            Move move = captures_list.list(i).move;
-
-            accumulator = eval::update(position, move, accumulator);
-            accum_history.emplace_back(accumulator);
-            position.make_move(move);
-
-            if (!is_legal(position)) {
-                position.unmake_move();
-                accum_history.pop_back();
-                accumulator = accum_history.back();
-
-                continue;
-            }
-
-            nodes++;
-
-            int32_t score = quiesce(position, -beta, -alpha, end);
-
-            position.unmake_move();
-            accum_history.pop_back();
-            accumulator = accum_history.back();
-            
-            if (end && steady_clock::now() >= *end) return 0;
-
-            if (score > best) {
-                best = score;
-            }
-
-            if (score >= alpha) {
-                alpha = score;
-
-                if (score > beta) {
-                    break;
-                }
-            }
-        }
 
         return best;
     }
