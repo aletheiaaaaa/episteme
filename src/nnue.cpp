@@ -1,5 +1,4 @@
 #include "nnue.h"
-#include <iostream>
 
 namespace episteme::nn {
     Accumulator NNUE::update_accumulator(const Position& position, const Move& move, Accumulator accum) const {
@@ -120,8 +119,8 @@ namespace episteme::nn {
                 __m256i l1w0 = _mm256_load_si256(reinterpret_cast<const __m256i*>(&l1_weights[0][i + offset]));
                 __m256i l1w1 = _mm256_load_si256(reinterpret_cast<const __m256i*>(&l1_weights[1][i + offset]));
 
-                __m256i stm = _mm256_min_epi16(_mm256_max_epi16(stm_pre, _mm256_setzero_si256()), _mm256_set1_epi16(255));
-                __m256i ntm = _mm256_min_epi16(_mm256_max_epi16(ntm_pre, _mm256_setzero_si256()), _mm256_set1_epi16(255));
+                __m256i stm = _mm256_min_epi16(_mm256_max_epi16(stm_pre, _mm256_setzero_si256()), _mm256_set1_epi16(QA));
+                __m256i ntm = _mm256_min_epi16(_mm256_max_epi16(ntm_pre, _mm256_setzero_si256()), _mm256_set1_epi16(QA));
 
                 __m256i temp_stm = _mm256_mullo_epi16(stm, l1w0);
                 __m256i temp_ntm = _mm256_mullo_epi16(ntm, l1w1);

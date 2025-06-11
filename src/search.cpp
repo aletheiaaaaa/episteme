@@ -13,32 +13,40 @@ namespace episteme::search {
         }
     }
 
-    ScoredList generate_scored_moves(const Position& position) {
+    template<typename F>
+    ScoredList generate_scored_targets(const Position& position, F generator, bool include_quiets) {
         MoveList move_list;
-        generate_all_moves(move_list, position);
+        generator(move_list, position);
         ScoredList scored_list;
 
         for (size_t i = 0; i < move_list.count(); i++) {
             Move move = move_list.list(i);
-            ScoredMove scored_move;
             PieceType src = piece_type(position.mailbox(sq_idx(move.from_square())));
             PieceType dst = piece_type(position.mailbox(sq_idx(move.to_square())));
+            int src_val;
+            int dst_val;
 
-            const int src_val = piece_vals[piece_type_idx(src)];
-            const int dst_val = (dst != PieceType::None) ? ((move.move_type() == MoveType::EnPassant) ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)]) : 0;
-            const int mvv_lva = (dst_val) ? dst_val * 10 - src_val : 0;
+            bool is_capture = !include_quiets || dst != PieceType::None;
 
-            scored_move = {
+            src_val = piece_vals[piece_type_idx(src)];
+            if(is_capture) {
+                dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
+            } else {
+                dst_val = 0;
+            }
+
+            int mvv_lva = (dst_val) ? dst_val * 10 - src_val : 0;
+
+            scored_list.add({
                 .move = move,
                 .mvv_lva = mvv_lva
-            };
-            scored_list.add(scored_move);
+            });
         }
 
         return scored_list;
     }
 
-    bool isLegal(const Position& position) {
+    bool is_legal(const Position& position) {
         uint64_t kingBB = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(position.NTM()) + position.COLOR_OFFSET);
         return !is_square_attacked(sq_from_idx(std::countr_zero(kingBB)), position, position.STM());
     };
@@ -47,7 +55,7 @@ namespace episteme::search {
         if (end && steady_clock::now() >= *end) return 0;
 
         if (depth <= 0) {
-            return eval::evaluate(accumulator);
+            return quiesce(position, alpha, beta, end);
         }
 
         ScoredList move_list = generate_scored_moves(position);
@@ -62,7 +70,7 @@ namespace episteme::search {
             accum_history.emplace_back(accumulator);
             position.make_move(move);
 
-            if (!isLegal(position)) {
+            if (!is_legal(position)) {
                 position.unmake_move();
                 accum_history.pop_back();
                 accumulator = accum_history.back();

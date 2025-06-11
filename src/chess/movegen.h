@@ -226,33 +226,62 @@ namespace episteme {
         return get_pawn_attacks_helper(position, stm, true);
     }    
 
-    void generate_pawn_moves(MoveList &move_list, const Position &position);
-
     template<PieceType PT, typename F>
-    extern void generate_piece_moves(MoveList& move_list, const Position& position, F get_attacks);
+    extern void generate_piece_targets(MoveList& move_list, const Position& position, F get_attacks, bool include_quiets);
+
+    extern void generate_pawn_targets(MoveList& move_list, const Position& position, bool include_quiets);
 
     inline void generate_knight_moves(MoveList& move_list, const Position& position) {
-        generate_piece_moves<PieceType::Knight>(move_list, position, get_knight_attacks);
+        generate_piece_targets<PieceType::Knight>(move_list, position, get_knight_attacks, true);
     }
 
     inline void generate_bishop_moves(MoveList& move_list, const Position& position) {
-        generate_piece_moves<PieceType::Bishop>(move_list, position, get_bishop_attacks);
+        generate_piece_targets<PieceType::Bishop>(move_list, position, get_bishop_attacks, true);
     }
 
     inline void generate_rook_moves(MoveList& move_list, const Position& position) {
-        generate_piece_moves<PieceType::Rook>(move_list, position, get_rook_attacks);
+        generate_piece_targets<PieceType::Rook>(move_list, position, get_rook_attacks, true);
     }
 
     inline void generate_queen_moves(MoveList& move_list, const Position& position) {
-        generate_piece_moves<PieceType::Queen>(move_list, position, get_queen_attacks);
+        generate_piece_targets<PieceType::Queen>(move_list, position, get_queen_attacks, true);
     }
 
     inline void generate_king_moves(MoveList& move_list, const Position& position) {
-        generate_piece_moves<PieceType::King>(move_list, position, get_king_attacks);
+        generate_piece_targets<PieceType::King>(move_list, position, get_king_attacks, true);
     }
+
+    inline void generate_pawn_moves(MoveList &move_list, const Position &position) {
+        generate_pawn_targets(move_list, position, true);
+    };
+
+    inline void generate_knight_captures(MoveList& move_list, const Position& position) {
+        generate_piece_targets<PieceType::Knight>(move_list, position, get_knight_attacks, false);
+    }
+
+    inline void generate_bishop_captures(MoveList& move_list, const Position& position) {
+        generate_piece_targets<PieceType::Bishop>(move_list, position, get_bishop_attacks, false);
+    }
+
+    inline void generate_rook_captures(MoveList& move_list, const Position& position) {
+        generate_piece_targets<PieceType::Rook>(move_list, position, get_rook_attacks, false);
+    }
+
+    inline void generate_queen_captures(MoveList& move_list, const Position& position) {
+        generate_piece_targets<PieceType::Queen>(move_list, position, get_queen_attacks, false);
+    }
+
+    inline void generate_king_captures(MoveList& move_list, const Position& position) {
+        generate_piece_targets<PieceType::King>(move_list, position, get_king_attacks, false);
+    }
+
+    inline void generate_pawn_captures(MoveList &move_list, const Position &position) {
+        generate_pawn_targets(move_list, position, false);
+    };
 
     void generate_en_passant(MoveList& move_list, const Position& position);
     void generate_castles(MoveList& move_list, const Position& position, bool is_kingside);
 
     void generate_all_moves(MoveList& move_list, const Position& position);
+    void generate_all_captures(MoveList& move_list, const Position& position);
 }

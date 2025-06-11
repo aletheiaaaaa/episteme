@@ -202,7 +202,7 @@ namespace episteme {
         uint64_t them_bb = position.bitboard(color_idx(flip(stm)) + position.COLOR_OFFSET);
         uint64_t pawn_bb = position.bitboard(piece_type_idx(PieceType::Pawn)) & us_bb;
         
-        uint64_t occupied = us_bb | (is_pseudo ? 0ULL : them_bb);  // only filter them_bb if not pseudo
+        uint64_t occupied = us_bb | (is_pseudo ? 0ULL : them_bb); 
         uint64_t captures_mask = is_pseudo ? ~0ULL : them_bb;
     
         PawnAttacks attacks;
@@ -252,27 +252,36 @@ namespace episteme {
     }
     
     template<PieceType PT, typename F>
-    void generate_piece_moves(MoveList& move_list, const Position& position, F get_attacks) {
+    void generate_piece_targets(MoveList& move_list, const Position& position, F get_attacks, bool include_quiets) {
         uint64_t us_bb = position.bitboard(color_idx(position.STM()) + position.COLOR_OFFSET);
+        uint64_t them_bb = position.bitboard(color_idx(position.NTM()) + position.COLOR_OFFSET);
         uint64_t piece_bb = position.bitboard(piece_type_idx(PT)) & us_bb;
+
         while (piece_bb != 0) {
             Square from_sq = sq_from_idx(std::countr_zero(piece_bb));
+
             uint64_t attacks_bb;
             if constexpr (std::is_invocable_r<uint64_t, F, Square, const Position&>::value) {
-                attacks_bb = get_attacks(from_sq, position) & ~us_bb;
+                attacks_bb = get_attacks(from_sq, position);
             } else {
-                attacks_bb = get_attacks(from_sq) & ~us_bb;
+                attacks_bb = get_attacks(from_sq);
             }
-            while (attacks_bb != 0) {
-                Square to_sq = sq_from_idx(std::countr_zero(attacks_bb));
+
+            uint64_t targets_bb = (include_quiets) 
+                ? (attacks_bb & ~us_bb)
+                : (attacks_bb & ~us_bb & them_bb);
+
+            while (targets_bb != 0) {
+                Square to_sq = sq_from_idx(std::countr_zero(targets_bb));
                 move_list.add({from_sq, to_sq});
-                attacks_bb &= attacks_bb - 1;
+                targets_bb &= targets_bb - 1;
             }
+
             piece_bb &= piece_bb - 1;
         }
     }
 
-    void generate_pawn_moves(MoveList& move_list, const Position& position) {
+    void generate_pawn_targets(MoveList& move_list, const Position& position, bool include_quiets) {
         Color stm = position.STM();
         PawnAttacks attacks = get_pawn_attacks(position, stm);
         uint64_t promo_rank = (stm == Color::White) ? (RANK_8) : (RANK_1);
@@ -308,8 +317,11 @@ namespace episteme {
             }
         };
 
-        attacks2Moves(attacks.push_1st, push1st_shift);
-        attacks2Moves(attacks.push_2nd, push2nd_shift);
+        if (include_quiets) {
+            attacks2Moves(attacks.push_1st, push1st_shift);
+            attacks2Moves(attacks.push_2nd, push2nd_shift);
+        }
+
         attacks2Moves(attacks.left_captures, left_capture_shift[color_idx(stm)]);
         attacks2Moves(attacks.right_captures, right_capture_shift[color_idx(stm)]);
     }
@@ -373,7 +385,6 @@ namespace episteme {
     }
 
     void generate_all_moves(MoveList& move_list, const Position& position) {
-
         generate_pawn_moves(move_list, position);
         generate_knight_moves(move_list, position);
         generate_bishop_moves(move_list, position);
@@ -393,6 +404,19 @@ namespace episteme {
         }
         if (queenside_castle != Square::None) {
             generate_castles(move_list, position, false);
+        }
+    }
+
+    void generate_all_captures(MoveList& move_list, const Position& position) {
+        generate_pawn_captures(move_list, position);
+        generate_knight_captures(move_list, position);
+        generate_bishop_captures(move_list, position);
+        generate_rook_captures(move_list, position);
+        generate_queen_captures(move_list, position);
+        generate_king_captures(move_list, position);
+
+        if (position.ep_square() != Square::None) {
+            generate_en_passant(move_list, position);
         }
     }
 }
