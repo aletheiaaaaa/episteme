@@ -1,9 +1,5 @@
 #include "evaluate.h"
 
-// #ifndef EVALFILE
-//     #define EVALFILE "./episteme_dev_net.bin"
-// #endif
-
 INCBIN(NNUE, EVALFILE);
 
 namespace episteme::eval {

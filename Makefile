@@ -7,7 +7,7 @@ SRC_DIR = src
 OBJ_DIR = build/obj
 BIN_DIR = build
 
-EVAL_DIR = /episteme_dev_net.bin
+EVAL_DIR = ./episteme_dev_net.bin
 
 ifndef EVALFILE
 	EVALFILE = $(EVAL_DIR)
