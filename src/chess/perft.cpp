@@ -70,7 +70,7 @@ namespace episteme {
         double seconds = duration.count() / 1000.0;
         double nps = nodes / (seconds > 0 ? seconds : 1.0);  // avoid divide-by-zero
 
-        std::cout << "nodes " << nodes << " nps " << static_cast<uint64_t>(nps) << std::endl;
+        std::cout << nodes << " nodes " << static_cast<uint64_t>(nps) << " nps" << std::endl;
     }
 
 }
