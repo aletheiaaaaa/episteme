@@ -107,7 +107,7 @@ namespace episteme {
             size_t space = cmd.find(' ');
             std::string arg = (space != std::string::npos) ? cmd.substr(space+1) : "";
             perft(arg, params);
-        };
+        }
 
         else std::cout << "invalid command\n";
 
