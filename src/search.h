@@ -50,7 +50,16 @@ namespace episteme::search {
             int the_count = 0;
     };
 
-    ScoredList generate_scored_moves(const Position& position);
+    template<typename F>
+    extern ScoredList generate_scored_targets(const Position& position, F generator, bool include_quiets);
+
+    inline ScoredList generate_scored_moves(const Position& position) {
+        return generate_scored_targets(position, generate_all_moves, true);
+    }
+
+    inline ScoredList generate_scored_captures(const Position& position) {
+        return generate_scored_targets(position, generate_all_captures, false);
+    }
 
     void pick_move(ScoredList& scored_list, int start);
 
@@ -91,6 +100,7 @@ namespace episteme::search {
     class Worker {
         public:
             int32_t search(Position& position, Line& PV, uint16_t depth, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end);
+            int32_t quiesce(Position& position, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end);
             std::pair<int32_t, Move> run(const Parameters& params);
             void bench(int depth);
         private:
@@ -100,5 +110,5 @@ namespace episteme::search {
             uint64_t nodes;
     };
 
-    bool isLegal(const Position& position);
+    bool is_legal(const Position& position);
 }

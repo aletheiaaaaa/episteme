@@ -13,32 +13,40 @@ namespace episteme::search {
         }
     }
 
-    ScoredList generate_scored_moves(const Position& position) {
+    template<typename F>
+    ScoredList generate_scored_targets(const Position& position, F generator, bool include_quiets) {
         MoveList move_list;
-        generate_all_moves(move_list, position);
+        generator(move_list, position);
         ScoredList scored_list;
 
         for (size_t i = 0; i < move_list.count(); i++) {
             Move move = move_list.list(i);
-            ScoredMove scored_move;
             PieceType src = piece_type(position.mailbox(sq_idx(move.from_square())));
             PieceType dst = piece_type(position.mailbox(sq_idx(move.to_square())));
+            int src_val;
+            int dst_val;
 
-            const int src_val = piece_vals[piece_type_idx(src)];
-            const int dst_val = (dst != PieceType::None) ? ((move.move_type() == MoveType::EnPassant) ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)]) : 0;
-            const int mvv_lva = (dst_val) ? dst_val * 10 - src_val : 0;
+            bool is_capture = !include_quiets || dst != PieceType::None;
 
-            scored_move = {
+            src_val = piece_vals[piece_type_idx(src)];
+            if(is_capture) {
+                dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
+            } else {
+                dst_val = 0;
+            }
+
+            int mvv_lva = (dst_val) ? dst_val * 10 - src_val : 0;
+
+            scored_list.add({
                 .move = move,
                 .mvv_lva = mvv_lva
-            };
-            scored_list.add(scored_move);
+            });
         }
 
         return scored_list;
     }
 
-    bool isLegal(const Position& position) {
+    bool is_legal(const Position& position) {
         uint64_t kingBB = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(position.NTM()) + position.COLOR_OFFSET);
         return !is_square_attacked(sq_from_idx(std::countr_zero(kingBB)), position, position.STM());
     };
@@ -47,7 +55,7 @@ namespace episteme::search {
         if (end && steady_clock::now() >= *end) return 0;
 
         if (depth <= 0) {
-            return eval::evaluate(accumulator);
+            return quiesce(position, alpha, beta, end);
         }
 
         ScoredList move_list = generate_scored_moves(position);
@@ -62,7 +70,7 @@ namespace episteme::search {
             accum_history.emplace_back(accumulator);
             position.make_move(move);
 
-            if (!isLegal(position)) {
+            if (!is_legal(position)) {
                 position.unmake_move();
                 accum_history.pop_back();
                 accumulator = accum_history.back();
@@ -93,6 +101,64 @@ namespace episteme::search {
                 }
             }
         };  
+
+        return best;
+    }
+
+    int32_t Worker::quiesce(Position& position, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end) {
+        if (end && steady_clock::now() >= *end) return 0;
+        
+        int32_t eval = eval::evaluate(accumulator);
+
+        int32_t best = eval;
+        if (best >= alpha) {
+            alpha = best;
+
+            if (best > beta) {
+                return best;
+            }
+        };
+
+        ScoredList captures_list = generate_scored_captures(position);
+
+        for (size_t i = 0; i < captures_list.count(); i++) {
+            pick_move(captures_list, i);
+            Move move = captures_list.list(i).move;
+
+            accumulator = eval::update(position, move, accumulator);
+            accum_history.emplace_back(accumulator);
+            position.make_move(move);
+
+            if (!is_legal(position)) {
+                position.unmake_move();
+                accum_history.pop_back();
+                accumulator = accum_history.back();
+
+                continue;
+            }
+
+            nodes++;
+
+            int32_t score = quiesce(position, -beta, -alpha, end);
+
+            position.unmake_move();
+            accum_history.pop_back();
+            accumulator = accum_history.back();
+            
+            if (end && steady_clock::now() >= *end) return 0;
+
+            if (score > best) {
+                best = score;
+            }
+
+            if (score >= alpha) {
+                alpha = score;
+
+                if (score > beta) {
+                    break;
+                }
+            }
+        }
 
         return best;
     }
