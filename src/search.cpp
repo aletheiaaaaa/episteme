@@ -202,6 +202,6 @@ namespace episteme::search {
             total += nodes;
         }
         
-        std::cout << "nodes " << total << " nps " << 1000 * total / elapsed.count() << std::endl;
+        std::cout << total << " nodes " << 1000 * total / elapsed.count() << " nps" << std::endl;
     }
 }
