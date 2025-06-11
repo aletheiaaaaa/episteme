@@ -10,7 +10,7 @@ BIN_DIR = build
 EVAL_DIR = ./episteme_dev_net.bin
 
 ifndef EVALFILE
-	EVALFILE = ${EVAL_DIR}
+	EVALFILE = $(EVAL_DIR)
 	DOWNLOAD_NET = true
 endif
 
