@@ -16,7 +16,14 @@ TARGET  := $(BIN_DIR)/$(EXE)
 SRCS    := $(shell find $(SRC_DIR) -name '*.cpp')
 OBJS    := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 
-all: $(TARGET)
+all: check_net $(TARGET)
+
+check_net:
+	@if [ ! -f $(EVALFILE) ]; then \
+		echo >&2 "Error: Neural net file '$(EVALFILE)' not found."; \
+		echo >&2 "Hint: Did you run 'git lfs pull'?"; \
+		exit 1; \
+	fi
 
 $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
