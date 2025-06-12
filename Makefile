@@ -2,8 +2,8 @@ CXX       := g++
 CXXFLAGS  := -std=c++23 -O3 -flto -mavx2
 
 SRC_DIR   := src
-OBJ_DIR   := build/obj
-BIN_DIR   := build
+OBJ_DIR   := ./obj
+BIN_DIR   := .
 
 DEFAULT_NET := ./episteme_dev_net.bin
 EVALFILE    ?= $(DEFAULT_NET)
