@@ -1,52 +1,52 @@
-# === Compiler and Flags ===
+# === Compiler & Optimization ===
 CXX       := g++
 CXXFLAGS  := -std=c++23 -O3 -flto -mavx2
 
-# === Project Structure ===
+# === Paths ===
 SRC_DIR   := src
 OBJ_DIR   := build/obj
 BIN_DIR   := build
 
-# === Neural Net File ===
-NET_FILE      := episteme_dev_net.bin
-EVALFILE      := ./$(NET_FILE)
+# === Neural Network Path (can be overridden by EVALFILE env var) ===
+DEFAULT_NET := ./episteme_dev_net.bin
+EVALFILE    ?= $(DEFAULT_NET)
 
-# === Executable ===
-EXE       ?= episteme
-TARGET    := $(BIN_DIR)/$(EXE)
-
-# === Source and Object Files ===
-SRCS      := $(shell find $(SRC_DIR) -name '*.cpp')
-OBJS      := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
-
-# === Preprocessor definition ===
+# Define macro for compiler
 CXXFLAGS  += -DEVALFILE=\"$(EVALFILE)\"
 
-# === Default Target ===
+# === Executable Name (default or from OpenBench via EXE=...) ===
+EXE     ?= episteme
+TARGET  := $(BIN_DIR)/$(EXE)
+
+# === Source & Object Lists ===
+SRCS    := $(shell find $(SRC_DIR) -name '*.cpp')
+OBJS    := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
+
+# === Top-Level Rule ===
 all: check_net $(TARGET)
 
-# === Check NNUE file exists ===
+# === Check: Warn if network file missing (e.g. due to missing git lfs pull) ===
 check_net:
 	@if [ ! -f $(EVALFILE) ]; then \
 		echo >&2 "Error: Neural net file '$(EVALFILE)' not found."; \
-		echo >&2 "Did you forget to run 'git lfs pull'?"; \
+		echo >&2 "Hint: Did you run 'git lfs pull'?"; \
 		exit 1; \
 	fi
 
-# === Link object files into executable ===
+# === Link ===
 $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-# === Compile each source file ===
+# === Compile Objects ===
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	@echo "Compiling $<"
+	@echo "Compiling $< with EVALFILE=$(EVALFILE)"
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# === Clean build artifacts ===
+# === Clean ===
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
 
-# === Force full rebuild ===
+# === Full Rebuild ===
 rebuild: clean all
