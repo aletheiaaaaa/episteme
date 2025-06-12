@@ -203,6 +203,7 @@ namespace episteme::search {
             position.from_FEN(fen);
             accumulator = eval::reset(position);
             accum_history.emplace_back(accumulator);
+
             nodes = 0;
 
             auto start = steady_clock::now();
