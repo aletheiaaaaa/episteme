@@ -75,7 +75,7 @@ namespace episteme {
     }
     
     auto bench(const std::string& args) {
-        int depth = (args.empty()) ? 3 : std::stoi(args);
+        int depth = (args.empty()) ? 5 : std::stoi(args);
         search::Worker worker;
 
         worker.bench(depth);
