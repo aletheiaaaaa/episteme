@@ -22,17 +22,6 @@ TARGET  := $(BIN_DIR)/$(EXE)
 SRCS    := $(shell find $(SRC_DIR) -name '*.cpp')
 OBJS    := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 
-# === Top-Level Rule ===
-all: check_net $(TARGET)
-
-# === Check: Warn if network file missing (e.g. due to missing git lfs pull) ===
-check_net:
-	@if [ ! -f $(EVALFILE) ]; then \
-		echo >&2 "Error: Neural net file '$(EVALFILE)' not found."; \
-		echo >&2 "Hint: Did you run 'git lfs pull'?"; \
-		exit 1; \
-	fi
-
 # === Link ===
 $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
