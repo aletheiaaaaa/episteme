@@ -5,8 +5,12 @@ SRC_DIR   := src
 OBJ_DIR   := ./obj
 BIN_DIR   := .
 
+<<<<<<< HEAD
 DEFAULT_NET := ./episteme_dev_net.bin
 EVALFILE    ?= $(DEFAULT_NET)
+=======
+EVAL_DIR = ./episteme_dev_net.bin
+>>>>>>> 61ac67e (hopefully final net fix)
 
 CXXFLAGS  += -DEVALFILE=\"$(EVALFILE)\"
 
@@ -29,6 +33,13 @@ $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
+<<<<<<< HEAD
+=======
+# Add the macro definition directly to CXXFLAGS
+CXXFLAGS += -DEVALFILE=\"$(EVALFILE)\"
+
+# Compile sources
+>>>>>>> 61ac67e (hopefully final net fix)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo "Compiling $< with EVALFILE=$(EVALFILE)"
