@@ -16,6 +16,8 @@ TARGET  := $(BIN_DIR)/$(EXE)
 SRCS    := $(shell find $(SRC_DIR) -name '*.cpp')
 OBJS    := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 
+all: $(TARGET)
+
 $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^
