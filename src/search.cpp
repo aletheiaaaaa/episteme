@@ -127,8 +127,10 @@ namespace episteme::search {
 
             PieceType src = piece_type(position.mailbox(sq_idx(move.from_square())));
             PieceType dst = piece_type(position.mailbox(sq_idx(move.to_square())));
+            int src_val = piece_vals[piece_type_idx(src)];
+            int dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
 
-            if (piece_vals[piece_type_idx(dst)] - piece_vals[piece_type_idx(src)] < 0) break;
+            if (dst_val - src_val < 0) break;
 
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
