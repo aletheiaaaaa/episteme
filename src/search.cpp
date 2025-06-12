@@ -69,7 +69,7 @@ namespace episteme::search {
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
             position.make_move(move);
-            
+
             if (!is_legal(position)) {
                 position.unmake_move();
                 accum_history.pop_back();
