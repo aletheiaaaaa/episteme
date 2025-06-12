@@ -174,6 +174,7 @@ namespace episteme::search {
         int32_t result = -1;
 
         Line PV = {};
+
         Position position = params.position;
         accumulator = eval::reset(position);
         accum_history.emplace_back(accumulator);
