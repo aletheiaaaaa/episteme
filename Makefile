@@ -7,7 +7,7 @@ SRC_DIR = src
 OBJ_DIR = build/obj
 BIN_DIR = build
 
-EVAL_DIR = /episteme_dev_net.bin
+EVAL_DIR = ./episteme_dev_net.bin
 
 ifndef EVALFILE
 	EVALFILE = $(EVAL_DIR)
@@ -29,6 +29,9 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^
+
+# Add the macro definition directly to CXXFLAGS
+CXXFLAGS += -DEVALFILE=\"$(EVALFILE)\"
 
 # Compile sources
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
