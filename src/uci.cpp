@@ -65,8 +65,10 @@ namespace episteme {
         }
 
         search::Worker worker;
-        std::cout << worker.run(params).second.to_string() << std::endl;
-    }
+        Move move = worker.run(params).second;
+
+        std::cout << "bestmove " << move.to_string() << "\n";
+        }
 
     auto ucinewgame(search::Parameters& params) {
         params = {};
