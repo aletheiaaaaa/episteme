@@ -1,7 +1,6 @@
 #include "uci.h"
 
 namespace episteme {
-
     auto uci() {
         std::cout << "id name Episteme \nid author aletheia\n";
         std::cout << "option name Hash type spin default 32 min 1 max 128\n";
