@@ -1,6 +1,7 @@
 #include "uci.h"
 
 namespace episteme {
+
     auto uci() {
         std::cout << "id name Episteme \nid author aletheia\n";
         std::cout << "option name Hash type spin default 32 min 1 max 128\n";
@@ -67,14 +68,14 @@ namespace episteme {
         Move move = worker.run(params).second;
 
         std::cout << "bestmove " << move.to_string() << "\n";
-    }
+        }
 
     auto ucinewgame(search::Parameters& params) {
         params = {};
     }
     
     auto bench(const std::string& args) {
-        int depth = (args.empty()) ? 3 : std::stoi(args);
+        int depth = (args.empty()) ? 5 : std::stoi(args);
         search::Worker worker;
 
         worker.bench(depth);
