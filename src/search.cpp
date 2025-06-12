@@ -173,6 +173,8 @@ namespace episteme::search {
 
         Line PV = {};
         Position position = params.position;
+        accumulator = eval::reset(position);
+        accum_history.emplace_back(accumulator);
 
         int32_t time = params.time[color_idx(position.STM())];
         int32_t inc = params.inc[color_idx(position.STM())];
