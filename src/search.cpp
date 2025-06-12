@@ -105,8 +105,6 @@ namespace episteme::search {
         return best;
     }
 
-<<<<<<< HEAD
-=======
     int32_t Worker::quiesce(Position& position, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end) {
         if (end && steady_clock::now() >= *end) return 0;
         
@@ -172,7 +170,6 @@ namespace episteme::search {
         return best;
     }
 
->>>>>>> dev
     std::pair<int32_t, Move> Worker::run(const Parameters& params) {
         int32_t result = -1;
 
