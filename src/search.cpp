@@ -125,6 +125,11 @@ namespace episteme::search {
             pick_move(captures_list, i);
             Move move = captures_list.list(i).move;
 
+            PieceType src = piece_type(position.mailbox(sq_idx(move.from_square())));
+            PieceType dst = piece_type(position.mailbox(sq_idx(move.to_square())));
+
+            if (piece_vals[piece_type_idx(dst)] - piece_vals[piece_type_idx(src)] < 0) break;
+
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
             position.make_move(move);
