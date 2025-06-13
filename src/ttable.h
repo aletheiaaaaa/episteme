@@ -41,7 +41,8 @@ namespace episteme::tt {
                 ttable.clear();
             }
 
-            inline void add(TTEntry tt_entry, uint64_t index) {
+            inline void add(TTEntry tt_entry) {
+                uint64_t index = table_index(tt_entry.hash);
                 ttable[index] = tt_entry;
             };
 

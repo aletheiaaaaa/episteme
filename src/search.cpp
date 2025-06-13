@@ -1,6 +1,5 @@
 #include "search.h"
 #include "bench.h"
-#include <cassert>
 
 namespace episteme::search {
     using namespace std::chrono;
@@ -52,8 +51,6 @@ namespace episteme::search {
         return !is_square_attacked(sq_from_idx(std::countr_zero(kingBB)), position, position.STM());
     };
 
-    Thread::Thread(tt::TTable& ttable) : ttable(ttable) {};
-
     int32_t Thread::search(Position& position, Line& PV, int16_t depth, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end) {
         if (end && steady_clock::now() >= *end) return 0;
 
@@ -61,9 +58,20 @@ namespace episteme::search {
             return quiesce(position, alpha, beta, end);
         }
 
+        tt::TTEntry tt_entry = ttable.probe(position.zobrist());
+        if (tt_entry.depth >= depth
+            && ((tt_entry.node_type == tt::NodeType::PVNode)
+                || (tt_entry.node_type == tt::NodeType::AllNode && tt_entry.score <= alpha)
+                || (tt_entry.node_type == tt::NodeType::CutNode && tt_entry.score >= beta)
+            )
+        ) {
+            return tt_entry.score;
+        }
+
         ScoredList move_list = generate_scored_moves(position);
         int32_t best = -INF;
         Line candidate = {};
+        tt::NodeType node_type = tt::NodeType::AllNode;
 
         for (size_t i = 0; i < move_list.count(); i++) { 
             pick_move(move_list, i);
@@ -97,13 +105,24 @@ namespace episteme::search {
 
             if (score > alpha) {    
                 alpha = score;
+
+                node_type = tt::NodeType::PVNode;
                 PV.update_line(move, candidate);
 
                 if (score >= beta) {
+                    node_type = tt::NodeType::CutNode;
                     break;
                 }
             }
-        };  
+        };
+        
+        ttable.add({
+            .hash = position.zobrist(),
+            .move = PV.moves[0],
+            .score = best,
+            .depth = static_cast<uint8_t>(depth),
+            .node_type = node_type
+        });
 
         return best;
     }
@@ -173,7 +192,7 @@ namespace episteme::search {
         return best;
     }
 
-    std::pair<int32_t, Line> Thread::run(const Parameters& params) {
+    ScoredLine Thread::run(const Parameters& params) {
         int32_t result = -1;
         Line PV = {};
 
@@ -192,7 +211,12 @@ namespace episteme::search {
             result = search(position, PV, depth, -INF, INF, end);
         };
 
-        return {result, PV};
+        ScoredLine scored_line = {
+            .score = result,
+            .line = PV
+        };
+
+        return scored_line;
     }
 
     void Thread::bench(int depth) {
@@ -219,11 +243,9 @@ namespace episteme::search {
         std::cout << total << " nodes " << 1000 * total / elapsed.count() << " nps" << std::endl;
     }
 
-    Instance::Instance(Config& cfg) : ttable(cfg.hash_size), params(cfg.params), thread(ttable) {}
-
     void Instance::run() {
-        std::pair<int32_t, Line> variation = thread.run(params);
-        Move best = variation.second.moves[0];
+        ScoredLine variation = thread.run(params);
+        Move best = variation.line.moves[0];
         std::cout << "bestmove " << best.to_string() << std::endl;
     }
 
