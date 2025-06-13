@@ -1,6 +1,8 @@
 #pragma once
 
 #include "move.h"
+#include "zobrist.h"
+
 #include <array>
 #include <vector>
 #include <string>
@@ -9,25 +11,41 @@
 #include <cstdlib>
 
 namespace episteme {
+    static constexpr std::array<Piece, 64> empty_mailbox() {
+        std::array<Piece, 64> mailbox{};
+        mailbox.fill(Piece::None);
+        return mailbox;
+    }
+
     struct PositionState {
-        std::array<uint64_t, 8> bitboard;
-        std::array<Piece, 64> mailbox;
-        AllowedCastles allowed_castles;
-        bool stm;
-        uint8_t half_clock;
-        uint32_t full_number;
-        Square en_passant = Square::None;
+        std::array<uint64_t, 8> bitboards{};
+        std::array<Piece, 64> mailbox = empty_mailbox();
+    
+        AllowedCastles allowed_castles{
+            .rooks{
+                {{.kingside = Square::None, .queenside = Square::None},
+                {.kingside = Square::None, .queenside = Square::None}}
+            }
+        };
+    
+        bool stm = color_idx(Color::White);
+        uint8_t half_move_clock = 0;
+        uint32_t full_move_number = 0;
+        Square ep_square = Square::None;
+
+        uint64_t hash = 0;
     };
+
     class Position {
         public:
             Position();
 
-            [[nodiscard]] inline std::array<uint64_t, 8> bitboard_all() const {
-                return state.bitboard;
+            [[nodiscard]] inline std::array<uint64_t, 8> bitboards_all() const {
+                return state.bitboards;
             }
 
             [[nodiscard]] inline uint64_t bitboard(int index) const {
-                return state.bitboard[index];
+                return state.bitboards[index];
             }
         
             [[nodiscard]] inline Color STM() const {
@@ -39,15 +57,15 @@ namespace episteme {
             }
         
             [[nodiscard]] inline uint8_t half_move_clock() const {
-                return state.half_clock; 
+                return state.half_move_clock; 
             }
         
             [[nodiscard]] inline uint32_t full_move_number() const {
-                return state.full_number;
+                return state.full_move_number;
             }
         
             [[nodiscard]] inline Square ep_square() const {
-                return state.en_passant;    
+                return state.ep_square;    
             }
         
             [[nodiscard]] inline AllowedCastles::RookPair castling_rights(Color stm) const {
@@ -62,13 +80,17 @@ namespace episteme {
                 return state.mailbox;
             }
 
-            
+            [[nodiscard]] inline uint64_t zobrist() const {
+                return state.hash;
+            }
+
             void from_FEN(std::string_view FEN);
-            std::string to_fEN() const; 
             void from_start_pos();
+
             void make_move(const Move& move);
             void unmake_move();
 
+            std::string to_fEN() const; 
         public:
             static const uint16_t COLOR_OFFSET = 6;
 

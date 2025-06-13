@@ -1,12 +1,13 @@
 #include "search.h"
 #include "bench.h"
+#include <cassert>
 
 namespace episteme::search {
     using namespace std::chrono;
 
     void pick_move(ScoredList& scored_list, int start) {
         const ScoredMove& start_move = scored_list.list(start);
-        for (int i = start + 1; i <  scored_list.count(); i++)    {
+        for (size_t i = start + 1; i <  scored_list.count(); i++)    {
             if (scored_list.list(i).mvv_lva > start_move.mvv_lva) {
                 scored_list.swap(start, i);
             }
@@ -51,11 +52,13 @@ namespace episteme::search {
         return !is_square_attacked(sq_from_idx(std::countr_zero(kingBB)), position, position.STM());
     };
 
-    int32_t Worker::search(Position& position, Line& PV, uint16_t depth, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end) {
+    Thread::Thread(tt::TTable& ttable) : ttable(ttable) {};
+
+    int32_t Thread::search(Position& position, Line& PV, int16_t depth, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end) {
         if (end && steady_clock::now() >= *end) return 0;
 
         if (depth <= 0) {
-            return eval::evaluate(accumulator);
+            return quiesce(position, alpha, beta, end);
         }
 
         ScoredList move_list = generate_scored_moves(position);
@@ -105,7 +108,7 @@ namespace episteme::search {
         return best;
     }
 
-    int32_t Worker::quiesce(Position& position, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end) {
+    int32_t Thread::quiesce(Position& position, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end) {
         if (end && steady_clock::now() >= *end) return 0;
         
         int32_t eval = eval::evaluate(accumulator);
@@ -170,9 +173,8 @@ namespace episteme::search {
         return best;
     }
 
-    std::pair<int32_t, Move> Worker::run(const Parameters& params) {
+    std::pair<int32_t, Line> Thread::run(const Parameters& params) {
         int32_t result = -1;
-
         Line PV = {};
 
         Position position = params.position;
@@ -190,10 +192,10 @@ namespace episteme::search {
             result = search(position, PV, depth, -INF, INF, end);
         };
 
-        return {result, PV.moves[0]};
+        return {result, PV};
     }
 
-    void Worker::bench(int depth) {
+    void Thread::bench(int depth) {
         uint64_t total = 0;
         milliseconds elapsed = 0ms;
         for (std::string fen : fens) {
@@ -216,4 +218,17 @@ namespace episteme::search {
         
         std::cout << total << " nodes " << 1000 * total / elapsed.count() << " nps" << std::endl;
     }
+
+    Instance::Instance(Config& cfg) : ttable(cfg.hash_size), params(cfg.params), thread(ttable) {}
+
+    void Instance::run() {
+        std::pair<int32_t, Line> variation = thread.run(params);
+        Move best = variation.second.moves[0];
+        std::cout << "bestmove " << best.to_string() << std::endl;
+    }
+
+    void Instance::bench(int depth) {
+        thread.bench(depth);
+    }
+
 }

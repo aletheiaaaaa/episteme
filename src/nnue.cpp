@@ -84,7 +84,7 @@ namespace episteme::nn {
         Accumulator accum = {};
         std::array<Piece, 64> mailbox = position.mailbox_all();
 
-        for (uint8_t i = 0; i < 64; i++) {
+        for (size_t i = 0; i < 64; i++) {
             int stm = piecesquare(mailbox[i], sq_from_idx(i), false);
             int ntm = piecesquare(mailbox[i], sq_from_idx(i), true);
 

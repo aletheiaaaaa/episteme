@@ -224,7 +224,6 @@ namespace episteme {
 
     bool is_square_attacked(Square square, const Position& position, Color nstm) {
         uint64_t square_bb = uint64_t(1) << sq_idx(square);
-    
         uint64_t them_bb = position.bitboard(color_idx(nstm) + position.COLOR_OFFSET);
         
         uint64_t knights = position.bitboard(piece_type_idx(PieceType::Knight));

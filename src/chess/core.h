@@ -6,37 +6,32 @@
 #include <array>
 
 namespace episteme {
-    enum class Rank : uint16_t {
-        Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8, 
-        None
-    };
+    constexpr std::array<int, 6> piece_vals = {0, 3, 3, 5, 9, -1}; 
 
-    enum class File : uint16_t {
-        FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH, 
-        None
-    };
+    constexpr uint8_t WHITE_KINGSIDE = 1;
+    constexpr uint8_t WHITE_QUEENSIDE = 1 << 1;
+    constexpr uint8_t BLACK_KINGSIDE = 1 << 2;
+    constexpr uint8_t BLACK_QUEENSIDE = 1 << 3;
 
-    const std::array<int, 6> piece_vals = {0, 3, 3, 5, 9, -1}; 
+    constexpr uint64_t FILE_A = 0x0101010101010101;
+    constexpr uint64_t FILE_B = 0x0202020202020202;
+    constexpr uint64_t FILE_C = 0x0404040404040404;
+    constexpr uint64_t FILE_D = 0x0808080808080808;
+    constexpr uint64_t FILE_E = 0x1010101010101010;
+    constexpr uint64_t FILE_F = 0x2020202020202020;
+    constexpr uint64_t FILE_G = 0x4040404040404040;
+    constexpr uint64_t FILE_H = 0x8080808080808080;
 
-    const uint64_t FILE_A = 0x0101010101010101;
-    const uint64_t FILE_B = 0x0202020202020202;
-    const uint64_t FILE_C = 0x0404040404040404;
-    const uint64_t FILE_D = 0x0808080808080808;
-    const uint64_t FILE_E = 0x1010101010101010;
-    const uint64_t FILE_F = 0x2020202020202020;
-    const uint64_t FILE_G = 0x4040404040404040;
-    const uint64_t FILE_H = 0x8080808080808080;
+    constexpr uint64_t RANK_1 = 0x00000000000000FF;
+    constexpr uint64_t RANK_2 = 0x000000000000FF00;
+    constexpr uint64_t RANK_3 = 0x0000000000FF0000;
+    constexpr uint64_t RANK_4 = 0x00000000FF000000;
+    constexpr uint64_t RANK_5 = 0x000000FF00000000;
+    constexpr uint64_t RANK_6 = 0x0000FF0000000000;
+    constexpr uint64_t RANK_7 = 0x00FF000000000000;
+    constexpr uint64_t RANK_8 = 0xFF00000000000000;
 
-    const uint64_t RANK_1 = 0x00000000000000FF;
-    const uint64_t RANK_2 = 0x000000000000FF00;
-    const uint64_t RANK_3 = 0x0000000000FF0000;
-    const uint64_t RANK_4 = 0x00000000FF000000;
-    const uint64_t RANK_5 = 0x000000FF00000000;
-    const uint64_t RANK_6 = 0x0000FF0000000000;
-    const uint64_t RANK_7 = 0x00FF000000000000;
-    const uint64_t RANK_8 = 0xFF00000000000000;
-
-    const size_t DOUBLE_PUSH = 16;
+    constexpr size_t DOUBLE_PUSH = 16;
 
     enum class Square : uint16_t {
         A1, B1, C1, D1, E1, F1, G1, H1, 
@@ -108,6 +103,16 @@ namespace episteme {
             };
         };
         std::array<RookPair, 2> rooks{};
+        
+        [[nodiscard]] inline uint8_t as_mask() {
+            size_t mask = 0;
+            if (rooks[0].is_kingside_set()) mask |= WHITE_KINGSIDE; 
+            if (rooks[0].is_queenside_set()) mask |= WHITE_QUEENSIDE; 
+            if (rooks[1].is_kingside_set()) mask |= BLACK_KINGSIDE; 
+            if (rooks[1].is_queenside_set()) mask |= BLACK_QUEENSIDE;  
+
+            return mask;
+        }
     };
 
     static const std::unordered_map<char, std::pair<PieceType, Color>> piece_map = {
@@ -150,7 +155,11 @@ namespace episteme {
         return static_cast<int16_t>(stm) * 384 + static_cast<int16_t>(piece_type(piece)) * 64 + static_cast<int16_t>(location);
     }
 
-    [[nodiscard]] inline Square sq_from_idx(size_t index) {
+    [[nodiscard]] inline Piece pc_from_idx(uint16_t index) {
+        return static_cast<Piece>(index);
+    }
+
+    [[nodiscard]] inline Square sq_from_idx(uint16_t index) {
         return static_cast<Square>(index);
     }
 
@@ -166,20 +175,12 @@ namespace episteme {
         return static_cast<uint16_t>(color);
     }
 
-    [[nodiscard]] inline uint16_t rank_idx(Rank rank) {
-        return static_cast<uint16_t>(rank);
+    [[nodiscard]] inline uint16_t file(Square square) {
+        return sq_idx(square) % 8;
     }
 
-    [[nodiscard]] inline uint16_t file_idx(File file) {
-        return static_cast<uint16_t>(file);
-    }
-
-    [[nodiscard]] inline File file(Square square) {
-        return static_cast<File>(sq_idx(square) % 8);
-    }
-
-    [[nodiscard]] inline Rank rank(Square square) {
-        return static_cast<Rank>(sq_idx(square) / 8);
+    [[nodiscard]] inline uint16_t rank(Square square) {
+        return sq_idx(square) / 8;
     }
 
     [[nodiscard]] inline uint64_t shift_west(uint64_t bitboard) {
