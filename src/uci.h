@@ -10,14 +10,14 @@
 #include <array>
 
 namespace episteme::uci {
-    int parse(const std::string& cmd, search::Config& cfg);
+    int parse(const std::string& cmd, search::Parameters& params);
 
     auto uci();
     // auto setOption(const std::string& args, search::Parameters params);
     auto isready();
-    auto position(const std::string& args, search::Config& cfg);
-    auto go(const std::string& args, search::Config& cfg);
-    auto ucinewgame(search::Config& cfg);
-    auto bench(const std::string& args, search::Config& cfg);
-    auto perft(const std::string& args, search::Config& cfg);
+    auto position(const std::string& args, search::Parameters& params);
+    auto go(const std::string& args, search::Parameters& params);
+    auto ucinewgame(search::Parameters& params);
+    auto bench(const std::string& args, search::Parameters& params);
+    auto perft(const std::string& args, search::Parameters& params);
 }

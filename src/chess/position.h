@@ -1,7 +1,6 @@
 #pragma once
 
 #include "move.h"
-#include "zobrist.h"
 
 #include <array>
 #include <vector>
@@ -32,8 +31,6 @@ namespace episteme {
         uint8_t half_move_clock = 0;
         uint32_t full_move_number = 0;
         Square ep_square = Square::None;
-
-        uint64_t hash = 0;
     };
 
     class Position {
@@ -78,10 +75,6 @@ namespace episteme {
 
             [[nodiscard]] inline std::array<Piece, 64> mailbox_all() const {
                 return state.mailbox;
-            }
-
-            [[nodiscard]] inline uint64_t zobrist() const {
-                return state.hash;
             }
 
             void from_FEN(std::string_view FEN);

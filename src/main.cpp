@@ -14,8 +14,7 @@
 using namespace episteme;
 
 int main(int argc, char *argv[]) {
-    zobrist::init();
-    search::Config cfg = {};
+    search::Parameters params = {};
 
     if (argc > 1) {
         std::string cmd;
@@ -23,12 +22,12 @@ int main(int argc, char *argv[]) {
             cmd += argv[i];
             if (i < argc - 1) cmd += ' ';
         }
-        uci::parse(cmd, cfg);
+        uci::parse(cmd, params);
 
     } else {
         std::string line;
         while (std::getline(std::cin, line)) {
-            uci::parse(line, cfg);    
+            uci::parse(line, params);    
         }    
     }
 

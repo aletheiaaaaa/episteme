@@ -17,11 +17,9 @@ add_executable(episteme
     "${SRC}/chess/move.cpp" 
     "${SRC}/chess/movegen.cpp" 
     "${SRC}/chess/perft.cpp" 
-    "${SRC}/chess/zobrist.cpp" 
     "${SRC}/evaluate.cpp" 
     "${SRC}/nnue.cpp" 
     "${SRC}/search.cpp" 
-    "${SRC}/ttable.cpp"
     "${SRC}/uci.cpp" 
     "${SRC}/main.cpp"
 )

@@ -2,7 +2,6 @@
 
 #include "chess/movegen.h"
 #include "evaluate.h"
-#include "ttable.h"
 
 #include <cstdint>
 #include <chrono>
@@ -73,12 +72,6 @@ namespace episteme::search {
         Position position;
     };
 
-    struct Config {
-        Parameters params = {};
-        uint32_t hash_size = 0;
-        uint16_t num_threads = 0;
-    };
-
     struct Line {
         size_t length = 0;
         std::array<Move, MAX_SEARCH_PLY + 1> moves = {};
@@ -105,8 +98,6 @@ namespace episteme::search {
 
     class Thread {
         public:
-            Thread(tt::TTable& ttable);
-
             int32_t search(Position& position, Line& PV, int16_t depth, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end);
             int32_t quiesce(Position& position, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end);
             std::pair<int32_t, Line> run(const Parameters& params);
@@ -115,21 +106,7 @@ namespace episteme::search {
             nn::Accumulator accumulator;
             std::vector<nn::Accumulator> accum_history;
 
-            tt::TTable& ttable;
             uint64_t nodes;
-    };
-
-    class Instance {
-        public:
-            Instance(Config& cfg);
-
-            void run();
-            void bench(int depth);
-        private:
-            tt::TTable ttable;
-            Parameters params;
-
-            Thread thread;
     };
 
     bool is_legal(const Position& position);
