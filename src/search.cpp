@@ -14,13 +14,15 @@ namespace episteme::search {
     }
 
     template<typename F>
-    ScoredList generate_scored_targets(const Position& position, F generator, bool include_quiets) {
+    ScoredList generate_scored_targets(const Position& position, F generator, bool include_quiets, const std::optional<tt::TTEntry>& tt_entry) {
         MoveList move_list;
         generator(move_list, position);
         ScoredList scored_list;
 
         for (size_t i = 0; i < move_list.count(); i++) {
             Move move = move_list.list(i);
+            bool from_tt = tt_entry && include_quiets && tt_entry->move.data() == move.data();
+
             PieceType src = piece_type(position.mailbox(sq_idx(move.from_square())));
             PieceType dst = piece_type(position.mailbox(sq_idx(move.to_square())));
             int src_val;
@@ -39,7 +41,7 @@ namespace episteme::search {
 
             scored_list.add({
                 .move = move,
-                .mvv_lva = mvv_lva
+                .mvv_lva = from_tt ? 1000 : mvv_lva
             });
         }
 
@@ -51,7 +53,7 @@ namespace episteme::search {
         return !is_square_attacked(sq_from_idx(std::countr_zero(kingBB)), position, position.STM());
     };
 
-    int32_t Thread::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end) {
+    int32_t Thread::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end = std::nullopt) {
         if (end && steady_clock::now() >= *end) return 0;
 
         if (depth <= 0) {
@@ -68,7 +70,7 @@ namespace episteme::search {
             return tt_entry.score;
         }
 
-        ScoredList move_list = generate_scored_moves(position);
+        ScoredList move_list = generate_scored_moves(position, tt_entry);
         int32_t best = -INF;
         Line candidate = {};
         tt::NodeType node_type = tt::NodeType::AllNode;
@@ -233,15 +235,14 @@ namespace episteme::search {
             nodes = 0;
 
             auto start = steady_clock::now();
-            int32_t _ = search(position, PV, depth, 0, -INF, INF, std::nullopt);
+            int32_t _ = search(position, PV, depth, 0, -INF, INF);
             auto end = steady_clock::now();
 
             elapsed += duration_cast<milliseconds>(end - start);
             total += nodes;
         }
 
-        std::cout << total << " nodes " << 1000 * total / elapsed.count() << " nps" << std::endl;
-    }
+        std::cout << total << " nodes " << 1000 * total / elapsed.count() << " nps" << std::endl;    }
 
     void Instance::run() {
         ScoredLine variation = thread.run(params);

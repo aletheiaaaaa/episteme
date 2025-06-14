@@ -52,10 +52,10 @@ namespace episteme::search {
     };
 
     template<typename F>
-    extern ScoredList generate_scored_targets(const Position& position, F generator, bool include_quiets);
+    extern ScoredList generate_scored_targets(const Position& position, F generator, bool include_quiets, const std::optional<tt::TTEntry>& tt_entry = std::nullopt);
 
-    inline ScoredList generate_scored_moves(const Position& position) {
-        return generate_scored_targets(position, generate_all_moves, true);
+    inline ScoredList generate_scored_moves(const Position& position, const tt::TTEntry& tt_entry) {
+        return generate_scored_targets(position, generate_all_moves, true, tt_entry);
     }
 
     inline ScoredList generate_scored_captures(const Position& position) {

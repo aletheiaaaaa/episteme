@@ -56,16 +56,7 @@ namespace episteme {
         state.half_move_clock = std::stoi(tokens[4]);
         state.full_move_number = std::stoi(tokens[5]);
 
-        for (size_t i = 0; i < 64; i++) {
-            if (state.mailbox[i] != Piece::None) {
-                state.hash ^= zobrist::piecesquares[piecesquare(mailbox(i), sq_from_idx(i), false)];
-            }
-        }
-
-        if (!state.stm) state.hash ^= zobrist::stm;
-        if (state.ep_square != Square::None) state.hash ^= zobrist::ep_files[file(state.ep_square)];
-
-        state.hash ^= zobrist::castling_rights[state.allowed_castles.as_mask()];
+        state.hash = explicit_zobrist();
 
         position_history.push_back(state);
     }
@@ -329,6 +320,22 @@ namespace episteme {
         fen += std::to_string(state.half_move_clock) + " " + std::to_string(state.full_move_number);
     
         return fen;
+    }
+
+    uint64_t Position::explicit_zobrist() {
+        uint64_t hash = 0;
+        for (size_t i = 0; i < 64; i++) {
+            if (state.mailbox[i] != Piece::None) {
+                hash ^= zobrist::piecesquares[piecesquare(state.mailbox[i], sq_from_idx(i), false)];
+            }
+        }
+
+        if (!state.stm) hash ^= zobrist::stm;
+        if (state.ep_square != Square::None) hash ^= zobrist::ep_files[file(state.ep_square)];
+
+        hash ^= zobrist::castling_rights[state.allowed_castles.as_mask()];
+
+        return hash;
     }
 
     Move from_UCI(const Position& position, const std::string& move) {
