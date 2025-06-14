@@ -25,8 +25,8 @@ namespace episteme {
                 return the_list[index];
             }
         private:
-        std::array<Move, 256> the_list;
-        uint32_t the_count = 0;
+            std::array<Move, 256> the_list;
+            uint32_t the_count = 0;
     };
 
     struct PawnAttacks {

@@ -20,6 +20,10 @@ namespace episteme {
             Move();
             Move(Square from_square, Square to_square, MoveType move_type = MoveType::Normal, PromoPiece promo_piece = PromoPiece::None);
 
+            [[nodiscard]] inline uint16_t data() const {
+                return move_data;
+            }
+
             [[nodiscard]] inline Square from_square() const {
                 return static_cast<Square>(move_data & 0b111111);
             }
@@ -38,6 +42,10 @@ namespace episteme {
         
             [[nodiscard]] inline PieceType promo_piece_type() const {
                 return static_cast<PieceType>(((move_data >> 14) & 0b11) + 1);
+            }
+
+            [[nodiscard]] inline bool is_empty() const {
+                return (move_data == 0x0000);
             }
         
             std::string to_string() const;

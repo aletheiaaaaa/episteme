@@ -2,6 +2,7 @@
 
 #include "chess/movegen.h"
 #include "evaluate.h"
+#include "ttable.h"
 
 #include <cstdint>
 #include <chrono>
@@ -51,10 +52,10 @@ namespace episteme::search {
     };
 
     template<typename F>
-    extern ScoredList generate_scored_targets(const Position& position, F generator, bool include_quiets);
+    extern ScoredList generate_scored_targets(const Position& position, F generator, bool include_quiets, const std::optional<tt::TTEntry>& tt_entry = std::nullopt);
 
-    inline ScoredList generate_scored_moves(const Position& position) {
-        return generate_scored_targets(position, generate_all_moves, true);
+    inline ScoredList generate_scored_moves(const Position& position, const tt::TTEntry& tt_entry) {
+        return generate_scored_targets(position, generate_all_moves, true, tt_entry);
     }
 
     inline ScoredList generate_scored_captures(const Position& position) {
@@ -70,6 +71,12 @@ namespace episteme::search {
         std::array<int32_t, 2> inc = {};
         
         Position position;
+    };
+
+    struct Config {
+        Parameters params = {};
+        uint32_t hash_size = 0;
+        uint16_t num_threads = 0;
     };
 
     struct Line {
@@ -96,17 +103,38 @@ namespace episteme::search {
         }
     };
 
+    struct ScoredLine {
+        int32_t score;
+        Line line;
+    };
+
     class Thread {
         public:
-            int32_t search(Position& position, Line& PV, int16_t depth, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end);
-            int32_t quiesce(Position& position, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end);
-            std::pair<int32_t, Line> run(const Parameters& params);
+            Thread(tt::TTable& ttable) : ttable(ttable) {};
+
+            int32_t search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end);
+            int32_t quiesce(Position& position, int16_t ply, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end);
+            ScoredLine run(const Parameters& params);
             void bench(int depth);
         private:
             nn::Accumulator accumulator;
             std::vector<nn::Accumulator> accum_history;
 
+            tt::TTable& ttable;
             uint64_t nodes;
+    };
+
+    class Instance {
+        public:
+            Instance(Config& cfg) : ttable(cfg.hash_size), params(cfg.params), thread(ttable) {};
+
+            void run();
+            void bench(int depth);
+        private:
+            tt::TTable ttable;
+            Parameters params;
+
+            Thread thread;
     };
 
     bool is_legal(const Position& position);

@@ -9,15 +9,30 @@ namespace episteme::uci {
         std::cout << "uciok\n";
     }
 
-    // auto setoption(const std::string& args, search::Parameters& params) {
-
-    // }
+    auto setoption(const std::string& args, search::Config& cfg) {
+        std::istringstream iss(args);
+        std::string name, option_name, value, option_value;
+    
+        iss >> name >> option_name >> value >> option_value;
+    
+        if (name != "name" || value != "value") {
+            std::cout << "invalid command" << std::endl;
+        }
+    
+        if (option_name == "Hash") {
+            cfg.hash_size = std::stoi(option_value);
+        } else if (option_name == "Threads") {
+            cfg.num_threads = std::stoi(option_value);
+        } else {
+            std::cout << "invalid option" << std::endl;
+        }
+    }
 
     auto isready() {
         std::cout << "readyok\n";
     }
 
-    auto position(const std::string& args, search::Parameters& params) {
+    auto position(const std::string& args, search::Config& cfg) {
         Position position;
         std::istringstream iss(args);
         std::string token;
@@ -25,7 +40,7 @@ namespace episteme::uci {
         iss >> token;
 
         if (token == "startpos") {
-            position.from_start_pos();
+            position.from_startpos();
 
         } else if (token == "fen") {    
             std::string fen;
@@ -45,67 +60,67 @@ namespace episteme::uci {
             }
         }
 
-        params.position = position;
+        cfg.params.position = position;
     }
 
-    auto go(const std::string& args, search::Parameters& params) {
+    auto go(const std::string& args, search::Config& cfg) {
         std::istringstream iss(args);
         std::string token;
 
         while (iss >> token) {
-            if (token == "wtime" && iss >> token) params.time[0] = std::stoi(token);
-            else if (token == "btime" && iss >> token) params.time[1] = std::stoi(token);
-            else if (token == "winc" && iss >> token) params.inc[0] = std::stoi(token);
-            else if (token == "binc" && iss >> token) params.inc[1] = std::stoi(token);
+            if (token == "wtime" && iss >> token) cfg.params.time[0] = std::stoi(token);
+            else if (token == "btime" && iss >> token) cfg.params.time[1] = std::stoi(token);
+            else if (token == "winc" && iss >> token) cfg.params.inc[0] = std::stoi(token);
+            else if (token == "binc" && iss >> token) cfg.params.inc[1] = std::stoi(token);
             else {
                 std::cout << "invalid command\n"; 
                 break;
             }
         }
 
-        search::Thread thread;
-        std::cout << "bestmove " << thread.run(params).second.moves[0].to_string() << std::endl;
+        search::Instance instance(cfg);
+        instance.run();
     }
 
-    auto ucinewgame(search::Parameters& params) {
-        params = {};
+    auto ucinewgame(search::Config& cfg) {
+        cfg.params = {};
     }
     
-    auto bench(const std::string& args) {
+    auto bench(const std::string& args, search::Config& cfg) {
         int depth = (args.empty()) ? 4 : std::stoi(args);
+        if (!cfg.hash_size) cfg.hash_size = 32;
     
-        search::Thread thread;
-        thread.bench(depth);
+        search::Instance instance(cfg);
+        instance.bench(depth);
     }
 
-    auto perft(const std::string& args, search::Parameters& params) {
+    auto perft(const std::string& args, search::Config& cfg) {
         int depth = (args.empty()) ? 6 : std::stoi(args);
-        Position& position = params.position;
+        Position& position = cfg.params.position;
 
         time_perft(position, depth);
     }
 
-    int parse(const std::string& cmd, search::Parameters& params) {
+    int parse(const std::string& cmd, search::Config& cfg) {
         std::string keyword = cmd.substr(0, cmd.find(' '));
 
         if (keyword == "uci") uci();
-        // else if (keyword == "setoption") setoption(cmd.substr(cmd.find(" ")+1), params);
-        else if (keyword == "setoption") return 0;
+        else if (keyword == "setoption") setoption(cmd.substr(cmd.find(" ")+1), cfg);
         else if (keyword == "isready") isready();
-        else if (keyword == "position") position(cmd.substr(cmd.find(" ")+1), params);
-        else if (keyword == "go") go(cmd.substr(cmd.find(" ")+1), params);
-        else if (keyword == "ucinewgame") ucinewgame(params);
+        else if (keyword == "position") position(cmd.substr(cmd.find(" ")+1), cfg);
+        else if (keyword == "go") go(cmd.substr(cmd.find(" ")+1), cfg);
+        else if (keyword == "ucinewgame") ucinewgame(cfg);
         else if (keyword == "quit") std::exit(0);
 
         else if (keyword == "bench") {
             size_t space = cmd.find(' ');
             std::string arg = (space != std::string::npos) ? cmd.substr(space+1) : "";
-            bench(arg);
+            bench(arg, cfg);
         }
         else if (keyword == "perft") {
             size_t space = cmd.find(' ');
             std::string arg = (space != std::string::npos) ? cmd.substr(space+1) : "";
-            perft(arg, params);
+            perft(arg, cfg);
         }
 
         else std::cout << "invalid command\n";
