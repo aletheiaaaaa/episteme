@@ -1,8 +1,8 @@
 #pragma once
 
 #include "nnue.h"
-#include "./chess/position.h"
-#include "./utils/incbin.h"
+#include "../chess/position.h"
+#include "../external/incbin.h"
 
 namespace episteme::eval {
     nn::Accumulator update(const Position& position, const Move& move, nn::Accumulator accum);    

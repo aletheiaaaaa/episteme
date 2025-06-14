@@ -1,8 +1,8 @@
 #pragma once
 
-#include "chess/position.h"
-#include "chess/perft.h"
-#include "search.h"
+#include "../chess/position.h"
+#include "../chess/perft.h"
+#include "../search/search.h"
 
 #include <string>
 #include <sstream>
