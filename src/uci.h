@@ -13,7 +13,7 @@ namespace episteme::uci {
     int parse(const std::string& cmd, search::Config& cfg);
 
     auto uci();
-    // auto setOption(const std::string& args, search::Parameters params);
+    auto setOption(const std::string& args, search::Config& cfg);
     auto isready();
     auto position(const std::string& args, search::Config& cfg);
     auto go(const std::string& args, search::Config& cfg);
