@@ -18,6 +18,6 @@ namespace episteme::uci {
     auto position(const std::string& args, search::Parameters& params);
     auto go(const std::string& args, search::Parameters& params);
     auto ucinewgame(search::Parameters& params);
-    auto bench(const std::string& args, search::Parameters& params);
+    auto bench(const std::string& args);
     auto perft(const std::string& args, search::Parameters& params);
 }

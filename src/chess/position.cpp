@@ -11,7 +11,7 @@ namespace episteme {
 
         for (auto&& token : FEN | std::views::split(' ')) {
             if (i >= tokens.size()) break;
-            tokens[i++] = std::string(token.begin(), token.end());
+            tokens[i++] = std::string(std::ranges::begin(token), std::ranges::end(token));
         }
 
         size_t square_idx = 56;

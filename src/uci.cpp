@@ -71,7 +71,7 @@ namespace episteme::uci {
         params = {};
     }
     
-    auto bench(const std::string& args, search::Parameters& params) {
+    auto bench(const std::string& args) {
         int depth = (args.empty()) ? 5 : std::stoi(args);
     
         search::Thread thread;
@@ -100,7 +100,7 @@ namespace episteme::uci {
         else if (keyword == "bench") {
             size_t space = cmd.find(' ');
             std::string arg = (space != std::string::npos) ? cmd.substr(space+1) : "";
-            bench(arg, params);
+            bench(arg);
         }
         else if (keyword == "perft") {
             size_t space = cmd.find(' ');
