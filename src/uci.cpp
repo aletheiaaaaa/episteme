@@ -72,7 +72,7 @@ namespace episteme::uci {
     }
     
     auto bench(const std::string& args) {
-        int depth = (args.empty()) ? 5 : std::stoi(args);
+        int depth = (args.empty()) ? 4 : std::stoi(args);
     
         search::Thread thread;
         thread.bench(depth);
