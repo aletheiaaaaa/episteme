@@ -70,7 +70,7 @@ namespace episteme {
         position_history.push_back(state);
     }
 
-    void Position::from_start_pos() {
+    void Position::from_startpos() {
         state.bitboards[piece_type_idx(PieceType::Pawn)]   = 0x00FF00000000FF00;
         state.bitboards[piece_type_idx(PieceType::Knight)] = 0x4200000000000042;
         state.bitboards[piece_type_idx(PieceType::Bishop)] = 0x2400000000000024;
@@ -142,7 +142,7 @@ namespace episteme {
             state.full_move_number++;
         }
 
-        state.hash ^= zobrist::piecesquares[piecesquare(src, sq_src, false)] ^ zobrist::piecesquares[piecesquare(src, sq_dst, false)];
+        state.hash ^= zobrist::piecesquares[piecesquare(src, sq_src, false)];
 
         switch (move.move_type()) {
             case MoveType::Normal: {
@@ -165,10 +165,8 @@ namespace episteme {
 
                 if (piece_type(src) == PieceType::King) {
                     state.hash ^= zobrist::castling_rights[state.allowed_castles.as_mask()];
-
                     auto& rooks = state.allowed_castles.rooks[us];
                     rooks.clear();
-
                     state.hash ^= zobrist::castling_rights[state.allowed_castles.as_mask()];
                 } else if (piece_type(src) == PieceType::Rook) {
                     state.hash ^= zobrist::castling_rights[state.allowed_castles.as_mask()];
@@ -185,9 +183,10 @@ namespace episteme {
                     std::abs(sq_idx(sq_src) - sq_idx(sq_dst)) == DOUBLE_PUSH) {
                     int ep_offset = (side == Color::White) ? -8 : 8;
                     state.ep_square = sq_from_idx(sq_idx(sq_dst) + ep_offset);
-                    state.hash ^= zobrist::ep_files[file(sq_src)];
+                    state.hash ^= zobrist::ep_files[file(sq_dst)];
                 }
 
+                state.hash ^= zobrist::piecesquares[piecesquare(src, sq_dst, false)];
                 state.bitboards[piece_type_idx(piece_type(src))] ^= bb_src ^ bb_dst;
                 state.bitboards[us + COLOR_OFFSET] ^= bb_src ^ bb_dst;
                 dst = src;
@@ -208,6 +207,7 @@ namespace episteme {
 
                 state.hash ^= zobrist::piecesquares[piecesquare(rook_piece, rook_src, false)];
                 state.hash ^= zobrist::piecesquares[piecesquare(rook_piece, rook_dst, false)];
+                state.hash ^= zobrist::piecesquares[piecesquare(src, sq_dst, false)];
 
                 state.bitboards[piece_type_idx(PieceType::Rook)] ^= bb_rook_src ^ bb_rook_dst;
                 state.bitboards[us + COLOR_OFFSET] ^= bb_rook_src ^ bb_rook_dst;
@@ -234,6 +234,7 @@ namespace episteme {
 
                 Piece captured_pawn = piece_type_with_color(PieceType::Pawn, flip(side));
                 state.hash ^= zobrist::piecesquares[piecesquare(captured_pawn, sq_from_idx(capture_idx), false)];
+                state.hash ^= zobrist::piecesquares[piecesquare(src, sq_dst, false)];
 
                 state.bitboards[piece_type_idx(PieceType::Pawn)] ^= bb_src ^ bb_dst ^ bb_cap;
                 state.bitboards[us + COLOR_OFFSET] ^= bb_src ^ bb_dst;
@@ -260,7 +261,6 @@ namespace episteme {
                 state.bitboards[piece_type_idx(PieceType::Pawn)] ^= bb_src;
 
                 state.bitboards[us + COLOR_OFFSET] ^= bb_src ^ bb_dst;
-
                 dst = promo_piece;
 
                 break;

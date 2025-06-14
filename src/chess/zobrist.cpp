@@ -26,7 +26,7 @@ namespace episteme::zobrist {
         castling_rights[BLACK_KINGSIDE] = dist(gen);
         castling_rights[BLACK_QUEENSIDE] = dist(gen);
 
-        for (size_t i = 1; i < 16; i++) {
+        for (uint8_t i = 0; i < 16; i++) {
             if (std::popcount(i) < 2) continue;
 
             uint64_t delta = 0;
@@ -38,5 +38,7 @@ namespace episteme::zobrist {
 
             castling_rights[i] = delta;
         }
+
+        stm = dist(gen);
     }
 }

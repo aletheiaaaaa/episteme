@@ -85,7 +85,7 @@ namespace episteme {
             }
 
             void from_FEN(std::string_view FEN);
-            void from_start_pos();
+            void from_startpos();
 
             void make_move(const Move& move);
             void unmake_move();

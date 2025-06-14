@@ -40,7 +40,7 @@ namespace episteme::uci {
         iss >> token;
 
         if (token == "startpos") {
-            position.from_start_pos();
+            position.from_startpos();
 
         } else if (token == "fen") {    
             std::string fen;

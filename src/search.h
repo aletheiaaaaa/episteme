@@ -112,8 +112,8 @@ namespace episteme::search {
         public:
             Thread(tt::TTable& ttable) : ttable(ttable) {};
 
-            int32_t search(Position& position, Line& PV, int16_t depth, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end);
-            int32_t quiesce(Position& position, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end);
+            int32_t search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end);
+            int32_t quiesce(Position& position, int16_t ply, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end);
             ScoredLine run(const Parameters& params);
             void bench(int depth);
         private:
