@@ -1,6 +1,6 @@
 #pragma once
 
-#include "chess/move.h"
+#include "../chess/move.h"
 
 #include <cstdint>
 #include <vector>

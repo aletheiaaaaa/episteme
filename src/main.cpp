@@ -1,8 +1,8 @@
 #include "chess/movegen.h"
 #include "chess/perft.h"
-#include "search.h"
-#include "uci.h"
-#include "bench.h"
+#include "search/search.h"
+#include "search/bench.h"
+#include "uci/uci.h"
 
 #include <cstdint>
 #include <array>

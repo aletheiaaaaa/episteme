@@ -1,8 +1,8 @@
 #pragma once
 
-#include "chess/core.h"
-#include "chess/move.h"
-#include "chess/position.h"
+#include "../chess/core.h"
+#include "../chess/move.h"
+#include "../chess/position.h"
 
 #include <cstdint>
 #include <cmath>
