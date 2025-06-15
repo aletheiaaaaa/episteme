@@ -95,8 +95,8 @@ namespace episteme::search {
 
     struct Config {
         Parameters params = {};
-        uint32_t hash_size = 0;
-        uint16_t num_threads = 0;
+        uint32_t hash_size = 32;
+        uint16_t num_threads = 1;
     };
 
     struct Line {

@@ -198,7 +198,7 @@ namespace episteme::search {
 
     ThreadReport Thread::run(const Parameters& params) {
         int32_t final_score = -1;
-        Line final_PV = {};
+        Line PV = {};
 
         int64_t elapsed = 0;
         int64_t nps = 0;
@@ -220,13 +220,10 @@ namespace episteme::search {
             limits.max_nodes = target_nodes;
 
             for (int depth = 1; depth < MAX_SEARCH_PLY; depth++) {
-                Line PV = {};
-
                 int32_t score = search(position, PV, depth, 0, -INF, INF, limits);
                 if (limits.node_exceeded(nodes)) break;
 
                 final_score = score;
-                final_PV = PV;
                 search_depth = depth;
             };
 
@@ -236,7 +233,7 @@ namespace episteme::search {
         if (target_depth) {
             auto start = steady_clock::now();
 
-            final_score = search(position, final_PV, target_depth, 0, -INF, INF);
+            final_score = search(position, PV, target_depth, 0, -INF, INF);
 
             search_depth = target_depth;
             elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
@@ -250,13 +247,10 @@ namespace episteme::search {
             limits.end = end;
 
             for (int depth = 1; depth < MAX_SEARCH_PLY; depth++) {
-                Line PV = {};
-
                 int32_t score = search(position, PV, depth, 0, -INF, INF, limits);
                 if (limits.time_exceeded()) break;
 
                 final_score = score;
-                final_PV = PV;
                 search_depth = depth;
             };  
 
@@ -271,7 +265,7 @@ namespace episteme::search {
             .nodes = nodes,
             .nps = nps,
             .score = final_score,
-            .line = final_PV
+            .line = PV
         };
 
         return report;
