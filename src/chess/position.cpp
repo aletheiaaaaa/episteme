@@ -99,7 +99,7 @@ namespace episteme {
         state.allowed_castles.rooks[color_idx(Color::Black)].kingside  = Square::H8;
         state.allowed_castles.rooks[color_idx(Color::Black)].queenside = Square::A8;
 
-        state.hash = 0x827a1c765ff06ae9;
+        state.hash = 0x33dc8684cf354d4a;
 
         position_history.push_back(state);
     }
