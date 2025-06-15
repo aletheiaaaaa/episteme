@@ -15,7 +15,10 @@ using namespace episteme;
 
 int main(int argc, char *argv[]) {
     zobrist::init();
-    search::Config cfg = {};
+    search::Config cfg = {
+        .hash_size = 32,
+        .num_threads = 1
+    };
 
     if (argc > 1) {
         std::string cmd;

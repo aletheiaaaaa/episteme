@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../chess/movegen.h"
-#include "../evaluate/evaluate.h"
+#include "../evaluation/evaluate.h"
 #include "ttable.h"
 
 #include <cstdint>
@@ -69,9 +69,29 @@ namespace episteme::search {
     struct Parameters {
         std::array<int32_t, 2> time = {};
         std::array<int32_t, 2> inc = {};
-        
+
+        int16_t depth = 0;
+        uint64_t nodes = 0;
+
         Position position;
     };
+
+    struct SearchLimits {
+        std::optional<steady_clock::time_point> end;
+        std::optional<uint64_t> max_nodes;
+    
+        bool time_exceeded() const {
+            return end && steady_clock::now() >= *end;
+        }
+    
+        bool node_exceeded(uint64_t current_nodes) const {
+            return max_nodes && current_nodes >= *max_nodes;
+        }
+    
+        bool should_stop(uint64_t current_nodes) const {
+            return time_exceeded() || node_exceeded(current_nodes);
+        }
+    };    
 
     struct Config {
         Parameters params = {};
@@ -103,7 +123,11 @@ namespace episteme::search {
         }
     };
 
-    struct ScoredLine {
+    struct ThreadReport {
+        int16_t depth;
+        int64_t time;
+        uint64_t nodes;
+        int64_t nps;
         int32_t score;
         Line line;
     };
@@ -112,9 +136,9 @@ namespace episteme::search {
         public:
             Thread(tt::TTable& ttable) : ttable(ttable) {};
 
-            int32_t search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end);
-            int32_t quiesce(Position& position, int16_t ply, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end);
-            ScoredLine run(const Parameters& params);
+            int32_t search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
+            int32_t quiesce(Position& position, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
+            ThreadReport run(const Parameters& params);
             void bench(int depth);
         private:
             nn::Accumulator accumulator;

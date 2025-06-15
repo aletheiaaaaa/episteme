@@ -171,7 +171,8 @@ namespace episteme {
                 }
 
                 if (piece_type(src) == PieceType::Pawn &&
-                    std::abs(sq_idx(sq_src) - sq_idx(sq_dst)) == DOUBLE_PUSH) {
+                    std::abs(sq_idx(sq_src) - sq_idx(sq_dst)) == DOUBLE_PUSH
+                ) {
                     int ep_offset = (side == Color::White) ? -8 : 8;
                     state.ep_square = sq_from_idx(sq_idx(sq_dst) + ep_offset);
                     state.hash ^= zobrist::ep_files[file(sq_dst)];

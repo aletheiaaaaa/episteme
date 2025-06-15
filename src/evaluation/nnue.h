@@ -16,7 +16,7 @@ namespace episteme::nn {
     constexpr int16_t QB = 64;
     constexpr int16_t EVAL_SCALE = 400;
 
-    constexpr int L0_WIDTH = 1024;
+    constexpr int L1_WIDTH = 1024;
 
     struct Accumulator {
         alignas(32) std::array<int16_t, 1024> stm = {};
@@ -30,9 +30,9 @@ namespace episteme::nn {
             int32_t l1_forward(const Accumulator& accum) const; 
 
         private:
-            using L0Weights = std::array<std::array<int16_t, L0_WIDTH>, 768>;
-            using L0Biases = std::array<int16_t, L0_WIDTH>;
-            using L1Weights = std::array<std::array<int16_t, L0_WIDTH>, 2>;
+            using L0Weights = std::array<std::array<int16_t, L1_WIDTH>, 768>;
+            using L0Biases = std::array<int16_t, L1_WIDTH>;
+            using L1Weights = std::array<std::array<int16_t, L1_WIDTH>, 2>;
             using L1Bias = int16_t;
 
             alignas(32) L0Weights l0_weights;
