@@ -72,7 +72,6 @@ namespace episteme::search {
 
         ScoredList move_list = generate_scored_moves(position, tt_entry);
         int32_t best = -INF;
-        Line candidate = {};
         tt::NodeType node_type = tt::NodeType::AllNode;
 
         for (size_t i = 0; i < move_list.count(); i++) { 
@@ -93,6 +92,7 @@ namespace episteme::search {
 
             nodes++;
 
+            Line candidate = {};
             int32_t score = -search(position, candidate, depth - 1, ply + 1, -beta, -alpha, end);
 
             position.unmake_move();
