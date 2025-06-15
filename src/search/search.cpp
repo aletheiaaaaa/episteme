@@ -6,7 +6,7 @@ namespace episteme::search {
 
     void pick_move(ScoredList& scored_list, int start) {
         const ScoredMove& start_move = scored_list.list(start);
-        for (size_t i = start + 1; i <  scored_list.count(); i++)    {
+        for (size_t i = start + 1; i < scored_list.count(); i++)    {
             if (scored_list.list(i).score > start_move.score) {
                 scored_list.swap(start, i);
             }
@@ -77,6 +77,8 @@ namespace episteme::search {
         int32_t best = -INF;
         tt::NodeType node_type = tt::NodeType::AllNode;
 
+        MoveList explored_quiets = {};
+
         for (size_t i = 0; i < move_list.count(); i++) { 
             pick_move(move_list, i);
             Move move = move_list.list(i).move;
@@ -96,6 +98,8 @@ namespace episteme::search {
             }
 
             nodes++;
+            explored_quiets.add(move);
+
             if (limits.node_exceeded(nodes)) return 0;
 
             Line candidate = {};
@@ -120,6 +124,12 @@ namespace episteme::search {
                 if (score >= beta) {
                     if (is_quiet) {
                         history.update_butterfly(position.STM(), move, hist::history_bonus(depth));
+                        for (size_t i = 0; i < explored_quiets.count(); i++) {
+                            Move quiet = explored_quiets.list(i);
+
+                            if (quiet.data() == move.data()) continue;
+                            history.update_butterfly(position.STM(), move, -hist::history_bonus(depth));
+                        }
                     }
 
                     node_type = tt::NodeType::CutNode;
