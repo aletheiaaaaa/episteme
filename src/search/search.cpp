@@ -7,51 +7,54 @@ namespace episteme::search {
     void pick_move(ScoredList& scored_list, int start) {
         const ScoredMove& start_move = scored_list.list(start);
         for (size_t i = start + 1; i <  scored_list.count(); i++)    {
-            if (scored_list.list(i).mvv_lva > start_move.mvv_lva) {
+            if (scored_list.list(i).score > start_move.score) {
                 scored_list.swap(start, i);
             }
         }
-    }
-
-    template<typename F>
-    ScoredList generate_scored_targets(const Position& position, F generator, bool include_quiets, const std::optional<tt::TTEntry>& tt_entry) {
-        MoveList move_list;
-        generator(move_list, position);
-        ScoredList scored_list;
-
-        for (size_t i = 0; i < move_list.count(); i++) {
-            Move move = move_list.list(i);
-            bool from_tt = tt_entry && include_quiets && tt_entry->move.data() == move.data();
-
-            PieceType src = piece_type(position.mailbox(sq_idx(move.from_square())));
-            PieceType dst = piece_type(position.mailbox(sq_idx(move.to_square())));
-            int src_val;
-            int dst_val;
-
-            bool is_capture = !include_quiets || dst != PieceType::None;
-
-            src_val = piece_vals[piece_type_idx(src)];
-            if(is_capture) {
-                dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
-            } else {
-                dst_val = 0;
-            }
-
-            int mvv_lva = (dst_val) ? dst_val * 10 - src_val : 0;
-
-            scored_list.add({
-                .move = move,
-                .mvv_lva = from_tt ? 1000 : mvv_lva
-            });
-        }
-
-        return scored_list;
     }
 
     bool is_legal(const Position& position) {
         uint64_t kingBB = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(position.NTM()) + position.COLOR_OFFSET);
         return !is_square_attacked(sq_from_idx(std::countr_zero(kingBB)), position, position.STM());
     };
+
+    template<typename F>
+    ScoredList Thread::generate_scored_targets(const Position& position, F generator, bool include_quiets, const std::optional<tt::Entry>& tt_entry) {
+        MoveList move_list;
+        generator(move_list, position);
+        ScoredList scored_list;
+
+        for (size_t i = 0; i < move_list.count(); i++) {
+            scored_list.add(score_move(position, move_list.list(i), include_quiets, tt_entry));
+        }
+
+        return scored_list;
+    }
+
+    ScoredMove Thread::score_move(const Position& position, const Move& move, bool include_quiets, const std::optional<tt::Entry>& tt_entry) {
+        ScoredMove scored_move{.move = move};
+
+        if (include_quiets && tt_entry && tt_entry->move.data() == move.data()) {
+            scored_move.score = 1000000;
+            return scored_move;
+        }
+
+        Piece src = position.mailbox(sq_idx(move.from_square()));
+        Piece dst = position.mailbox(sq_idx(move.to_square()));
+
+        bool is_quiet = dst == Piece::None && move.move_type() != MoveType::EnPassant;
+
+        if (!is_quiet) {
+            int src_val = piece_vals[piece_type_idx(src)];
+            int dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
+
+            scored_move.score += dst_val * 10 - src_val + 100000;
+        } else {
+            scored_move.score += history.get_butterfly(position.STM(), move).value;
+        }
+
+        return scored_move;
+    }
 
     int32_t Thread::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits = {}) {
         if (limits.time_exceeded()) return 0;
@@ -60,7 +63,7 @@ namespace episteme::search {
             return quiesce(position, ply + 1, alpha, beta, limits);
         }
 
-        tt::TTEntry tt_entry = ttable.probe(position.zobrist());
+        tt::Entry tt_entry = ttable.probe(position.zobrist());
         if (ply > 0 && (tt_entry.depth >= depth
             && ((tt_entry.node_type == tt::NodeType::PVNode)
                 || (tt_entry.node_type == tt::NodeType::AllNode && tt_entry.score <= alpha)
@@ -77,6 +80,8 @@ namespace episteme::search {
         for (size_t i = 0; i < move_list.count(); i++) { 
             pick_move(move_list, i);
             Move move = move_list.list(i).move;
+
+            bool is_quiet = move.move_type() != MoveType::EnPassant && position.mailbox(sq_idx(move.to_square())) != Piece::None;
 
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
@@ -113,6 +118,10 @@ namespace episteme::search {
                 PV.update_line(move, candidate);
 
                 if (score >= beta) {
+                    if (is_quiet) {
+                        history.update_butterfly(position.STM(), move, hist::history_bonus(depth));
+                    }
+
                     node_type = tt::NodeType::CutNode;
                     break;
                 }

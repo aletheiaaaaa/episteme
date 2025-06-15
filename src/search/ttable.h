@@ -12,7 +12,7 @@ namespace episteme::tt {
         PVNode, AllNode, CutNode, None
     };
 
-    struct TTEntry {
+    struct Entry {
         uint64_t hash = 0; 
         Move move = {};
         int32_t score = 0;
@@ -20,17 +20,17 @@ namespace episteme::tt {
         NodeType node_type = NodeType::None;
     };
 
-    class TTable {
+    class Table {
         public:
-            TTable(uint32_t size);
+            Table(uint32_t size);
 
             [[nodiscard]] inline uint64_t table_index(uint64_t hash) {
                 return static_cast<uint64_t>((static_cast<unsigned __int128>(hash) * static_cast<unsigned __int128>(ttable.size())) >> 64);
             }
 
-            [[nodiscard]] inline TTEntry probe(uint64_t hash) {
+            [[nodiscard]] inline Entry probe(uint64_t hash) {
                 uint64_t index = table_index(hash);
-                TTEntry entry;
+                Entry entry;
 
                 if (ttable[index].hash == hash) entry = ttable[index];
 
@@ -41,11 +41,11 @@ namespace episteme::tt {
                 ttable.clear();
             }
 
-            inline void add(TTEntry tt_entry) {
+            inline void add(Entry tt_entry) {
                 uint64_t index = table_index(tt_entry.hash);
                 ttable[index] = tt_entry;
             }
         private:
-            std::vector<TTEntry> ttable;
+            std::vector<Entry> ttable;
     };
 }
