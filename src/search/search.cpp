@@ -128,7 +128,7 @@ namespace episteme::search {
                             Move quiet = explored_quiets.list(i);
 
                             if (quiet.data() == move.data()) continue;
-                            history.update_butterfly(position.STM(), move, -hist::history_bonus(depth));
+                            history.update_butterfly(position.STM(), quiet, -hist::history_bonus(depth));
                         }
                     }
 
