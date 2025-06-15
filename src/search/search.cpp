@@ -81,7 +81,7 @@ namespace episteme::search {
             pick_move(move_list, i);
             Move move = move_list.list(i).move;
 
-            bool is_quiet = move.move_type() != MoveType::EnPassant && position.mailbox(sq_idx(move.to_square())) != Piece::None;
+            bool is_quiet = move.move_type() != MoveType::EnPassant && position.mailbox(sq_idx(move.to_square())) == Piece::None;
 
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
