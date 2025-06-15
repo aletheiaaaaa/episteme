@@ -6,7 +6,7 @@
 #include <array>
 
 namespace episteme {
-    constexpr std::array<int, 6> piece_vals = {0, 3, 3, 5, 9, -1}; 
+    constexpr std::array<int, 6> piece_vals = {1, 3, 3, 5, 9, -1}; 
 
     constexpr uint8_t WHITE_KINGSIDE = 1;
     constexpr uint8_t WHITE_QUEENSIDE = 1 << 1;
