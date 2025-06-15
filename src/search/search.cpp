@@ -218,12 +218,12 @@ namespace episteme::search {
         if (target_nodes) {
             auto start = steady_clock::now();
 
-            Line PV = {};
-
             SearchLimits limits;
             limits.max_nodes = target_nodes;
 
             for (int depth = 1; depth < MAX_SEARCH_PLY; depth++) {
+                Line PV = {};
+
                 int32_t score = search(position, PV, depth, 0, -INF, INF, limits);
                 if (limits.node_exceeded(nodes)) break;
 
@@ -244,16 +244,16 @@ namespace episteme::search {
             elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
         }
 
-        if (time && inc) {
+        if (time) {
             auto start = steady_clock::now();
             auto end = start + milliseconds(time / 20 + inc / 2);
-
-            Line PV = {};
 
             SearchLimits limits;
             limits.end = end;
 
             for (int depth = 1; depth < MAX_SEARCH_PLY; depth++) {
+                Line PV = {};
+
                 int32_t score = search(position, PV, depth, 0, -INF, INF, limits);
                 if (limits.time_exceeded()) break;
 
