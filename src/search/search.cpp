@@ -42,9 +42,9 @@ namespace episteme::search {
         Piece src = position.mailbox(sq_idx(move.from_square()));
         Piece dst = position.mailbox(sq_idx(move.to_square()));
 
-        bool is_quiet = dst == Piece::None && move.move_type() != MoveType::EnPassant;
+        bool is_capture = dst != Piece::None || move.move_type() == MoveType::EnPassant;
 
-        if (!is_quiet) {
+        if (is_capture) {
             int src_val = piece_vals[piece_type_idx(src)];
             int dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
 

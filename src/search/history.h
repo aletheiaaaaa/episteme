@@ -26,7 +26,7 @@ namespace episteme::hist {
             }
 
             inline void update_butterfly(Color stm, Move move, int16_t bonus) {
-                get_butterfly(stm, move).update(bonus);
+                butterfly[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())].update(bonus);
             }
 
         private:
