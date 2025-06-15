@@ -205,8 +205,6 @@ namespace episteme::search {
         int16_t search_depth = 0;
 
         Position position = params.position;
-        accumulator = eval::reset(position);
-        accum_history.emplace_back(accumulator);
 
         int16_t target_depth = params.depth;
         uint64_t target_nodes = params.nodes;
