@@ -53,11 +53,11 @@ namespace episteme::search {
         return !is_square_attacked(sq_from_idx(std::countr_zero(kingBB)), position, position.STM());
     };
 
-    int32_t Thread::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end = std::nullopt) {
-        if (end && steady_clock::now() >= *end) return 0;
+    int32_t Thread::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits = {}) {
+        if (limits.time_exceeded()) return 0;
 
         if (depth <= 0) {
-            return quiesce(position, ply + 1, alpha, beta, end);
+            return quiesce(position, ply + 1, alpha, beta, limits);
         }
 
         tt::TTEntry tt_entry = ttable.probe(position.zobrist());
@@ -91,15 +91,16 @@ namespace episteme::search {
             }
 
             nodes++;
+            if (limits.node_exceeded(nodes)) return 0;
 
             Line candidate = {};
-            int32_t score = -search(position, candidate, depth - 1, ply + 1, -beta, -alpha, end);
+            int32_t score = -search(position, candidate, depth - 1, ply + 1, -beta, -alpha, limits);
 
             position.unmake_move();
             accum_history.pop_back();
             accumulator = accum_history.back();
             
-            if (end && steady_clock::now() >= *end) return 0;
+            if (limits.time_exceeded()) return 0;
             
             if (score > best) {
                 best = score;
@@ -129,8 +130,8 @@ namespace episteme::search {
         return best;
     }
 
-    int32_t Thread::quiesce(Position& position, int16_t ply, int32_t alpha, int32_t beta, std::optional<steady_clock::time_point> end) {
-        if (end && steady_clock::now() >= *end) return 0;
+    int32_t Thread::quiesce(Position& position, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
+        if (limits.time_exceeded()) return 0;
         
         int32_t eval = eval::evaluate(accumulator);
 
@@ -169,14 +170,15 @@ namespace episteme::search {
             }
 
             nodes++;
+            if (limits.node_exceeded(nodes)) return 0;
 
-            int32_t score = -quiesce(position, ply + 1, -beta, -alpha, end);
+            int32_t score = -quiesce(position, ply + 1, -beta, -alpha, limits);
 
             position.unmake_move();
             accum_history.pop_back();
             accumulator = accum_history.back();
             
-            if (end && steady_clock::now() >= *end) return 0;
+            if (limits.time_exceeded()) return 0;
 
             if (score > best) {
                 best = score;
@@ -194,31 +196,87 @@ namespace episteme::search {
         return best;
     }
 
-    ScoredLine Thread::run(const Parameters& params) {
-        int32_t result = -1;
-        Line PV = {};
+    ThreadReport Thread::run(const Parameters& params) {
+        int32_t final_score = -1;
+        Line final_PV = {};
+
+        int64_t elapsed = 0;
+        int64_t nps = 0;
+        int16_t search_depth = 0;
 
         Position position = params.position;
         accumulator = eval::reset(position);
         accum_history.emplace_back(accumulator);
 
+        int16_t target_depth = params.depth;
+        uint64_t target_nodes = params.nodes;
         int32_t time = params.time[color_idx(position.STM())];
         int32_t inc = params.inc[color_idx(position.STM())];
 
-        auto start = steady_clock::now();
-        auto end = start + milliseconds(time / 20 + inc / 2);
+        nodes = 0;
 
-        for (int depth = 1; depth < MAX_SEARCH_PLY; depth++) {
-            if (steady_clock::now() >= end) break;
-            result = search(position, PV, depth, 0, -INF, INF, end);
+        if (target_nodes) {
+            auto start = steady_clock::now();
+
+            SearchLimits limits;
+            limits.max_nodes = target_nodes;
+
+            for (int depth = 1; depth < MAX_SEARCH_PLY; depth++) {
+                Line PV = {};
+
+                int32_t score = search(position, PV, depth, 0, -INF, INF, limits);
+                if (limits.node_exceeded(nodes)) break;
+
+                final_score = score;
+                final_PV = PV;
+                search_depth = depth;
+            };
+
+            elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
+        }
+
+        if (target_depth) {
+            auto start = steady_clock::now();
+
+            final_score = search(position, final_PV, target_depth, 0, -INF, INF);
+
+            search_depth = target_depth;
+            elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
+        }
+
+        if (time) {
+            auto start = steady_clock::now();
+            auto end = start + milliseconds(time / 20 + inc / 2);
+
+            SearchLimits limits;
+            limits.end = end;
+
+            for (int depth = 1; depth < MAX_SEARCH_PLY; depth++) {
+                Line PV = {};
+
+                int32_t score = search(position, PV, depth, 0, -INF, INF, limits);
+                if (limits.time_exceeded()) break;
+
+                final_score = score;
+                final_PV = PV;
+                search_depth = depth;
+            };  
+
+            elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
+        }
+
+        nps = (elapsed > 0) ? (1000 * nodes) / elapsed : nodes;
+
+        ThreadReport report {
+            .depth = search_depth,
+            .time = elapsed,
+            .nodes = nodes,
+            .nps = nps,
+            .score = final_score,
+            .line = final_PV
         };
 
-        ScoredLine scored_line = {
-            .score = result,
-            .line = PV
-        };
-
-        return scored_line;
+        return report;
     }
 
     void Thread::bench(int depth) {
@@ -242,10 +300,24 @@ namespace episteme::search {
             total += nodes;
         }
 
-        std::cout << total << " nodes " << 1000 * total / elapsed.count() << " nps" << std::endl;    }
+        int64_t nps = elapsed.count() > 0 ? 1000 * total / elapsed.count() : 0;
+        std::cout << total << " nodes " << nps << " nps" << std::endl;    }
 
     void Instance::run() {
-        ScoredLine variation = thread.run(params);
+        ThreadReport variation = thread.run(params);
+
+        std::cout << "info depth " << variation.depth 
+            << " time " << variation.time 
+            << " nodes " << variation.nodes 
+            << " nps " << variation.nps
+            << " score cp " << variation.score
+            << " pv ";
+
+        for (size_t i = 0; i < variation.line.length; i++) {
+            std::cout << variation.line.moves[i].to_string() << " ";
+        }
+        std::cout << std::endl;
+
         Move best = variation.line.moves[0];
         std::cout << "bestmove " << best.to_string() << std::endl;
     }
@@ -253,5 +325,4 @@ namespace episteme::search {
     void Instance::bench(int depth) {
         thread.bench(depth);
     }
-
 }
