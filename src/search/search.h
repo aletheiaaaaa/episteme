@@ -87,10 +87,6 @@ namespace episteme::search {
         bool node_exceeded(uint64_t current_nodes) const {
             return max_nodes && current_nodes >= *max_nodes;
         }
-    
-        bool should_stop(uint64_t current_nodes) const {
-            return time_exceeded() || node_exceeded(current_nodes);
-        }
     };    
 
     struct Config {
