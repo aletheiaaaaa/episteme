@@ -99,7 +99,7 @@ namespace episteme {
         state.allowed_castles.rooks[color_idx(Color::Black)].kingside  = Square::H8;
         state.allowed_castles.rooks[color_idx(Color::Black)].queenside = Square::A8;
 
-        state.hash = 0x827a1c765ff06ae9;
+        state.hash = 0x33dc8684cf354d4a;
 
         position_history.push_back(state);
     }
@@ -171,7 +171,8 @@ namespace episteme {
                 }
 
                 if (piece_type(src) == PieceType::Pawn &&
-                    std::abs(sq_idx(sq_src) - sq_idx(sq_dst)) == DOUBLE_PUSH) {
+                    std::abs(sq_idx(sq_src) - sq_idx(sq_dst)) == DOUBLE_PUSH
+                ) {
                     int ep_offset = (side == Color::White) ? -8 : 8;
                     state.ep_square = sq_from_idx(sq_idx(sq_dst) + ep_offset);
                     state.hash ^= zobrist::ep_files[file(sq_dst)];
