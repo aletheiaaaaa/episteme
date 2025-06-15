@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../chess/movegen.h"
-#include "../evaluate/evaluate.h"
+#include "../evaluation/evaluate.h"
 #include "ttable.h"
 
 #include <cstdint>
