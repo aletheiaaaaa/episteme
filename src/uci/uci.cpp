@@ -72,6 +72,8 @@ namespace episteme::uci {
             else if (token == "btime" && iss >> token) cfg.params.time[1] = std::stoi(token);
             else if (token == "winc" && iss >> token) cfg.params.inc[0] = std::stoi(token);
             else if (token == "binc" && iss >> token) cfg.params.inc[1] = std::stoi(token);
+            else if (token == "depth" && iss >> token) cfg.params.depth = std::stoi(token);
+            else if (token == "nodes" && iss >> token) cfg.params.nodes = std::stoi(token);
             else {
                 std::cout << "invalid command\n"; 
                 break;
