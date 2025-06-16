@@ -1,8 +1,6 @@
 #include "search.h"
 #include "bench.h"
 
-#include <cassert>
-
 namespace episteme::search {
     using namespace std::chrono;
 
