@@ -121,6 +121,8 @@ namespace episteme::search {
             }
         };
 
+        if (num_legal == 0) return in_check(position, position.STM()) ? (-MATE + ply) : 0;
+
         ttable.add({
             .hash = position.zobrist(),
             .move = PV.moves[0],
