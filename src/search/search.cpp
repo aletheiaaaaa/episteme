@@ -1,6 +1,8 @@
 #include "search.h"
 #include "bench.h"
 
+#include <cassert>
+
 namespace episteme::search {
     using namespace std::chrono;
 
@@ -121,6 +123,10 @@ namespace episteme::search {
             }
         };
 
+        if (num_legal == 0) {
+            return in_check(position, position.STM()) ? (-MATE + ply) : 0;
+        }
+
         ttable.add({
             .hash = position.zobrist(),
             .move = PV.moves[0],
@@ -128,10 +134,6 @@ namespace episteme::search {
             .depth = static_cast<uint8_t>(depth),
             .node_type = node_type
         });
-
-        if (num_legal == 0) {
-            return in_check(position, position.STM()) ? (-MATE + ply) : 0;
-        }
 
         return best;
     }
@@ -309,7 +311,7 @@ namespace episteme::search {
         bool is_mate = std::abs(variation.score) >= MATE - MAX_SEARCH_PLY;
 
         int32_t score = (is_mate)
-            ? (MATE - std::abs(variation.score)) * (variation.score > 0 ? 1 : -1)
+            ? ((1 + MATE - std::abs(variation.score)) / 2) * (variation.score > 0 ? 1 : -1)
             : variation.score;
 
         std::cout << "info depth " << variation.depth 
