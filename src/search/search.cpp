@@ -1,8 +1,6 @@
 #include "search.h"
 #include "bench.h"
 
-#include <cassert>
-
 namespace episteme::search {
     using namespace std::chrono;
 
@@ -43,7 +41,7 @@ namespace episteme::search {
 
             scored_list.add({
                 .move = move,
-                .mvv_lva = mvv_lva
+                .mvv_lva = from_tt ? 1000 : mvv_lva
             });
         }
 
