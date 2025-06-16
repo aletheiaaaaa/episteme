@@ -13,8 +13,8 @@
 namespace episteme::search {
     using namespace std::chrono;
 
-    constexpr int32_t INF = 65535;
-    constexpr int32_t MATE = 65534;
+    constexpr int32_t INF = 1048576;
+    constexpr int32_t MATE = 1048575;
     constexpr int MAX_SEARCH_PLY = 256;
 
     // BEGIN MOVEPICKING //
