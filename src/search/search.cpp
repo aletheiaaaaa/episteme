@@ -56,6 +56,8 @@ namespace episteme::search {
     int32_t Thread::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits = {}) {
         if (limits.time_exceeded()) return 0;
 
+        if (position.is_threefold()) return 0;
+
         if (depth <= 0) {
             return quiesce(position, ply + 1, alpha, beta, limits);
         }
@@ -93,6 +95,7 @@ namespace episteme::search {
 
             nodes++;
             num_legal++;
+
             if (limits.node_exceeded(nodes)) return 0;
 
             Line candidate = {};
@@ -299,7 +302,8 @@ namespace episteme::search {
         }
 
         int64_t nps = elapsed.count() > 0 ? 1000 * total / elapsed.count() : 0;
-        std::cout << total << " nodes " << nps << " nps" << std::endl;    }
+        std::cout << total << " nodes " << nps << " nps" << std::endl;
+    }
 
     void Instance::run() {
         ThreadReport variation = thread.run(params);

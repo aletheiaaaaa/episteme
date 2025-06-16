@@ -272,6 +272,17 @@ namespace episteme {
         state = prev;
     }
 
+    bool Position::is_threefold() {
+        uint8_t rep_counter = 0;
+        for (PositionState prev_state : position_history) {
+            if (prev_state.hash == state.hash) {
+                rep_counter++;
+                if (rep_counter == 3) return true;
+            }
+        }
+        return false;
+    }
+
     std::string Position::to_fEN() const {
         std::string fen;
     
