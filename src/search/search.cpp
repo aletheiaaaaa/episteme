@@ -48,9 +48,9 @@ namespace episteme::search {
         return scored_list;
     }
 
-    bool in_check(const Position& position) {
-        uint64_t kingBB = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(position.NTM()) + position.COLOR_OFFSET);
-        return is_square_attacked(sq_from_idx(std::countr_zero(kingBB)), position, position.STM());
+    bool in_check(const Position& position, Color color) {
+        uint64_t kingBB = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(color) + position.COLOR_OFFSET);
+        return is_square_attacked(sq_from_idx(std::countr_zero(kingBB)), position, flip(color));
     };
 
     int32_t Thread::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits = {}) {
@@ -83,7 +83,7 @@ namespace episteme::search {
             accum_history.emplace_back(accumulator);
             position.make_move(move);
 
-            if (in_check(position)) {
+            if (in_check(position, position.NTM())) {
                 position.unmake_move();
                 accum_history.pop_back();
                 accumulator = accum_history.back();
@@ -121,10 +121,6 @@ namespace episteme::search {
             }
         };
 
-        if (num_legal == 0) {
-            return in_check(position) ? (-MATE + ply) : 0;
-        }
-
         ttable.add({
             .hash = position.zobrist(),
             .move = PV.moves[0],
@@ -132,6 +128,10 @@ namespace episteme::search {
             .depth = static_cast<uint8_t>(depth),
             .node_type = node_type
         });
+
+        if (num_legal == 0) {
+            return in_check(position, position.STM()) ? (-MATE + ply) : 0;
+        }
 
         return best;
     }
@@ -167,7 +167,7 @@ namespace episteme::search {
             accum_history.emplace_back(accumulator);
             position.make_move(move);
 
-            if (in_check(position)) {
+            if (in_check(position, position.NTM())) {
                 position.unmake_move();
                 accum_history.pop_back();
                 accumulator = accum_history.back();
