@@ -8,7 +8,7 @@ namespace episteme::hist {
     constexpr int MAX_HISTORY = 16384;
 
     [[nodiscard]] inline int16_t history_bonus(int16_t depth) {
-        return static_cast<int16_t>(std::clamp(depth * 300, 0, 2000));
+        return static_cast<int16_t>(std::clamp(depth * 300- 300, 0, 2500));
     }
 
     struct Entry {
@@ -21,7 +21,7 @@ namespace episteme::hist {
 
     class Table {
         public:
-            [[nodiscard]] inline Entry get_butterfly(Color stm, Move move) {
+            [[nodiscard]] inline Entry& get_butterfly(Color stm, Move move) {
                 return butterfly[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())];
             }
 

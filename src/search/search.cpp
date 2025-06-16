@@ -50,7 +50,7 @@ namespace episteme::search {
 
             scored_move.score += dst_val * 10 - src_val + 100000;
         } else {
-            scored_move.score += history.get_butterfly(position.STM(), move).value;
+            // scored_move.score += history.get_butterfly(position.STM(), move).value;
         }
 
         return scored_move;
