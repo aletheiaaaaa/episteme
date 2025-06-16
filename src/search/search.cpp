@@ -133,7 +133,7 @@ namespace episteme::search {
             .node_type = node_type
         });
 
-        return std::clamp(best, -MATE + MAX_SEARCH_PLY, MATE - MAX_SEARCH_PLY);
+        return best;
     }
 
     int32_t Thread::quiesce(Position& position, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
