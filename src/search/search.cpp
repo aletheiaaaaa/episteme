@@ -48,9 +48,9 @@ namespace episteme::search {
         return scored_list;
     }
 
-    bool is_legal(const Position& position) {
+    bool in_check(const Position& position) {
         uint64_t kingBB = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(position.NTM()) + position.COLOR_OFFSET);
-        return !is_square_attacked(sq_from_idx(std::countr_zero(kingBB)), position, position.STM());
+        return is_square_attacked(sq_from_idx(std::countr_zero(kingBB)), position, position.STM());
     };
 
     int32_t Thread::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits = {}) {
@@ -73,6 +73,7 @@ namespace episteme::search {
         ScoredList move_list = generate_scored_moves(position, tt_entry);
         int32_t best = -INF;
         tt::NodeType node_type = tt::NodeType::AllNode;
+        uint32_t num_legal = 0;
 
         for (size_t i = 0; i < move_list.count(); i++) { 
             pick_move(move_list, i);
@@ -82,7 +83,7 @@ namespace episteme::search {
             accum_history.emplace_back(accumulator);
             position.make_move(move);
 
-            if (!is_legal(position)) {
+            if (in_check(position)) {
                 position.unmake_move();
                 accum_history.pop_back();
                 accumulator = accum_history.back();
@@ -91,6 +92,7 @@ namespace episteme::search {
             }
 
             nodes++;
+            num_legal++;
             if (limits.node_exceeded(nodes)) return 0;
 
             Line candidate = {};
@@ -119,6 +121,10 @@ namespace episteme::search {
             }
         };
 
+        if (num_legal == 0) {
+            return in_check(position) ? (-MATE + ply) : 0;
+        }
+
         ttable.add({
             .hash = position.zobrist(),
             .move = PV.moves[0],
@@ -127,7 +133,7 @@ namespace episteme::search {
             .node_type = node_type
         });
 
-        return best;
+        return std::clamp(best, -MATE + MAX_SEARCH_PLY, MATE - MAX_SEARCH_PLY);
     }
 
     int32_t Thread::quiesce(Position& position, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
@@ -161,7 +167,7 @@ namespace episteme::search {
             accum_history.emplace_back(accumulator);
             position.make_move(move);
 
-            if (!is_legal(position)) {
+            if (in_check(position)) {
                 position.unmake_move();
                 accum_history.pop_back();
                 accumulator = accum_history.back();
@@ -300,11 +306,17 @@ namespace episteme::search {
     void Instance::run() {
         ThreadReport variation = thread.run(params);
 
+        bool is_mate = std::abs(variation.score) >= MATE - MAX_SEARCH_PLY;
+
+        int32_t score = (is_mate)
+            ? (MATE - std::abs(variation.score)) * (variation.score > 0 ? 1 : -1)
+            : variation.score;
+
         std::cout << "info depth " << variation.depth 
             << " time " << variation.time 
             << " nodes " << variation.nodes 
             << " nps " << variation.nps
-            << " score cp " << variation.score
+            << " score " << (is_mate ? "mate " : "cp ") << score
             << " pv ";
 
         for (size_t i = 0; i < variation.line.length; i++) {
