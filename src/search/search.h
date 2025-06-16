@@ -53,17 +53,6 @@ namespace episteme::search {
             int the_count = 0;
     };
 
-    template<typename F>
-    extern ScoredList generate_scored_targets(const Position& position, F generator, int16_t depth = -1, const std::optional<tt::Entry>& tt_entry = std::nullopt);
-
-    inline ScoredList generate_scored_moves(const Position& position, int16_t depth, const tt::Entry& tt_entry) {
-        return generate_scored_targets(position, generate_all_moves, depth, tt_entry);
-    }
-
-    inline ScoredList generate_scored_captures(const Position& position) {
-        return generate_scored_targets(position, generate_all_captures);
-    }
-
     void pick_move(ScoredList& scored_list, int start);
 
     // BEGIN SEARCH //
