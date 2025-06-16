@@ -1,6 +1,8 @@
 #include "search.h"
 #include "bench.h"
 
+#include <cassert>
+
 namespace episteme::search {
     using namespace std::chrono;
 
@@ -41,7 +43,7 @@ namespace episteme::search {
 
             scored_list.add({
                 .move = move,
-                .mvv_lva = from_tt ? 1000 : mvv_lva
+                .mvv_lva = mvv_lva
             });
         }
 
@@ -59,6 +61,8 @@ namespace episteme::search {
         if (depth <= 0) {
             return quiesce(position, ply + 1, alpha, beta, limits);
         }
+
+        if (position.is_threefold()) return 0;
 
         tt::TTEntry tt_entry = ttable.probe(position.zobrist());
         if (ply > 0 && (tt_entry.depth >= depth
@@ -83,7 +87,7 @@ namespace episteme::search {
             accum_history.emplace_back(accumulator);
             position.make_move(move);
 
-            if (in_check(position, position.NTM())|| position.is_threefold()) {
+            if (in_check(position, position.NTM())) {
                 position.unmake_move();
                 accum_history.pop_back();
                 accumulator = accum_history.back();
