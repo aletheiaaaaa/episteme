@@ -60,6 +60,8 @@ namespace episteme::search {
             return quiesce(position, ply + 1, alpha, beta, limits);
         }
 
+        if (position.is_threefold()) return 0;
+
         tt::TTEntry tt_entry = ttable.probe(position.zobrist());
         if (ply > 0 && (tt_entry.depth >= depth
             && ((tt_entry.node_type == tt::NodeType::PVNode)
@@ -93,6 +95,7 @@ namespace episteme::search {
 
             nodes++;
             num_legal++;
+
             if (limits.node_exceeded(nodes)) return 0;
 
             Line candidate = {};
@@ -121,9 +124,7 @@ namespace episteme::search {
             }
         };
 
-        if (num_legal == 0) {
-            return in_check(position, position.STM()) ? (-MATE + ply) : 0;
-        }
+        if (num_legal == 0) return in_check(position, position.STM()) ? (-MATE + ply) : 0;
 
         ttable.add({
             .hash = position.zobrist(),

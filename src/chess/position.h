@@ -90,6 +90,8 @@ namespace episteme {
             void make_move(const Move& move);
             void unmake_move();
 
+            bool is_threefold();
+
             std::string to_fEN() const; 
             uint64_t explicit_zobrist();
         public:
