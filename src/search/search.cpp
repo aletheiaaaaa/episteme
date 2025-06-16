@@ -60,8 +60,6 @@ namespace episteme::search {
             return quiesce(position, ply + 1, alpha, beta, limits);
         }
 
-        if (position.is_threefold()) return 0;
-
         tt::TTEntry tt_entry = ttable.probe(position.zobrist());
         if (ply > 0 && (tt_entry.depth >= depth
             && ((tt_entry.node_type == tt::NodeType::PVNode)
@@ -95,6 +93,8 @@ namespace episteme::search {
 
             nodes++;
             num_legal++;
+
+            if (position.is_threefold()) return 0;
 
             if (limits.node_exceeded(nodes)) return 0;
 
