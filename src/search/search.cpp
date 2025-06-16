@@ -1,8 +1,6 @@
 #include "search.h"
 #include "bench.h"
 
-#include <cassert>
-
 namespace episteme::search {
     using namespace std::chrono;
 
@@ -122,10 +120,6 @@ namespace episteme::search {
                 }
             }
         };
-
-        if (num_legal == 0) {
-            return in_check(position, position.STM()) ? (-MATE + ply) : 0;
-        }
 
         ttable.add({
             .hash = position.zobrist(),

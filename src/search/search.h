@@ -158,5 +158,5 @@ namespace episteme::search {
             Thread thread;
     };
 
-    bool in_check(const Position& position, Color stm);
+    bool in_check(const Position& position, Color color);
 }
