@@ -28,7 +28,7 @@ namespace episteme::search {
             int src_val;
             int dst_val;
 
-            bool is_capture = move.move_type() == MoveType::EnPassant || dst != PieceType::None;
+            bool is_capture = !include_quiets || move.move_type() == MoveType::EnPassant || dst != PieceType::None;
 
             src_val = piece_vals[piece_type_idx(src)];
             if(is_capture) {
