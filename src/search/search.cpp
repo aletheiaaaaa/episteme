@@ -83,7 +83,7 @@ namespace episteme::search {
             accum_history.emplace_back(accumulator);
             position.make_move(move);
 
-            if (in_check(position, position.NTM())) {
+            if (in_check(position, position.NTM())|| position.is_threefold()) {
                 position.unmake_move();
                 accum_history.pop_back();
                 accumulator = accum_history.back();
@@ -93,8 +93,6 @@ namespace episteme::search {
 
             nodes++;
             num_legal++;
-
-            if (position.is_threefold()) return 0;
 
             if (limits.node_exceeded(nodes)) return 0;
 
