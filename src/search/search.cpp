@@ -59,8 +59,6 @@ namespace episteme::search {
     int32_t Thread::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits = {}) {
         if (limits.time_exceeded()) return 0;
 
-        if (position.is_threefold()) return 0;
-
         if (depth <= 0) {
             return quiesce(position, ply + 1, alpha, beta, limits);
         }
