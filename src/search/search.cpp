@@ -5,9 +5,8 @@ namespace episteme::search {
     using namespace std::chrono;
 
     void pick_move(ScoredList& scored_list, int start) {
-        const ScoredMove& start_move = scored_list.list(start);
         for (size_t i = start + 1; i <  scored_list.count(); i++)    {
-            if (scored_list.list(i).score > start_move.score) {
+            if (scored_list.list(i).score > scored_list.list(start).score) {
                 scored_list.swap(start, i);
             }
         }
