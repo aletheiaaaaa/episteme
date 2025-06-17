@@ -2,6 +2,7 @@
 
 #include "../chess/movegen.h"
 #include "../evaluation/evaluate.h"
+#include "history.h"
 #include "ttable.h"
 
 #include <cstdint>
@@ -20,8 +21,8 @@ namespace episteme::search {
     // BEGIN MOVEPICKING //
 
     struct ScoredMove {
-        Move move;
-        int mvv_lva = 0;
+        Move move = {};
+        int score = 0;
     };
 
     class ScoredList {
@@ -51,17 +52,6 @@ namespace episteme::search {
             std::array<ScoredMove, 256> the_list;
             int the_count = 0;
     };
-
-    template<typename F>
-    extern ScoredList generate_scored_targets(const Position& position, F generator, bool include_quiets, const std::optional<tt::TTEntry>& tt_entry = std::nullopt);
-
-    inline ScoredList generate_scored_moves(const Position& position, const tt::TTEntry& tt_entry) {
-        return generate_scored_targets(position, generate_all_moves, true, tt_entry);
-    }
-
-    inline ScoredList generate_scored_captures(const Position& position) {
-        return generate_scored_targets(position, generate_all_captures, false);
-    }
 
     void pick_move(ScoredList& scored_list, int start);
 
@@ -131,7 +121,20 @@ namespace episteme::search {
 
     class Thread {
         public:
-            Thread(tt::TTable& ttable) : ttable(ttable) {};
+            Thread(tt::Table& ttable) : ttable(ttable) {};
+
+            ScoredMove score_move(const Position& position, const Move& move, bool include_quiets, const std::optional<tt::Entry>& tt_entry = std::nullopt);
+
+            template<typename F>
+            ScoredList generate_scored_targets(const Position& position, F generator, bool include_quiets, const std::optional<tt::Entry>& tt_entry = std::nullopt);
+
+            inline ScoredList generate_scored_moves(const Position& position, const tt::Entry& tt_entry) {
+                return generate_scored_targets(position, generate_all_moves, true, tt_entry);
+            }
+        
+            inline ScoredList generate_scored_captures(const Position& position) {
+                return generate_scored_targets(position, generate_all_captures, false);
+            }
 
             int32_t search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
             int32_t quiesce(Position& position, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
@@ -141,7 +144,8 @@ namespace episteme::search {
             nn::Accumulator accumulator;
             std::vector<nn::Accumulator> accum_history;
 
-            tt::TTable& ttable;
+            tt::Table& ttable;
+            hist::Table history;
             uint64_t nodes;
     };
 
@@ -152,7 +156,7 @@ namespace episteme::search {
             void run();
             void bench(int depth);
         private:
-            tt::TTable ttable;
+            tt::Table ttable;
             Parameters params;
 
             Thread thread;
