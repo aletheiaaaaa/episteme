@@ -122,6 +122,10 @@ namespace episteme::search {
         public:
             Thread(tt::Table& ttable) : ttable(ttable) {};
 
+            inline void reset_history() {
+                history.reset();
+            }
+
             ScoredMove score_move(const Position& position, const Move& move, bool include_quiets, const std::optional<tt::Entry>& tt_entry = std::nullopt);
 
             template<typename F>
@@ -144,8 +148,9 @@ namespace episteme::search {
             std::vector<nn::Accumulator> accum_history;
 
             tt::Table& ttable;
-            hist::Table history = {};
-            uint64_t nodes = 0;
+            hist::Table history;
+
+            uint64_t nodes;
     };
 
     class Instance {
@@ -160,9 +165,10 @@ namespace episteme::search {
                 params = new_params;
             }
 
-            inline void reset_tt() {
+            inline void reset() {
                 size_t size = ttable.size();
                 ttable.reset(size);
+                thread.reset_history();
             }
 
             void run();

@@ -88,7 +88,7 @@ namespace episteme::uci {
 
     auto ucinewgame(search::Config& cfg, search::Instance& instance) {
         cfg.params = {};
-        instance.reset_tt();
+        instance.reset();
     }
     
     auto bench(const std::string& args, search::Config& cfg) {
