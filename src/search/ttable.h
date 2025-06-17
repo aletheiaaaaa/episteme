@@ -31,6 +31,7 @@ namespace episteme::tt {
             }
 
             inline void reset(uint32_t entries) {
+                ttable.clear();
                 ttable.resize(entries);
             }
 
