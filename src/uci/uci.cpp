@@ -80,13 +80,13 @@ namespace episteme::uci {
             }
         }
 
-        instance.update(cfg);
+        instance.update(cfg.params);
         instance.run();
     }
 
     auto ucinewgame(search::Config& cfg, search::Instance& instance) {
         cfg.params = {};
-        instance.update(cfg);
+        instance.clear_tt();
     }
     
     auto bench(const std::string& args, search::Config& cfg) {
