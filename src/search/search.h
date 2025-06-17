@@ -2,7 +2,6 @@
 
 #include "../chess/movegen.h"
 #include "../evaluation/evaluate.h"
-#include "history.h"
 #include "ttable.h"
 
 #include <cstdint>
@@ -145,7 +144,6 @@ namespace episteme::search {
             std::vector<nn::Accumulator> accum_history;
 
             tt::Table& ttable;
-            hist::Table history;
             uint64_t nodes;
     };
 
