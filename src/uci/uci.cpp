@@ -84,8 +84,9 @@ namespace episteme::uci {
         instance.run();
     }
 
-    auto ucinewgame(search::Config& cfg) {
+    auto ucinewgame(search::Config& cfg, search::Instance& instance) {
         cfg.params = {};
+        instance.clear_tt();
     }
     
     auto bench(const std::string& args, search::Config& cfg) {
@@ -111,7 +112,7 @@ namespace episteme::uci {
         else if (keyword == "isready") isready();
         else if (keyword == "position") position(cmd.substr(cmd.find(" ")+1), cfg);
         else if (keyword == "go") go(cmd.substr(cmd.find(" ")+1), cfg, instance);
-        else if (keyword == "ucinewgame") ucinewgame(cfg);
+        else if (keyword == "ucinewgame") ucinewgame(cfg, instance);
         else if (keyword == "quit") std::exit(0);
 
         else if (keyword == "bench") {

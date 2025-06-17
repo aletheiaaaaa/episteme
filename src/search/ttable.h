@@ -24,6 +24,12 @@ namespace episteme::tt {
         public:
             Table(uint32_t size);
 
+            inline void resize(uint32_t size) {
+                clear();
+                const size_t entries = (size * 1024 * 1024) / sizeof(Entry);
+                ttable.resize(entries);
+            }
+
             [[nodiscard]] inline uint64_t table_index(uint64_t hash) {
                 return static_cast<uint64_t>((static_cast<unsigned __int128>(hash) * static_cast<unsigned __int128>(ttable.size())) >> 64);
             }

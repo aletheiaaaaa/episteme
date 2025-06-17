@@ -17,7 +17,7 @@ namespace episteme::uci {
     auto isready();
     auto position(const std::string& args, search::Config& cfg);
     auto go(const std::string& args, search::Config& cfg, search::Instance& instance);
-    auto ucinewgame(search::Config& cfg);
+    auto ucinewgame(search::Config& cfg, search::Instance& instance);
     auto bench(const std::string& args, search::Config& cfg);
     auto perft(const std::string& args, search::Config& cfg);
 }

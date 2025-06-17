@@ -155,6 +155,10 @@ namespace episteme::search {
                 params = cfg.params;
             }
 
+            inline void clear_tt() {
+                ttable.clear();
+            }
+            
             void run();
             void bench(int depth);
         private:
