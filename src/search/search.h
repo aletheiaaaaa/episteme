@@ -3,6 +3,7 @@
 #include "../chess/movegen.h"
 #include "../evaluation/evaluate.h"
 #include "ttable.h"
+#include "history.h"
 
 #include <cstdint>
 #include <chrono>
