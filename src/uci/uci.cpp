@@ -66,7 +66,6 @@ namespace episteme::uci {
     }
 
     auto go(const std::string& args, search::Config& cfg, search::Instance& instance) {
-        instance.clear_tt();
         std::istringstream iss(args);
         std::string token;
 
@@ -89,7 +88,7 @@ namespace episteme::uci {
 
     auto ucinewgame(search::Config& cfg, search::Instance& instance) {
         cfg.params = {};
-        instance.clear_tt();
+        instance.reset_tt();
     }
     
     auto bench(const std::string& args, search::Config& cfg) {

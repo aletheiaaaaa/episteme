@@ -25,8 +25,12 @@ namespace episteme::tt {
             Table(uint32_t size);
 
             inline void resize(uint32_t size) {
-                clear();
+                ttable.clear();
                 const size_t entries = (size * 1024 * 1024) / sizeof(Entry);
+                ttable.resize(entries);
+            }
+
+            inline void reset(uint32_t entries) {
                 ttable.resize(entries);
             }
 
@@ -43,8 +47,8 @@ namespace episteme::tt {
                 return entry;
             }
 
-            inline void clear() {
-                ttable.clear();
+            inline size_t size() {
+                return ttable.size();
             }
 
             inline void add(Entry tt_entry) {

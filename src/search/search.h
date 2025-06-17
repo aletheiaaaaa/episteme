@@ -159,10 +159,11 @@ namespace episteme::search {
                 params = new_params;
             }
 
-            inline void clear_tt() {
-                ttable.clear();
+            inline void reset_tt() {
+                size_t size = ttable.size();
+                ttable.reset(size);
             }
-            
+
             void run();
             void bench(int depth);
         private:
