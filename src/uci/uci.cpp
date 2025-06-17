@@ -82,19 +82,20 @@ namespace episteme::uci {
             }
         }
 
+        instance.reset_history();
         instance.update_params(cfg.params);
         instance.run();
     }
 
     auto ucinewgame(search::Config& cfg, search::Instance& instance) {
         cfg.params = {};
-        instance.reset();
+        instance.reset_tt();
     }
     
     auto bench(const std::string& args, search::Config& cfg) {
         int depth = (args.empty()) ? 4 : std::stoi(args);
         if (!cfg.hash_size) cfg.hash_size = 32;
-    
+
         search::Instance instance(cfg);
         instance.bench(depth);
     }
