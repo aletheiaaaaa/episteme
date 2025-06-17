@@ -22,7 +22,7 @@ namespace episteme::search {
 
     struct ScoredMove {
         Move move = {};
-        int score = 0;
+        int32_t score = 0;
     };
 
     class ScoredList {
