@@ -63,7 +63,7 @@ namespace episteme::uci {
         cfg.params.position = position;
     }
 
-    auto go(const std::string& args, search::Config& cfg) {
+    auto go(const std::string& args, search::Config& cfg, search::Instance& instance) {
         std::istringstream iss(args);
         std::string token;
 
@@ -80,7 +80,7 @@ namespace episteme::uci {
             }
         }
 
-        search::Instance instance(cfg);
+        instance.update(cfg);
         instance.run();
     }
 
@@ -103,14 +103,14 @@ namespace episteme::uci {
         time_perft(position, depth);
     }
 
-    int parse(const std::string& cmd, search::Config& cfg) {
+    int parse(const std::string& cmd, search::Config& cfg, search::Instance& instance) {
         std::string keyword = cmd.substr(0, cmd.find(' '));
 
         if (keyword == "uci") uci();
         else if (keyword == "setoption") setoption(cmd.substr(cmd.find(" ")+1), cfg);
         else if (keyword == "isready") isready();
         else if (keyword == "position") position(cmd.substr(cmd.find(" ")+1), cfg);
-        else if (keyword == "go") go(cmd.substr(cmd.find(" ")+1), cfg);
+        else if (keyword == "go") go(cmd.substr(cmd.find(" ")+1), cfg, instance);
         else if (keyword == "ucinewgame") ucinewgame(cfg);
         else if (keyword == "quit") std::exit(0);
 

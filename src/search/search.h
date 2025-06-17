@@ -151,6 +151,10 @@ namespace episteme::search {
         public:
             Instance(Config& cfg) : ttable(cfg.hash_size), params(cfg.params), thread(ttable) {};
 
+            inline void update(search::Config& cfg) {
+                params = cfg.params;
+            }
+
             void run();
             void bench(int depth);
         private:
