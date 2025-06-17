@@ -66,6 +66,7 @@ namespace episteme::uci {
     }
 
     auto go(const std::string& args, search::Config& cfg, search::Instance& instance) {
+        instance.clear_tt();
         std::istringstream iss(args);
         std::string token;
 
