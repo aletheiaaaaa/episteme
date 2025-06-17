@@ -92,7 +92,7 @@ namespace episteme {
 
             bool is_threefold();
 
-            std::string to_FEN() const; 
+            std::string to_fEN() const; 
             uint64_t explicit_zobrist();
         public:
             static const uint16_t COLOR_OFFSET = 6;

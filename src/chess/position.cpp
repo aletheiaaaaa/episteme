@@ -283,7 +283,7 @@ namespace episteme {
         return false;
     }
 
-    std::string Position::to_FEN() const {
+    std::string Position::to_fEN() const {
         std::string fen;
     
         for (int rank = 7; rank >= 0; --rank) {
