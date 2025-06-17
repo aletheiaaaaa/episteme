@@ -9,7 +9,7 @@ namespace episteme::uci {
         std::cout << "uciok\n";
     }
 
-    auto setoption(const std::string& args, search::Config& cfg) {
+    auto setoption(const std::string& args, search::Config& cfg, search::Instance& instance) {
         std::istringstream iss(args);
         std::string name, option_name, value, option_value;
     
@@ -26,6 +26,8 @@ namespace episteme::uci {
         } else {
             std::cout << "invalid option" << std::endl;
         }
+
+        instance.set_cfg(cfg);
     }
 
     auto isready() {
@@ -63,7 +65,7 @@ namespace episteme::uci {
         cfg.params.position = position;
     }
 
-    auto go(const std::string& args, search::Config& cfg) {
+    auto go(const std::string& args, search::Config& cfg, search::Instance& instance) {
         std::istringstream iss(args);
         std::string token;
 
@@ -80,12 +82,13 @@ namespace episteme::uci {
             }
         }
 
-        search::Instance instance(cfg);
+        instance.update_params(cfg.params);
         instance.run();
     }
 
-    auto ucinewgame(search::Config& cfg) {
+    auto ucinewgame(search::Config& cfg, search::Instance& instance) {
         cfg.params = {};
+        instance.reset();
     }
     
     auto bench(const std::string& args, search::Config& cfg) {
@@ -103,15 +106,15 @@ namespace episteme::uci {
         time_perft(position, depth);
     }
 
-    int parse(const std::string& cmd, search::Config& cfg) {
+    int parse(const std::string& cmd, search::Config& cfg, search::Instance& instance) {
         std::string keyword = cmd.substr(0, cmd.find(' '));
 
         if (keyword == "uci") uci();
-        else if (keyword == "setoption") setoption(cmd.substr(cmd.find(" ")+1), cfg);
+        else if (keyword == "setoption") setoption(cmd.substr(cmd.find(" ")+1), cfg, instance);
         else if (keyword == "isready") isready();
         else if (keyword == "position") position(cmd.substr(cmd.find(" ")+1), cfg);
-        else if (keyword == "go") go(cmd.substr(cmd.find(" ")+1), cfg);
-        else if (keyword == "ucinewgame") ucinewgame(cfg);
+        else if (keyword == "go") go(cmd.substr(cmd.find(" ")+1), cfg, instance);
+        else if (keyword == "ucinewgame") ucinewgame(cfg, instance);
         else if (keyword == "quit") std::exit(0);
 
         else if (keyword == "bench") {

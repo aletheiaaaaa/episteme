@@ -29,6 +29,10 @@ namespace episteme::hist {
                 butterfly[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())].update(bonus);
             }
 
+            inline void reset() {
+                butterfly = {};
+            }
+
         private:
             std::array<std::array<std::array<Entry, 64>, 64>, 2> butterfly = {};
     };
