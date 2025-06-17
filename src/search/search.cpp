@@ -49,6 +49,8 @@ namespace episteme::search {
             int dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
 
             scored_move.score += dst_val * 10 - src_val + 100000;
+        } else {
+            scored_move.score += history.get_butterfly(position.STM(), move).value;
         }
 
         return scored_move;
@@ -79,6 +81,8 @@ namespace episteme::search {
         for (size_t i = 0; i < move_list.count(); i++) { 
             pick_move(move_list, i);
             Move move = move_list.list(i).move;
+
+            bool is_quiet = position.mailbox(sq_idx(move.to_square())) == Piece::None && move.move_type() != MoveType::EnPassant;
 
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
@@ -117,6 +121,10 @@ namespace episteme::search {
                 PV.update_line(move, candidate);
 
                 if (score >= beta) {
+                    if (is_quiet) {
+                        history.update_butterfly(position.STM(), move, hist::history_bonus(depth));
+                    }
+
                     node_type = tt::NodeType::CutNode;
                     break;
                 }
