@@ -144,7 +144,8 @@ namespace episteme::search {
             std::vector<nn::Accumulator> accum_history;
 
             tt::Table& ttable;
-            uint64_t nodes;
+            hist::Table history = {};
+            uint64_t nodes = 0;
     };
 
     class Instance {
