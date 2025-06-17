@@ -121,9 +121,9 @@ namespace episteme::search {
                 PV.update_line(move, candidate);
 
                 if (score >= beta) {
-                    if (is_quiet) {
-                        history.update_butterfly(position.STM(), move, hist::history_bonus(depth));
-                    }
+                    // if (is_quiet) {
+                    //     history.update_butterfly(position.STM(), move, hist::history_bonus(depth));
+                    // }
 
                     node_type = tt::NodeType::CutNode;
                     break;
