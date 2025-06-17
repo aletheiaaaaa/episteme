@@ -165,9 +165,12 @@ namespace episteme::search {
                 params = new_params;
             }
 
-            inline void reset() {
+            inline void reset_tt() {
                 size_t size = ttable.size();
                 ttable.reset(size);
+            }
+
+            inline void reset_history() {
                 thread.reset_history();
             }
 
