@@ -153,10 +153,7 @@ namespace episteme::search {
 
             inline void update(search::Config& cfg) {
                 params = cfg.params;
-            }
-
-            inline void clear_tt() {
-                ttable.clear();
+                ttable.resize(cfg.hash_size);
             }
             
             void run();
