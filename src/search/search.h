@@ -145,8 +145,8 @@ namespace episteme::search {
             std::vector<nn::Accumulator> accum_history;
 
             tt::Table& ttable;
-            hist::Table history;
-            uint64_t nodes;
+            hist::Table history = {};
+            uint64_t nodes = 0;
     };
 
     class Instance {
@@ -162,5 +162,5 @@ namespace episteme::search {
             Thread thread;
     };
 
-    bool in_check(const Position& position, Color stm);
+    bool in_check(const Position& position, Color color);
 }
