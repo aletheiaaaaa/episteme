@@ -9,7 +9,7 @@ namespace episteme::uci {
         std::cout << "uciok\n";
     }
 
-    auto setoption(const std::string& args, search::Config& cfg) {
+    auto setoption(const std::string& args, search::Config& cfg, search::Instance& instance) {
         std::istringstream iss(args);
         std::string name, option_name, value, option_value;
     
@@ -26,6 +26,8 @@ namespace episteme::uci {
         } else {
             std::cout << "invalid option" << std::endl;
         }
+
+        instance.set_cfg(cfg);
     }
 
     auto isready() {
@@ -80,7 +82,7 @@ namespace episteme::uci {
             }
         }
 
-        instance.update(cfg.params);
+        instance.update_params(cfg.params);
         instance.run();
     }
 
@@ -108,7 +110,7 @@ namespace episteme::uci {
         std::string keyword = cmd.substr(0, cmd.find(' '));
 
         if (keyword == "uci") uci();
-        else if (keyword == "setoption") setoption(cmd.substr(cmd.find(" ")+1), cfg);
+        else if (keyword == "setoption") setoption(cmd.substr(cmd.find(" ")+1), cfg, instance);
         else if (keyword == "isready") isready();
         else if (keyword == "position") position(cmd.substr(cmd.find(" ")+1), cfg);
         else if (keyword == "go") go(cmd.substr(cmd.find(" ")+1), cfg, instance);
