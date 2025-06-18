@@ -125,7 +125,7 @@ namespace episteme::search {
             ScoredMove score_move(const Position& position, const Move& move, const tt::Entry& tt_entry);
 
             template<typename F>
-            ScoredList generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry = std::nullopt);
+            ScoredList generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry);
 
             inline ScoredList generate_scored_moves(const Position& position, const tt::Entry& tt_entry) {
                 return generate_scored_targets(position, generate_all_moves, tt_entry);
