@@ -59,7 +59,7 @@ namespace episteme::search {
         if (position.is_threefold()) return 0;
 
         if (depth <= 0) {
-            return quiesce(position, ply + 1, alpha, beta, limits);
+            return quiesce(position, PV, ply, alpha, beta, limits);
         }
 
         tt::Entry tt_entry = ttable.probe(position.zobrist());
@@ -137,7 +137,7 @@ namespace episteme::search {
         return best;
     }
 
-    int32_t Thread::quiesce(Position& position, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
+    int32_t Thread::quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
         if (limits.time_exceeded()) return 0;
         
         int32_t eval = eval::evaluate(accumulator);
@@ -179,7 +179,8 @@ namespace episteme::search {
             nodes++;
             if (limits.node_exceeded(nodes)) return 0;
 
-            int32_t score = -quiesce(position, ply + 1, -beta, -alpha, limits);
+            Line candidate = {};
+            int32_t score = -quiesce(position, PV, ply + 1, -beta, -alpha, limits);
 
             position.unmake_move();
             accum_history.pop_back();
@@ -193,6 +194,7 @@ namespace episteme::search {
 
             if (score >= alpha) {
                 alpha = score;
+                PV.update_line(move, candidate);
 
                 if (score > beta) {
                     break;
