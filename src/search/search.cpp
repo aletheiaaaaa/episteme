@@ -180,7 +180,7 @@ namespace episteme::search {
             if (limits.node_exceeded(nodes)) return 0;
 
             Line candidate = {};
-            int32_t score = -quiesce(position, PV, ply + 1, -beta, -alpha, limits);
+            int32_t score = -quiesce(position, candidate, ply + 1, -beta, -alpha, limits);
 
             position.unmake_move();
             accum_history.pop_back();
@@ -216,6 +216,7 @@ namespace episteme::search {
         Position position = params.position;
         accumulator = eval::reset(position);
         accum_history.emplace_back(accumulator);
+        std::cout << accum_history.size() << std::endl;
 
         int16_t target_depth = params.depth;
         uint64_t target_nodes = params.nodes;
