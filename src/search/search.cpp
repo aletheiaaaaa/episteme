@@ -180,7 +180,7 @@ namespace episteme::search {
             if (limits.node_exceeded(nodes)) return 0;
 
             Line candidate = {};
-            int32_t score = -quiesce(position, PV, ply + 1, -beta, -alpha, limits);
+            int32_t score = -quiesce(position, candidate, ply + 1, -beta, -alpha, limits);
 
             position.unmake_move();
             accum_history.pop_back();
