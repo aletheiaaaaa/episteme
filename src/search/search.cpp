@@ -143,12 +143,12 @@ namespace episteme::search {
         int32_t eval = eval::evaluate(accumulator);
 
         tt::Entry tt_entry = ttable.probe(position.zobrist());
-        // if ((tt_entry.node_type == tt::NodeType::PVNode)
-        //     || (tt_entry.node_type == tt::NodeType::AllNode && tt_entry.score <= alpha)
-        //     || (tt_entry.node_type == tt::NodeType::CutNode && tt_entry.score >= beta)
-        // ) {
-        //     return tt_entry.score;
-        // }
+        if ((tt_entry.node_type == tt::NodeType::PVNode)
+            || (tt_entry.node_type == tt::NodeType::AllNode && tt_entry.score <= alpha)
+            || (tt_entry.node_type == tt::NodeType::CutNode && tt_entry.score >= beta)
+        ) {
+            return tt_entry.score;
+        }
 
         int32_t best = eval;
         if (best >= alpha) {
