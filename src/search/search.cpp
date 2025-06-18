@@ -143,12 +143,12 @@ namespace episteme::search {
         int32_t eval = eval::evaluate(accumulator);
 
         tt::Entry tt_entry = ttable.probe(position.zobrist());
-        // if ((tt_entry.node_type == tt::NodeType::PVNode)
-        //     || (tt_entry.node_type == tt::NodeType::AllNode && tt_entry.score <= alpha)
-        //     || (tt_entry.node_type == tt::NodeType::CutNode && tt_entry.score >= beta)
-        // ) {
-        //     return tt_entry.score;
-        // }
+        if ((tt_entry.node_type == tt::NodeType::PVNode)
+            || (tt_entry.node_type == tt::NodeType::AllNode && tt_entry.score <= alpha)
+            || (tt_entry.node_type == tt::NodeType::CutNode && tt_entry.score >= beta)
+        ) {
+            return tt_entry.score;
+        }
 
         int32_t best = eval;
         if (best >= alpha) {
@@ -170,7 +170,7 @@ namespace episteme::search {
             int src_val = piece_vals[piece_type_idx(src)];
             int dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
 
-            if (dst_val - src_val < 0) break;
+            if (dst_val - src_val < 0) continue;
 
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
