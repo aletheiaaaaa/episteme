@@ -18,22 +18,22 @@ namespace episteme::search {
     };
 
     template<typename F>
-    ScoredList Thread::generate_scored_targets(const Position& position, F generator, bool include_quiets, const std::optional<tt::Entry>& tt_entry) {
+    ScoredList Thread::generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry) {
         MoveList move_list;
         generator(move_list, position);
         ScoredList scored_list;
 
         for (size_t i = 0; i < move_list.count(); i++) {
-            scored_list.add(score_move(position, move_list.list(i), include_quiets, tt_entry));
+            scored_list.add(score_move(position, move_list.list(i), tt_entry));
         }
 
         return scored_list;
     }
 
-    ScoredMove Thread::score_move(const Position& position, const Move& move, bool include_quiets, const std::optional<tt::Entry>& tt_entry) {
+    ScoredMove Thread::score_move(const Position& position, const Move& move, const tt::Entry& tt_entry) {
         ScoredMove scored_move{.move = move};
 
-        if (include_quiets && tt_entry && tt_entry->move.data() == move.data()) {
+        if (tt_entry.move.data() == move.data()) {
             scored_move.score = 1000000;
             return scored_move;
         }
@@ -142,6 +142,14 @@ namespace episteme::search {
         
         int32_t eval = eval::evaluate(accumulator);
 
+        tt::Entry tt_entry = ttable.probe(position.zobrist());
+        if ((tt_entry.node_type == tt::NodeType::PVNode)
+            || (tt_entry.node_type == tt::NodeType::AllNode && tt_entry.score <= alpha)
+            || (tt_entry.node_type == tt::NodeType::CutNode && tt_entry.score >= beta)
+        ) {
+            return tt_entry.score;
+        }
+
         int32_t best = eval;
         if (best >= alpha) {
             alpha = best;
@@ -151,7 +159,7 @@ namespace episteme::search {
             }
         };
 
-        ScoredList captures_list = generate_scored_captures(position);
+        ScoredList captures_list = generate_scored_captures(position, tt_entry);
 
         for (size_t i = 0; i < captures_list.count(); i++) {
             pick_move(captures_list, i);
@@ -216,7 +224,6 @@ namespace episteme::search {
         Position position = params.position;
         accumulator = eval::reset(position);
         accum_history.emplace_back(accumulator);
-        std::cout << accum_history.size() << std::endl;
 
         int16_t target_depth = params.depth;
         uint64_t target_nodes = params.nodes;
