@@ -170,7 +170,7 @@ namespace episteme::search {
             int src_val = piece_vals[piece_type_idx(src)];
             int dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
 
-            if (dst_val - src_val < 0) break;
+            if (dst_val - src_val < 0) continue;
 
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
