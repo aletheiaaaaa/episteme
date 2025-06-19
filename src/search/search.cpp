@@ -205,7 +205,7 @@ namespace episteme::search {
 
                 PV.update_line(move, candidate);
 
-                if (score > beta) {
+                if (score >= beta) {
                     break;
                 }
             }
