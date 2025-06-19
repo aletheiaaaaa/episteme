@@ -166,6 +166,20 @@ namespace episteme {
         return {magic, used_indices};
     }
 
+    void print_magics() {
+        std::cout << "const std::array<uint64_t, 64> ROOK_MAGICS = {";
+        for (int i = 0; i < 64; i++) {
+            uint64_t rook_magic = find_rook_magics(sq_from_idx(i)).first; 
+            std::cout << std::hex << "0x" << rook_magic << ",\n";
+        }
+        std::cout << "}\nconst std::array<uint64_t, 64> BISHOP_MAGICS = {";
+        for (int i = 0; i < 64; i++) {
+            uint64_t bishop_magic = find_bishop_magics(sq_from_idx(i)).first;
+            std::cout << std::hex << "0x" << bishop_magic << ",\n";
+        }
+        std::cout << "}";
+    }
+
     template<size_t NUM_BITS, typename F>
     std::array<std::array<uint64_t, (1 << NUM_BITS)>, 64> fill_attacks(const std::array<uint64_t, 64>& MAGICS, const std::array<uint64_t, 64>& MASKS, F slow_attacks) {
         constexpr size_t ARR_SIZE = 1 << NUM_BITS;
