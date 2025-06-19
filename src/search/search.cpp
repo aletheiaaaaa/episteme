@@ -74,6 +74,7 @@ namespace episteme::search {
 
         ScoredList move_list = generate_scored_moves(position, tt_entry);
         int32_t best = -INF;
+        tt::NodeType node_type = tt::NodeType::AllNode;
         uint32_t num_legal = 0;
 
         for (size_t i = 0; i < move_list.count(); i++) { 
@@ -115,12 +116,21 @@ namespace episteme::search {
                 PV.update_line(move, candidate);
 
                 if (score >= beta) {
+                    node_type = tt::NodeType::CutNode;
                     break;
                 }
             }
         };
 
         if (num_legal == 0) return in_check(position, position.STM()) ? (-MATE + ply) : 0;
+
+        ttable.add({
+            .hash = position.zobrist(),
+            .move = PV.moves[0],
+            .score = best,
+            .depth = static_cast<uint8_t>(depth),
+            .node_type = node_type
+        });
 
         return best;
     }
@@ -148,7 +158,6 @@ namespace episteme::search {
         };
 
         ScoredList captures_list = generate_scored_captures(position, tt_entry);
-        tt::NodeType node_type = tt::NodeType::AllNode;
 
         for (size_t i = 0; i < captures_list.count(); i++) {
             pick_move(captures_list, i);
@@ -191,7 +200,6 @@ namespace episteme::search {
 
             if (score > alpha) {
                 alpha = score;
-                node_type = tt::NodeType::PVNode;
 
                 PV.update_line(move, candidate);
 
@@ -200,14 +208,6 @@ namespace episteme::search {
                 }
             }
         }
-
-        ttable.add({
-            .hash = position.zobrist(),
-            .move = PV.moves[0],
-            .score = best,
-            .depth = 0,
-            .node_type = node_type
-        });
 
         return best;
     }
