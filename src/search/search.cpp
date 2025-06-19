@@ -5,9 +5,8 @@ namespace episteme::search {
     using namespace std::chrono;
 
     void pick_move(ScoredList& scored_list, int start) {
-        const ScoredMove& start_move = scored_list.list(start);
         for (size_t i = start + 1; i <  scored_list.count(); i++)    {
-            if (scored_list.list(i).score > start_move.score) {
+            if (scored_list.list(i).score > scored_list.list(start).score) {
                 scored_list.swap(start, i);
             }
         }
@@ -19,22 +18,22 @@ namespace episteme::search {
     };
 
     template<typename F>
-    ScoredList Thread::generate_scored_targets(const Position& position, F generator, bool include_quiets, const std::optional<tt::Entry>& tt_entry) {
+    ScoredList Thread::generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry) {
         MoveList move_list;
         generator(move_list, position);
         ScoredList scored_list;
 
         for (size_t i = 0; i < move_list.count(); i++) {
-            scored_list.add(score_move(position, move_list.list(i), include_quiets, tt_entry));
+            scored_list.add(score_move(position, move_list.list(i), tt_entry));
         }
 
         return scored_list;
     }
 
-    ScoredMove Thread::score_move(const Position& position, const Move& move, bool include_quiets, const std::optional<tt::Entry>& tt_entry) {
+    ScoredMove Thread::score_move(const Position& position, const Move& move, const tt::Entry& tt_entry) {
         ScoredMove scored_move{.move = move};
 
-        if (include_quiets && tt_entry && tt_entry->move.data() == move.data()) {
+        if (tt_entry.move.data() == move.data()) {
             scored_move.score = 1000000;
             return scored_move;
         }
@@ -57,8 +56,10 @@ namespace episteme::search {
     int32_t Thread::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits = {}) {
         if (limits.time_exceeded()) return 0;
 
+        if (position.is_threefold()) return 0;
+
         if (depth <= 0) {
-            return quiesce(position, ply + 1, alpha, beta, limits);
+            return quiesce(position, PV, ply, alpha, beta, limits);
         }
 
         tt::Entry tt_entry = ttable.probe(position.zobrist());
@@ -73,7 +74,6 @@ namespace episteme::search {
 
         ScoredList move_list = generate_scored_moves(position, tt_entry);
         int32_t best = -INF;
-        tt::NodeType node_type = tt::NodeType::AllNode;
         uint32_t num_legal = 0;
 
         for (size_t i = 0; i < move_list.count(); i++) { 
@@ -112,12 +112,9 @@ namespace episteme::search {
 
             if (score > alpha) {    
                 alpha = score;
-                node_type = tt::NodeType::PVNode;
-
                 PV.update_line(move, candidate);
 
                 if (score >= beta) {
-                    node_type = tt::NodeType::CutNode;
                     break;
                 }
             }
@@ -125,21 +122,21 @@ namespace episteme::search {
 
         if (num_legal == 0) return in_check(position, position.STM()) ? (-MATE + ply) : 0;
 
-        ttable.add({
-            .hash = position.zobrist(),
-            .move = PV.moves[0],
-            .score = best,
-            .depth = static_cast<uint8_t>(depth),
-            .node_type = node_type
-        });
-
         return best;
     }
 
-    int32_t Thread::quiesce(Position& position, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
+    int32_t Thread::quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
         if (limits.time_exceeded()) return 0;
         
         int32_t eval = eval::evaluate(accumulator);
+
+        tt::Entry tt_entry = ttable.probe(position.zobrist());
+        if ((tt_entry.node_type == tt::NodeType::PVNode)
+            || (tt_entry.node_type == tt::NodeType::AllNode && tt_entry.score <= alpha)
+            || (tt_entry.node_type == tt::NodeType::CutNode && tt_entry.score >= beta)
+        ) {
+            return tt_entry.score;
+        }
 
         int32_t best = eval;
         if (best > alpha) {
@@ -150,7 +147,8 @@ namespace episteme::search {
             }
         };
 
-        ScoredList captures_list = generate_scored_captures(position);
+        ScoredList captures_list = generate_scored_captures(position, tt_entry);
+        tt::NodeType node_type = tt::NodeType::AllNode;
 
         for (size_t i = 0; i < captures_list.count(); i++) {
             pick_move(captures_list, i);
@@ -161,7 +159,7 @@ namespace episteme::search {
             int src_val = piece_vals[piece_type_idx(src)];
             int dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
 
-            if (dst_val - src_val < 0) break;
+            if (dst_val - src_val < 0) continue;
 
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
@@ -178,7 +176,8 @@ namespace episteme::search {
             nodes++;
             if (limits.node_exceeded(nodes)) return 0;
 
-            int32_t score = -quiesce(position, ply + 1, -beta, -alpha, limits);
+            Line candidate = {};
+            int32_t score = -quiesce(position, candidate, ply + 1, -beta, -alpha, limits);
 
             position.unmake_move();
             accum_history.pop_back();
@@ -192,12 +191,23 @@ namespace episteme::search {
 
             if (score > alpha) {
                 alpha = score;
+                node_type = tt::NodeType::PVNode;
 
-                if (score >= beta) {
+                PV.update_line(move, candidate);
+
+                if (score > beta) {
                     break;
                 }
             }
         }
+
+        ttable.add({
+            .hash = position.zobrist(),
+            .move = PV.moves[0],
+            .score = best,
+            .depth = 0,
+            .node_type = node_type
+        });
 
         return best;
     }
