@@ -241,6 +241,7 @@ namespace episteme::search {
         };
 
         ScoredList captures_list = generate_scored_captures(position, tt_entry);
+        tt::NodeType node_type = tt::NodeType::AllNode;
 
         for (size_t i = 0; i < captures_list.count; i++) {
             pick_move(captures_list, i);
@@ -276,13 +277,24 @@ namespace episteme::search {
 
             if (score > alpha) {
                 alpha = score;
+                node_type = tt::NodeType::PVNode;
+
                 PV.update_line(move, candidate);
 
                 if (score >= beta) {
+                    node_type = tt::NodeType::CutNode;
                     break;
                 }
             }
         }
+
+        ttable.add({
+            .hash = position.zobrist(),
+            .move = PV.moves[0],
+            .score = best,
+            .depth = 0,
+            .node_type = node_type
+        });
 
         return best;
     }
