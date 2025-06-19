@@ -140,8 +140,6 @@ namespace episteme::search {
     int32_t Thread::quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
         if (limits.time_exceeded()) return 0;
         
-        int32_t eval = eval::evaluate(accumulator);
-
         tt::Entry tt_entry = ttable.probe(position.zobrist());
         if ((tt_entry.node_type == tt::NodeType::PVNode)
             || (tt_entry.node_type == tt::NodeType::AllNode && tt_entry.score <= alpha)
@@ -149,6 +147,8 @@ namespace episteme::search {
         ) {
             return tt_entry.score;
         }
+
+        int32_t eval = eval::evaluate(accumulator);
 
         int32_t best = eval;
         if (best > alpha) {
@@ -202,7 +202,6 @@ namespace episteme::search {
 
             if (score > alpha) {
                 alpha = score;
-
                 PV.update_line(move, candidate);
 
                 if (score >= beta) {
