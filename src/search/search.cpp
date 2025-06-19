@@ -140,8 +140,6 @@ namespace episteme::search {
     int32_t Thread::quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
         if (limits.time_exceeded()) return 0;
         
-        int32_t eval = eval::evaluate(accumulator);
-
         tt::Entry tt_entry = ttable.probe(position.zobrist());
         if ((tt_entry.node_type == tt::NodeType::PVNode)
             || (tt_entry.node_type == tt::NodeType::AllNode && tt_entry.score <= alpha)
@@ -150,17 +148,18 @@ namespace episteme::search {
             return tt_entry.score;
         }
 
+        int32_t eval = eval::evaluate(accumulator);
+
         int32_t best = eval;
-        if (best >= alpha) {
+        if (best > alpha) {
             alpha = best;
 
-            if (best > beta) {
+            if (best >= beta) {
                 return best;
             }
         };
 
         ScoredList captures_list = generate_scored_captures(position, tt_entry);
-        tt::NodeType node_type = tt::NodeType::AllNode;
 
         for (size_t i = 0; i < captures_list.count(); i++) {
             pick_move(captures_list, i);
@@ -201,26 +200,15 @@ namespace episteme::search {
                 best = score;
             }
 
-            if (score >= alpha) {
+            if (score > alpha) {
                 alpha = score;
-                node_type = tt::NodeType::PVNode;
-
                 PV.update_line(move, candidate);
 
-                if (score > beta) {
-                    node_type = tt::NodeType::CutNode;
+                if (score >= beta) {
                     break;
                 }
             }
         }
-
-        ttable.add({
-            .hash = position.zobrist(),
-            .move = PV.moves[0],
-            .score = best,
-            .depth = 0,
-            .node_type = node_type
-        });
 
         return best;
     }
