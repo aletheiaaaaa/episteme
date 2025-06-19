@@ -113,6 +113,8 @@ namespace episteme::search {
 
             if (score > alpha) {    
                 alpha = score;
+                node_type = tt::NodeType::PVNode;
+
                 PV.update_line(move, candidate);
 
                 if (score >= beta) {
