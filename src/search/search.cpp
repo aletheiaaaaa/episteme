@@ -18,22 +18,22 @@ namespace episteme::search {
     };
 
     template<typename F>
-    ScoredList Thread::generate_scored_targets(const Position& position, F generator, bool include_quiets, const std::optional<tt::Entry>& tt_entry) {
+    ScoredList Thread::generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry) {
         MoveList move_list;
         generator(move_list, position);
         ScoredList scored_list;
 
         for (size_t i = 0; i < move_list.count(); i++) {
-            scored_list.add(score_move(position, move_list.list(i), include_quiets, tt_entry));
+            scored_list.add(score_move(position, move_list.list(i), tt_entry));
         }
 
         return scored_list;
     }
 
-    ScoredMove Thread::score_move(const Position& position, const Move& move, bool include_quiets, const std::optional<tt::Entry>& tt_entry) {
+    ScoredMove Thread::score_move(const Position& position, const Move& move, const tt::Entry& tt_entry) {
         ScoredMove scored_move{.move = move};
 
-        if (include_quiets && tt_entry && tt_entry->move.data() == move.data()) {
+        if (tt_entry.move.data() == move.data()) {
             scored_move.score = 1000000;
             return scored_move;
         }
@@ -61,7 +61,7 @@ namespace episteme::search {
         if (position.is_threefold()) return 0;
 
         if (depth <= 0) {
-            return quiesce(position, ply + 1, alpha, beta, limits);
+            return quiesce(position, PV, ply, alpha, beta, limits);
         }
 
         tt::Entry tt_entry = ttable.probe(position.zobrist());
@@ -145,21 +145,29 @@ namespace episteme::search {
         return best;
     }
 
-    int32_t Thread::quiesce(Position& position, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
+    int32_t Thread::quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
         if (limits.time_exceeded()) return 0;
         
+        tt::Entry tt_entry = ttable.probe(position.zobrist());
+        if ((tt_entry.node_type == tt::NodeType::PVNode)
+            || (tt_entry.node_type == tt::NodeType::AllNode && tt_entry.score <= alpha)
+            || (tt_entry.node_type == tt::NodeType::CutNode && tt_entry.score >= beta)
+        ) {
+            return tt_entry.score;
+        }
+
         int32_t eval = eval::evaluate(accumulator);
 
         int32_t best = eval;
-        if (best >= alpha) {
+        if (best > alpha) {
             alpha = best;
 
-            if (best > beta) {
+            if (best >= beta) {
                 return best;
             }
         };
 
-        ScoredList captures_list = generate_scored_captures(position);
+        ScoredList captures_list = generate_scored_captures(position, tt_entry);
 
         for (size_t i = 0; i < captures_list.count(); i++) {
             pick_move(captures_list, i);
@@ -170,7 +178,7 @@ namespace episteme::search {
             int src_val = piece_vals[piece_type_idx(src)];
             int dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
 
-            if (dst_val - src_val < 0) break;
+            if (dst_val - src_val < 0) continue;
 
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
@@ -187,7 +195,8 @@ namespace episteme::search {
             nodes++;
             if (limits.node_exceeded(nodes)) return 0;
 
-            int32_t score = -quiesce(position, ply + 1, -beta, -alpha, limits);
+            Line candidate = {};
+            int32_t score = -quiesce(position, candidate, ply + 1, -beta, -alpha, limits);
 
             position.unmake_move();
             accum_history.pop_back();
@@ -199,10 +208,11 @@ namespace episteme::search {
                 best = score;
             }
 
-            if (score >= alpha) {
+            if (score > alpha) {
                 alpha = score;
+                PV.update_line(move, candidate);
 
-                if (score > beta) {
+                if (score >= beta) {
                     break;
                 }
             }

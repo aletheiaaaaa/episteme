@@ -127,21 +127,21 @@ namespace episteme::search {
                 history.reset();
             }
 
-            ScoredMove score_move(const Position& position, const Move& move, bool include_quiets, const std::optional<tt::Entry>& tt_entry = std::nullopt);
+            ScoredMove score_move(const Position& position, const Move& move, const tt::Entry& tt_entry);
 
             template<typename F>
-            ScoredList generate_scored_targets(const Position& position, F generator, bool include_quiets, const std::optional<tt::Entry>& tt_entry = std::nullopt);
+            ScoredList generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry);
 
             inline ScoredList generate_scored_moves(const Position& position, const tt::Entry& tt_entry) {
-                return generate_scored_targets(position, generate_all_moves, true, tt_entry);
+                return generate_scored_targets(position, generate_all_moves, tt_entry);
             }
         
-            inline ScoredList generate_scored_captures(const Position& position) {
-                return generate_scored_targets(position, generate_all_captures, false);
+            inline ScoredList generate_scored_captures(const Position& position, const tt::Entry& tt_entry) {
+                return generate_scored_targets(position, generate_all_captures, tt_entry);
             }
 
             int32_t search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
-            int32_t quiesce(Position& position, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
+            int32_t quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
             ThreadReport run(const Parameters& params);
             void bench(int depth);
         private:
