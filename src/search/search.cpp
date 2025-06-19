@@ -151,10 +151,10 @@ namespace episteme::search {
         }
 
         int32_t best = eval;
-        if (best >= alpha) {
+        if (best > alpha) {
             alpha = best;
 
-            if (best > beta) {
+            if (best >= beta) {
                 return best;
             }
         };
@@ -200,11 +200,12 @@ namespace episteme::search {
                 best = score;
             }
 
-            if (score >= alpha) {
+            if (score > alpha) {
                 alpha = score;
+
                 PV.update_line(move, candidate);
 
-                if (score > beta) {
+                if (score >= beta) {
                     break;
                 }
             }
