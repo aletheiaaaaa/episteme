@@ -11,6 +11,10 @@ namespace episteme::hist {
         return static_cast<int16_t>(std::clamp(depth * 300, 0, 2500));
     }
 
+    [[nodiscard]] inline int16_t history_malus(int16_t depth) {
+        return -static_cast<int16_t>(std::clamp(depth * 300, 0, 1250));
+    }
+
     struct Entry {
         int16_t value = 0;
 

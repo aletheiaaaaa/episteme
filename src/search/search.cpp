@@ -78,6 +78,8 @@ namespace episteme::search {
 
         ScoredList move_list = generate_scored_moves(position, tt_entry);
         int32_t best = -INF;
+
+        MoveList explored_quiets;
         tt::NodeType node_type = tt::NodeType::AllNode;
         uint32_t num_legal = 0;
 
@@ -101,6 +103,8 @@ namespace episteme::search {
 
             nodes++;
             num_legal++;
+
+            if (is_quiet) explored_quiets.add(move);
 
             if (limits.node_exceeded(nodes)) return 0;
 
@@ -126,6 +130,10 @@ namespace episteme::search {
                 if (score >= beta) {
                     if (is_quiet) {
                         history.update_butterfly(position.STM(), move, hist::history_bonus(depth));
+                        for (i = 0; i < explored_quiets.count(); i++) {
+                            if (explored_quiets.list(i).data() == move.data()) continue;
+                            history.update_butterfly(position.STM(), move, hist::history_malus(depth));
+                        }
                     }
 
                     node_type = tt::NodeType::CutNode;
