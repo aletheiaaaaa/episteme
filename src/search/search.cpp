@@ -85,7 +85,7 @@ namespace episteme::search {
             pick_move(move_list, i);
             Move move = move_list.list(i).move;
 
-            // bool is_quiet = position.mailbox(sq_idx(move.to_square())) == Piece::None && move.move_type() != MoveType::EnPassant;
+            bool is_quiet = position.mailbox(sq_idx(move.to_square())) == Piece::None && move.move_type() != MoveType::EnPassant;
 
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
@@ -124,21 +124,15 @@ namespace episteme::search {
                 PV.update_line(move, candidate);
 
                 if (score >= beta) {
-                    // if (is_quiet) {
-                    //     history.update_butterfly(position.STM(), move, hist::history_bonus(depth));
-                    // }
+                    if (is_quiet) {
+                        history.update_butterfly(position.STM(), move, hist::history_bonus(depth));
+                    }
 
                     node_type = tt::NodeType::CutNode;
                     break;
                 }
             }
         };
-
-        bool is_quiet = position.mailbox(sq_idx(PV.moves[0].to_square())) == Piece::None && PV.moves[0].move_type() != MoveType::EnPassant;
-
-        if (is_quiet && best > beta) {
-            history.update_butterfly(position.STM(), PV.moves[0], hist::history_bonus(depth));
-        }
 
         if (num_legal == 0) return in_check(position, position.STM()) ? (-MATE + ply) : 0;
 

@@ -1,0 +1,186 @@
+diff --git a/src/chess/core.h b/src/chess/core.h
+index 729cff7..9afa20e 100755
+--- a/src/chess/core.h
++++ b/src/chess/core.h
+@@ -6,7 +6,7 @@
+ #include <array>
+ 
+ namespace episteme {
+-    constexpr std::array<int, 6> piece_vals = {1, 3, 3, 5, 9, -1}; 
++    constexpr std::array<int32_t, 6> piece_vals = {1, 3, 3, 5, 9, -1}; 
+ 
+     constexpr uint8_t WHITE_KINGSIDE = 1;
+     constexpr uint8_t WHITE_QUEENSIDE = 1 << 1;
+diff --git a/src/search/history.h b/src/search/history.h
+new file mode 100644
+index 0000000..717ba73
+--- /dev/null
++++ b/src/search/history.h
+@@ -0,0 +1,39 @@
++#include "../chess/move.h"
++
++#include <array>
++#include <cstdint>
++#include <algorithm>
++
++namespace episteme::hist {
++    constexpr int MAX_HISTORY = 16384;
++
++    [[nodiscard]] inline int16_t history_bonus(int16_t depth) {
++        return static_cast<int16_t>(std::clamp(depth * 300, 0, 2500));
++    }
++
++    struct Entry {
++        int16_t value = 0;
++
++        inline void update(int16_t bonus) {
++            value += bonus - value * std::abs(bonus) / MAX_HISTORY;
++        }
++    };
++
++    class Table {
++        public:
++            [[nodiscard]] inline Entry get_butterfly(Color stm, Move move) {
++                return butterfly[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())];
++            }
++
++            inline void update_butterfly(Color stm, Move move, int16_t bonus) {
++                butterfly[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())].update(bonus);
++            }
++
++            inline void reset() {
++                butterfly = {};
++            }
++
++        private:
++            std::array<std::array<std::array<Entry, 64>, 64>, 2> butterfly = {};
++    };
++}
+\ No newline at end of file
+diff --git a/src/search/search.cpp b/src/search/search.cpp
+index 96c0a78..19f685d 100755
+--- a/src/search/search.cpp
++++ b/src/search/search.cpp
+@@ -5,7 +5,7 @@ namespace episteme::search {
+     using namespace std::chrono;
+ 
+     void pick_move(ScoredList& scored_list, int start) {
+-        for (size_t i = start + 1; i <  scored_list.count(); i++)    {
++        for (size_t i = start + 1; i < scored_list.count(); i++)    {
+             if (scored_list.list(i).score > scored_list.list(start).score) {
+                 scored_list.swap(start, i);
+             }
+@@ -44,10 +44,12 @@ namespace episteme::search {
+         bool is_capture = dst != Piece::None || move.move_type() == MoveType::EnPassant;
+ 
+         if (is_capture) {
+-            int src_val = piece_vals[piece_type_idx(src)];
+-            int dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
++            int32_t src_val = piece_vals[piece_type_idx(src)];
++            int32_t dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
+ 
+             scored_move.score += dst_val * 10 - src_val + 100000;
++        } else {
++            scored_move.score += history.get_butterfly(position.STM(), move).value;
+         }
+ 
+         return scored_move;
+@@ -81,6 +83,8 @@ namespace episteme::search {
+             pick_move(move_list, i);
+             Move move = move_list.list(i).move;
+ 
++            bool is_quiet = position.mailbox(sq_idx(move.to_square())) == Piece::None && move.move_type() != MoveType::EnPassant;
++
+             accumulator = eval::update(position, move, accumulator);
+             accum_history.emplace_back(accumulator);
+             position.make_move(move);
+@@ -118,6 +122,10 @@ namespace episteme::search {
+                 PV.update_line(move, candidate);
+ 
+                 if (score >= beta) {
++                    if (is_quiet) {
++                        history.update_butterfly(position.STM(), move, hist::history_bonus(depth));
++                    }
++
+                     node_type = tt::NodeType::CutNode;
+                     break;
+                 }
+diff --git a/src/search/search.h b/src/search/search.h
+index fbb259b..f459ed3 100644
+--- a/src/search/search.h
++++ b/src/search/search.h
+@@ -3,6 +3,7 @@
+ #include "../chess/movegen.h"
+ #include "../evaluation/evaluate.h"
+ #include "ttable.h"
++#include "history.h"
+ 
+ #include <cstdint>
+ #include <chrono>
+@@ -21,7 +22,7 @@ namespace episteme::search {
+ 
+     struct ScoredMove {
+         Move move = {};
+-        int score = 0;
++        int32_t score = 0;
+     };
+ 
+     class ScoredList {
+@@ -122,6 +123,10 @@ namespace episteme::search {
+         public:
+             Thread(tt::Table& ttable) : ttable(ttable) {};
+ 
++            inline void reset_history() {
++                history.reset();
++            }
++
+             ScoredMove score_move(const Position& position, const Move& move, const tt::Entry& tt_entry);
+ 
+             template<typename F>
+@@ -144,6 +149,8 @@ namespace episteme::search {
+             std::vector<nn::Accumulator> accum_history;
+ 
+             tt::Table& ttable;
++            hist::Table history;
++
+             uint64_t nodes;
+     };
+ 
+@@ -164,6 +171,10 @@ namespace episteme::search {
+                 ttable.reset(size);
+             }
+ 
++            inline void reset_history() {
++                thread.reset_history();
++            }
++
+             void run();
+             void bench(int depth);
+         private:
+diff --git a/src/uci/uci.cpp b/src/uci/uci.cpp
+index 6854157..4c1b0a8 100644
+--- a/src/uci/uci.cpp
++++ b/src/uci/uci.cpp
+@@ -82,6 +82,7 @@ namespace episteme::uci {
+             }
+         }
+ 
++        instance.reset_history();
+         instance.update_params(cfg.params);
+         instance.run();
+     }
+@@ -89,12 +90,13 @@ namespace episteme::uci {
+     auto ucinewgame(search::Config& cfg, search::Instance& instance) {
+         cfg.params = {};
+         instance.reset_tt();
++        instance.reset_history();
+     }
+     
+     auto bench(const std::string& args, search::Config& cfg) {
+         int depth = (args.empty()) ? 4 : std::stoi(args);
+         if (!cfg.hash_size) cfg.hash_size = 32;
+-    
++
+         search::Instance instance(cfg);
+         instance.bench(depth);
+     }
