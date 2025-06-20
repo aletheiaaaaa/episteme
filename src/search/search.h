@@ -61,7 +61,7 @@ namespace episteme::search {
         std::array<int32_t, 2> time = {};
         std::array<int32_t, 2> inc = {};
 
-        int16_t depth = 0;
+        int16_t depth = MAX_SEARCH_PLY;
         uint64_t nodes = 0;
 
         Position position;
@@ -127,6 +127,10 @@ namespace episteme::search {
                 history.reset();
             }
 
+            inline void reset_nodes() {
+                nodes = 0;
+            }
+
             ScoredMove score_move(const Position& position, const Move& move, const tt::Entry& tt_entry);
 
             template<typename F>
@@ -143,9 +147,10 @@ namespace episteme::search {
             int32_t search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
             int32_t quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
 
-            ThreadReport run(const Parameters& params);
+            ThreadReport run(const Parameters& params, const SearchLimits& limits);
             int32_t eval(const Parameters& params);
             void bench(int depth);
+
         private:
             nn::Accumulator accumulator;
             std::vector<nn::Accumulator> accum_history;
