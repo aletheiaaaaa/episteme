@@ -7,7 +7,7 @@ namespace episteme {
         return position;
     }
 
-    uint64_t run_perft(Position& position, int32_t depth) {
+    uint64_t perft(Position& position, int32_t depth) {
         if (depth == 0) {
             return 1;
         }
@@ -22,7 +22,7 @@ namespace episteme {
             uint64_t king_bb = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(position.NTM()) + position.COLOR_OFFSET);
                 
             if (!is_square_attacked(sq_from_idx(std::countr_zero(king_bb)), position, position.STM())) {
-                move_count += run_perft(position, depth - 1);
+                move_count += perft(position, depth - 1);
             }
         
             position.unmake_move();
@@ -47,7 +47,7 @@ namespace episteme {
     
             uint64_t nodes = 0;
             if (!illegal) {
-                nodes = run_perft(position, depth - 1);
+                nodes = perft(position, depth - 1);
                 total += nodes;
                 std::cout << move.to_string() << ": " << nodes << "\n";
             }
@@ -63,7 +63,7 @@ namespace episteme {
         using namespace std::chrono;
 
         auto start = steady_clock::now();
-        uint64_t nodes = run_perft(position, depth);
+        uint64_t nodes = perft(position, depth);
         auto end = steady_clock::now();
 
         auto duration = duration_cast<milliseconds>(end - start);
