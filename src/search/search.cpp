@@ -124,8 +124,9 @@ namespace episteme::search {
                 PV.update_line(move, candidate);
 
                 if (score >= beta) {
-                    if (is_quiet) {
+                    if (is_quiet && depth > 1) {
                         history.update_butterfly(position.STM(), move, hist::history_bonus(depth));
+                        std::cout << position.to_FEN() << " " << move.to_string() << " " << depth << std::endl;
                     }
 
                     node_type = tt::NodeType::CutNode;
@@ -300,6 +301,16 @@ namespace episteme::search {
         return report;
     }
 
+    int32_t Thread::eval(const Parameters& params) {
+        Line PV = {};
+
+        Position position = params.position;
+        accumulator = eval::reset(position);
+        accum_history.emplace_back(accumulator);
+
+        return search(position, PV, 0, 0, -INF, INF);
+    }
+
     void Thread::bench(int depth) {
         uint64_t total = 0;
         milliseconds elapsed = 0ms;
@@ -348,6 +359,10 @@ namespace episteme::search {
 
         Move best = variation.line.moves[0];
         std::cout << "bestmove " << best.to_string() << std::endl;
+    }
+
+    void Instance::eval(const Parameters& params) {
+        std::cout << "info score cp " << thread.eval(params) << std::endl;
     }
 
     void Instance::bench(int depth) {
