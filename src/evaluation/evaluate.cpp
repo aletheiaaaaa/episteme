@@ -17,8 +17,8 @@ namespace episteme::eval {
         return accum;
     }
 
-    int32_t evaluate(Accumulator& accum) {
-        int32_t out = nnue->l1_forward(accum);
+    int32_t evaluate(Accumulator& accum, Color stm) {
+        int32_t out = nnue->l1_forward(accum, stm);
         return out;
     }
 }
