@@ -21,7 +21,7 @@ namespace episteme::hist {
 
     class Table {
         public:
-            [[nodiscard]] inline Entry get_butterfly(Color stm, Move move) {
+            [[nodiscard]] inline const Entry get_butterfly(Color stm, Move move) const {
                 return butterfly[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())];
             }
 

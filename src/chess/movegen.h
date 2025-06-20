@@ -1,9 +1,11 @@
 #pragma once
 
 #include "position.h"
+
 #include <unordered_set>
 #include <bit>
 #include <random>
+#include <iostream>
 
 namespace episteme {
     class MoveList {
@@ -33,74 +35,7 @@ namespace episteme {
         uint64_t push_1st, push_2nd, left_captures, right_captures;
     };
 
-    constexpr std::array<uint64_t, 64> BISHOP_MAGICS = {
-        0x3a00802502504e0,
-        0x81c0890900020a,
-        0x81c0890900020a,
-        0x880602004450158,
-        0x880804204004140,
-        0x880602004450158,
-        0x3a00802502504e0,
-        0xa80042100c010,
-        0x880602004450158,
-        0x3a00802502504e0,
-        0x880804204004140,
-        0x880602004450158,
-        0x81c0890900020a,
-        0x3a00802502504e0,
-        0x240001902028088,
-        0x880804204004140,
-        0x880804204004140,
-        0x880602004450158,
-        0x6062240086001204,
-        0x81c0890900020a,
-        0x220102200a48,
-        0x1a084010048048,
-        0x880804204004140,
-        0x880804204004140,
-        0x880602004450158,
-        0x880602004450158,
-        0x2020134002042200,
-        0x8080200820002,
-        0x101008800400a400,
-        0x2020134002042200,
-        0x880602004450158,
-        0x880602004450158,
-        0x4402010000a000,
-        0x880602004450158,
-        0x2000402914c0800,
-        0x902020080480080,
-        0x1002410041040140,
-        0x3a00802502504e0,
-        0x880602004450158,
-        0x880602004450158,
-        0x7710512080d0c,
-        0x7710512080d0c,
-        0x4020244008000090,
-        0x2000402914c0800,
-        0x21200380410,
-        0x3a00802502504e0,
-        0x81c0890900020a,
-        0x880602004450158,
-        0x3a00802502504e0,
-        0x1000c0100130001,
-        0x880602004450158,
-        0x880602004450158,
-        0x1360004002801402,
-        0x880804204004140,
-        0x3a00802502504e0,
-        0x81c0890900020a,
-        0x7710512080d0c,
-        0x880804204004140,
-        0x1360004002801402,
-        0x880602004450158,
-        0x140000010020010,
-        0x880804204004140,
-        0x880602004450158,
-        0x3a00802502504e0,
-    };
-
-    constexpr std::array<uint64_t, 64> ROOK_MAGICS = {
+    const std::array<uint64_t, 64> ROOK_MAGICS = {
         0x80024000802910,
         0x100100821004040,
         0x80a000a004840008,
@@ -167,6 +102,73 @@ namespace episteme {
         0x1000010020c28412,
     };
 
+    const std::array<uint64_t, 64> BISHOP_MAGICS = {
+        0x3a00802502504e0,
+        0x81c0890900020a,
+        0x81c0890900020a,
+        0x880602004450158,
+        0x880804204004140,
+        0x880602004450158,
+        0x3a00802502504e0,
+        0xa80042100c010,
+        0x880602004450158,
+        0x3a00802502504e0,
+        0x880804204004140,
+        0x880602004450158,
+        0x81c0890900020a,
+        0x3a00802502504e0,
+        0x240001902028088,
+        0x880804204004140,
+        0x880804204004140,
+        0x880602004450158,
+        0x6062240086001204,
+        0x81c0890900020a,
+        0x220102200a48,
+        0x1a084010048048,
+        0x880804204004140,
+        0x880804204004140,
+        0x880602004450158,
+        0x880602004450158,
+        0x2020134002042200,
+        0x8080200820002,
+        0x101008800400a400,
+        0x2020134002042200,
+        0x880602004450158,
+        0x880602004450158,
+        0x4402010000a000,
+        0x880602004450158,
+        0x2000402914c0800,
+        0x902020080480080,
+        0x1002410041040140,
+        0x3a00802502504e0,
+        0x880602004450158,
+        0x880602004450158,
+        0x7710512080d0c,
+        0x7710512080d0c,
+        0x4020244008000090,
+        0x2000402914c0800,
+        0x21200380410,
+        0x3a00802502504e0,
+        0x81c0890900020a,
+        0x880602004450158,
+        0x3a00802502504e0,
+        0x1000c0100130001,
+        0x880602004450158,
+        0x880602004450158,
+        0x1360004002801402,
+        0x880804204004140,
+        0x3a00802502504e0,
+        0x81c0890900020a,
+        0x7710512080d0c,
+        0x880804204004140,
+        0x1360004002801402,
+        0x880602004450158,
+        0x140000010020010,
+        0x880804204004140,
+        0x880602004450158,
+        0x3a00802502504e0,
+    };
+
     [[nodiscard]] std::array<uint64_t, 64> fill_king_attacks();
     [[nodiscard]] std::array<uint64_t, 64> fill_knight_attacks();
     [[nodiscard]] std::array<uint64_t, 64> fill_bishop_masks();
@@ -174,7 +176,7 @@ namespace episteme {
 
     [[nodiscard]] uint64_t slow_bishop_attacks(Square square, uint64_t blockers);
     [[nodiscard]] uint64_t slow_rook_attacks(Square square, uint64_t blockers);
-    
+
     [[nodiscard]] bool is_square_attacked(Square square, const Position& position, Color stm);
 
     extern const std::array<uint64_t, 64> KING_ATTACKS;
@@ -190,6 +192,19 @@ namespace episteme {
 
     extern const std::array<uint64_t, 64> ROOK_MASKS;
     extern const std::array<uint64_t, 64> BISHOP_MASKS;
+
+    template<size_t NUM_BITS, typename F>
+    extern std::pair<uint64_t, std::array<uint64_t, 1 << NUM_BITS>> find_magics(Square square, std::array<uint64_t, 64> MASKS, F slow_attacks);
+
+    [[nodiscard]] inline std::pair<uint64_t, std::array<uint64_t, 4096>> find_rook_magics(Square square) {
+        return find_magics<12>(square, ROOK_MASKS, slow_rook_attacks);
+    }
+
+    [[nodiscard]] inline std::pair<uint64_t, std::array<uint64_t, 512>> find_bishop_magics(Square square) {
+        return find_magics<9>(square, BISHOP_MASKS, slow_bishop_attacks);
+    }
+
+    void print_magics();
 
     extern const std::array<std::array<uint64_t, 4096>, 64> ROOK_ATTACKS;
     extern const std::array<std::array<uint64_t, 512>, 64> BISHOP_ATTACKS;

@@ -50,7 +50,7 @@ namespace episteme {
         }
 
         if (tokens[3] != "-") {
-            state.ep_square = static_cast<Square>((tokens[3][0] - 'a') * 8 + (tokens[3][1] - '1'));
+            state.ep_square = static_cast<Square>((tokens[3][0] - 'a') + (tokens[3][1] - '1') * 8);
         }
 
         state.half_move_clock = std::stoi(tokens[4]);
@@ -243,6 +243,17 @@ namespace episteme {
                     state.hash ^= zobrist::piecesquares[piecesquare(dst, sq_dst, false)];
                     state.bitboards[piece_type_idx(piece_type(dst))] ^= bb_dst;
                     state.bitboards[them + COLOR_OFFSET] ^= bb_dst;
+
+                    if (piece_type(dst) == PieceType::Rook) {
+                        state.hash ^= zobrist::castling_rights[state.allowed_castles.as_mask()];
+                        auto& rooks = state.allowed_castles.rooks[them];
+                        if (sq_dst == rooks.kingside) {
+                            rooks.unset(true);
+                        } else if (sq_dst == rooks.queenside) {
+                            rooks.unset(false);
+                        }
+                        state.hash ^= zobrist::castling_rights[state.allowed_castles.as_mask()];
+                    }
                 }
 
                 PieceType promo_type = move.promo_piece_type();
