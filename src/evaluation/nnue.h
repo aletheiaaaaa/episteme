@@ -19,15 +19,15 @@ namespace episteme::nn {
     constexpr int L1_WIDTH = 1024;
 
     struct Accumulator {
-        alignas(32) std::array<int16_t, L1_WIDTH> white = {};
-        alignas(32) std::array<int16_t, L1_WIDTH> black = {};
+        alignas(32) std::array<int16_t, 1024> stm = {};
+        alignas(32) std::array<int16_t, 1024> ntm = {};
     };
 
     class NNUE {
         public:
             Accumulator update_accumulator(const Position& position, const Move& move, Accumulator accum) const;
             Accumulator reset_accumulator(const Position& position) const;
-            int32_t l1_forward(const Accumulator& accum, Color stm) const; 
+            int32_t l1_forward(const Accumulator& accum) const; 
 
         private:
             using L0Weights = std::array<std::array<int16_t, L1_WIDTH>, 768>;

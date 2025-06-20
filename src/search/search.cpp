@@ -150,7 +150,7 @@ namespace episteme::search {
             return tt_entry.score;
         }
 
-        int32_t eval = eval::evaluate(accumulator, position.STM());
+        int32_t eval = eval::evaluate(accumulator);
 
         int32_t best = eval;
         if (best > alpha) {
@@ -247,7 +247,7 @@ namespace episteme::search {
         accumulator = eval::reset(position);
         accum_history.emplace_back(accumulator);
 
-        return eval::evaluate(accumulator, position.STM());
+        return eval::evaluate(accumulator);
     }
 
     void Thread::bench(int depth) {
