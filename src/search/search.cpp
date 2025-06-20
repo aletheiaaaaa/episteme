@@ -215,81 +215,39 @@ namespace episteme::search {
         return best;
     }
 
-    ThreadReport Thread::run(const Parameters& params) {
-        int32_t final_score = -1;
+    ThreadReport Thread::run(const Parameters& params, const SearchLimits& limits) {
         Line PV = {};
-
         int64_t elapsed = 0;
         int64_t nps = 0;
-        int16_t search_depth = 0;
 
         Position position = params.position;
         accumulator = eval::reset(position);
         accum_history.emplace_back(accumulator);
 
-        int16_t target_depth = params.depth;
-        uint64_t target_nodes = params.nodes;
-        int32_t time = params.time[color_idx(position.STM())];
-        int32_t inc = params.inc[color_idx(position.STM())];
+        auto start = steady_clock::now();
+        int32_t score = search(position, PV, params.depth, 0, -INF, INF, limits);
 
-        nodes = 0;
-
-        if (target_nodes) {
-            auto start = steady_clock::now();
-
-            SearchLimits limits;
-            limits.max_nodes = target_nodes;
-
-            for (int depth = 1; depth < MAX_SEARCH_PLY; depth++) {
-                int32_t score = search(position, PV, depth, 0, -INF, INF, limits);
-                if (limits.node_exceeded(nodes)) break;
-
-                final_score = score;
-                search_depth = depth;
-            };
-
-            elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
-        }
-
-        if (target_depth) {
-            auto start = steady_clock::now();
-
-            final_score = search(position, PV, target_depth, 0, -INF, INF);
-
-            search_depth = target_depth;
-            elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
-        }
-
-        if (time) {
-            auto start = steady_clock::now();
-            auto end = start + milliseconds(time / 20 + inc / 2);
-
-            SearchLimits limits;
-            limits.end = end;
-
-            for (int depth = 1; depth < MAX_SEARCH_PLY; depth++) {
-                int32_t score = search(position, PV, depth, 0, -INF, INF, limits);
-                if (limits.time_exceeded()) break;
-
-                final_score = score;
-                search_depth = depth;
-            };  
-
-            elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
-        }
-
+        elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
         nps = (elapsed > 0) ? (1000 * nodes) / elapsed : nodes;
 
         ThreadReport report {
-            .depth = search_depth,
+            .depth = params.depth,
             .time = elapsed,
             .nodes = nodes,
             .nps = nps,
-            .score = final_score,
+            .score = score,
             .line = PV
         };
 
         return report;
+    }
+
+    int32_t Thread::eval(const Parameters& params) {
+        Position position = params.position;
+        accumulator = eval::reset(position);
+        accum_history.emplace_back(accumulator);
+
+        return eval::evaluate(accumulator);
     }
 
     void Thread::bench(int depth) {
@@ -318,28 +276,54 @@ namespace episteme::search {
     }
 
     void Instance::run() {
-        ThreadReport variation = thread.run(params);
+        Position position = params.position;
+        int16_t max_depth = params.depth;
+        uint64_t target_nodes = params.nodes;
+        int32_t time = params.time[color_idx(position.STM())];
+        int32_t inc  = params.inc[color_idx(position.STM())];
 
-        bool is_mate = std::abs(variation.score) >= MATE - MAX_SEARCH_PLY;
+        SearchLimits limits;
+        if (target_nodes) limits.max_nodes = target_nodes;
+        if (time)limits.end = steady_clock::now() + milliseconds(time / 20 + inc / 2);
 
-        int32_t score = (is_mate)
-            ? ((1 + MATE - std::abs(variation.score)) / 2) * (variation.score > 0 ? 1 : -1)
-            : variation.score;
+        thread.reset_nodes();
 
-        std::cout << "info depth " << variation.depth 
-            << " time " << variation.time 
-            << " nodes " << variation.nodes 
-            << " nps " << variation.nps
-            << " score " << (is_mate ? "mate " : "cp ") << score
-            << " pv ";
+        ThreadReport last_report;
 
-        for (size_t i = 0; i < variation.line.length; i++) {
-            std::cout << variation.line.moves[i].to_string() << " ";
+        for (int depth = 1; depth <= max_depth; ++depth) {
+            Parameters iter_params = params;
+            iter_params.depth = depth;
+
+            ThreadReport report = thread.run(iter_params, limits);
+            
+            if ((target_nodes && limits.node_exceeded(report.nodes)) || (limits.end != time_point<steady_clock>() && limits.time_exceeded())) break;
+
+            last_report = report;
+
+            bool is_mate = std::abs(report.score) >= MATE - MAX_SEARCH_PLY;
+            int32_t display_score = is_mate
+                ? ((1 + MATE - std::abs(report.score)) / 2)
+                : report.score;
+
+            std::cout << "info depth " << report.depth
+                << " time " << report.time
+                << " nodes " << report.nodes
+                << " nps " << report.nps
+                << " score " << (is_mate ? "mate " : "cp ") << display_score
+                << " pv ";
+
+            for (size_t i = 0; i < report.line.length; ++i) {
+                std::cout << report.line.moves[i].to_string() << " ";
+            }
+            std::cout << std::endl;
         }
-        std::cout << std::endl;
-
-        Move best = variation.line.moves[0];
+    
+        Move best = last_report.line.moves[0];
         std::cout << "bestmove " << best.to_string() << std::endl;
+    }
+    
+    void Instance::eval(const Parameters& params) {
+        std::cout << "info score cp " << thread.eval(params) << std::endl;
     }
 
     void Instance::bench(int depth) {
