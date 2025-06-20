@@ -124,7 +124,7 @@ namespace episteme::search {
                 PV.update_line(move, candidate);
 
                 if (score >= beta) {
-                    if (is_quiet && depth > 1) {
+                    if (is_quiet) {
                         history.update_butterfly(position.STM(), move, hist::history_bonus(depth));
                     }
 
