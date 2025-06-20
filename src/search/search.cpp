@@ -130,9 +130,9 @@ namespace episteme::search {
                 if (score >= beta) {
                     if (is_quiet) {
                         history.update_butterfly(position.STM(), move, hist::history_bonus(depth));
-                        for (i = 0; i < explored_quiets.count(); i++) {
-                            if (explored_quiets.list(i).data() == move.data()) continue;
-                            history.update_butterfly(position.STM(), move, hist::history_malus(depth));
+                        for (size_t j = 0; j < explored_quiets.count(); j++) {
+                            if (explored_quiets.list(j).data() == move.data()) continue;
+                            history.update_butterfly(position.STM(), explored_quiets.list(j), hist::history_malus(depth));
                         }
                     }
 
