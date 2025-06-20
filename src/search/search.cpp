@@ -126,7 +126,6 @@ namespace episteme::search {
                 if (score >= beta) {
                     if (is_quiet && depth > 1) {
                         history.update_butterfly(position.STM(), move, hist::history_bonus(depth));
-                        std::cout << position.to_FEN() << " " << move.to_string() << " " << depth << std::endl;
                     }
 
                     node_type = tt::NodeType::CutNode;
