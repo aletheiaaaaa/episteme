@@ -251,13 +251,10 @@ namespace episteme::search {
     }
 
     int32_t Thread::eval(const Parameters& params) {
-        Line PV = {};
-
         Position position = params.position;
         accumulator = eval::reset(position);
-        accum_history.emplace_back(accumulator);
 
-        return search(position, PV, 0, 0, -INF, INF);
+        return eval::evaluate(accumulator, position.STM());
     }
 
     void Thread::bench(int depth) {
