@@ -82,6 +82,7 @@ namespace episteme::uci {
             }
         }
 
+        instance.reset_history();
         instance.update_params(cfg.params);
         instance.run();
     }
@@ -89,12 +90,17 @@ namespace episteme::uci {
     auto ucinewgame(search::Config& cfg, search::Instance& instance) {
         cfg.params = {};
         instance.reset_tt();
+        instance.reset_history();
+    }
+    
+    auto eval(search::Config& cfg, search::Instance& instance) {
+        instance.eval(cfg.params);
     }
     
     auto bench(const std::string& args, search::Config& cfg) {
         int depth = (args.empty()) ? 4 : std::stoi(args);
         if (!cfg.hash_size) cfg.hash_size = 32;
-    
+
         search::Instance instance(cfg);
         instance.bench(depth);
     }
@@ -127,6 +133,8 @@ namespace episteme::uci {
             std::string arg = (space != std::string::npos) ? cmd.substr(space+1) : "";
             perft(arg, cfg);
         }
+
+        else if (keyword == "eval") eval(cfg, instance);
 
         else std::cout << "invalid command\n";
 

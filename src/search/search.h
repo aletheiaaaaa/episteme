@@ -3,6 +3,7 @@
 #include "../chess/movegen.h"
 #include "../evaluation/evaluate.h"
 #include "ttable.h"
+#include "history.h"
 
 #include <cstdint>
 #include <chrono>
@@ -21,7 +22,7 @@ namespace episteme::search {
 
     struct ScoredMove {
         Move move = {};
-        int score = 0;
+        int32_t score = 0;
     };
 
     class ScoredList {
@@ -122,6 +123,10 @@ namespace episteme::search {
         public:
             Thread(tt::Table& ttable) : ttable(ttable) {};
 
+            inline void reset_history() {
+                history.reset();
+            }
+
             inline void reset_nodes() {
                 nodes = 0;
             }
@@ -145,11 +150,14 @@ namespace episteme::search {
             ThreadReport run(const Parameters& params, const SearchLimits& limits);
             int32_t eval(const Parameters& params);
             void bench(int depth);
+
         private:
             nn::Accumulator accumulator;
             std::vector<nn::Accumulator> accum_history;
 
             tt::Table& ttable;
+            hist::Table history;
+
             uint64_t nodes;
     };
 
@@ -168,6 +176,10 @@ namespace episteme::search {
             inline void reset_tt() {
                 size_t size = ttable.size();
                 ttable.reset(size);
+            }
+
+            inline void reset_history() {
+                thread.reset_history();
             }
 
             void run();

@@ -7,7 +7,7 @@ namespace episteme::search {
     using namespace std::chrono;
 
     void pick_move(ScoredList& scored_list, int start) {
-        for (size_t i = start + 1; i <  scored_list.count(); i++)    {
+        for (size_t i = start + 1; i < scored_list.count(); i++)    {
             if (scored_list.list(i).score > scored_list.list(start).score) {
                 scored_list.swap(start, i);
             }
@@ -46,10 +46,12 @@ namespace episteme::search {
         bool is_capture = dst != Piece::None || move.move_type() == MoveType::EnPassant;
 
         if (is_capture) {
-            int src_val = piece_vals[piece_type_idx(src)];
-            int dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
+            int32_t src_val = piece_vals[piece_type_idx(src)];
+            int32_t dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
 
             scored_move.score += dst_val * 10 - src_val + 100000;
+        } else {
+            scored_move.score += history.get_butterfly(position.STM(), move).value;
         }
 
         return scored_move;
@@ -82,6 +84,8 @@ namespace episteme::search {
         for (size_t i = 0; i < move_list.count(); i++) { 
             pick_move(move_list, i);
             Move move = move_list.list(i).move;
+
+            bool is_quiet = position.mailbox(sq_idx(move.to_square())) == Piece::None && move.move_type() != MoveType::EnPassant;
 
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
@@ -120,6 +124,10 @@ namespace episteme::search {
                 PV.update_line(move, candidate);
 
                 if (score >= beta) {
+                    if (is_quiet) {
+                        history.update_butterfly(position.STM(), move, hist::history_bonus(depth));
+                    }
+
                     node_type = tt::NodeType::CutNode;
                     break;
                 }
@@ -243,11 +251,13 @@ namespace episteme::search {
     }
 
     int32_t Thread::eval(const Parameters& params) {
+        Line PV = {};
+
         Position position = params.position;
         accumulator = eval::reset(position);
         accum_history.emplace_back(accumulator);
 
-        return eval::evaluate(accumulator, position.STM());
+        return search(position, PV, 0, 0, -INF, INF);
     }
 
     void Thread::bench(int depth) {
@@ -321,7 +331,7 @@ namespace episteme::search {
         Move best = last_report.line.moves[0];
         std::cout << "bestmove " << best.to_string() << std::endl;
     }
-    
+
     void Instance::eval(const Parameters& params) {
         std::cout << "info score cp " << thread.eval(params) << std::endl;
     }
