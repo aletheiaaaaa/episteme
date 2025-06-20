@@ -9,18 +9,19 @@ namespace episteme::nn {
         Piece pc_src = mailbox[sq_idx(sq_src)];
         Piece pc_dst = mailbox[sq_idx(sq_dst)];
 
-        int src_stm = piecesquare(pc_src, sq_src, false);
-        int dst_stm = piecesquare(pc_src, sq_dst, false);
-        int src_ntm = piecesquare(pc_src, sq_src, true);
-        int dst_ntm = piecesquare(pc_src, sq_dst, true);
+        int w_src = piecesquare(pc_src, sq_src, false);
+        int w_dst = piecesquare(pc_src, sq_dst, false);
+
+        int b_src = piecesquare(pc_src, sq_src, true);
+        int b_dst = piecesquare(pc_src, sq_dst, true);
 
         if (pc_dst != Piece::None){
-            int capt_stm = piecesquare(pc_dst, sq_dst, false);
-            int capt_ntm = piecesquare(pc_dst, sq_dst, true);
+            int w_capt = piecesquare(pc_dst, sq_dst, false);
+            int b_capt = piecesquare(pc_dst, sq_dst, true);
 
             for (int i = 0; i < L1_WIDTH; i++) {
-                accum.stm[i] -= l0_weights[capt_stm][i];
-                accum.ntm[i] -= l0_weights[capt_ntm][i];
+                accum.white[i] -= l0_weights[w_capt][i];
+                accum.black[i] -= l0_weights[b_capt][i];
             }
 
         } else if (move.move_type() == MoveType::Castling) {
@@ -37,17 +38,18 @@ namespace episteme::nn {
             
             Piece rook = mailbox[sq_idx(rook_src)];
             
-            int rook_src_stm = piecesquare(rook, rook_src, false);
-            int rook_dst_stm = piecesquare(rook, rook_dst, false);
-            int rook_src_ntm = piecesquare(rook, rook_src, true);
-            int rook_dst_ntm = piecesquare(rook, rook_dst, true);
+            int w_rook_src = piecesquare(rook, rook_src, false);
+            int w_rook_dst = piecesquare(rook, rook_dst, false);
+
+            int b_rook_src = piecesquare(rook, rook_src, true);
+            int b_rook_dst = piecesquare(rook, rook_dst, true);
             
             for (int i = 0; i < L1_WIDTH; i++) {
-                accum.stm[i] -= l0_weights[rook_src_stm][i];
-                accum.stm[i] += l0_weights[rook_dst_stm][i];
+                accum.white[i] -= l0_weights[w_rook_src][i];
+                accum.white[i] += l0_weights[w_rook_dst][i];
                 
-                accum.ntm[i] -= l0_weights[rook_src_ntm][i];
-                accum.ntm[i] += l0_weights[rook_dst_ntm][i];
+                accum.black[i] -= l0_weights[b_rook_src][i];
+                accum.black[i] += l0_weights[b_rook_dst][i];
             }
 
         } else if (move.move_type() == MoveType::EnPassant) {
@@ -55,26 +57,26 @@ namespace episteme::nn {
             int idx_ep = (position.STM() == Color::White) ? (sq_idx(sq_ep) - 8) : (sq_idx(sq_ep) + 8);
             Piece pc_ep = mailbox[idx_ep];
 
-            int capt_stm = piecesquare(pc_ep, sq_from_idx(idx_ep), false);
-            int capt_ntm = piecesquare(pc_ep, sq_from_idx(idx_ep), true);
+            int w_capt = piecesquare(pc_ep, sq_from_idx(idx_ep), false);
+            int b_capt = piecesquare(pc_ep, sq_from_idx(idx_ep), true);
 
             for (int i = 0; i < L1_WIDTH; i++) {
-                accum.stm[i] -= l0_weights[capt_stm][i];
-                accum.ntm[i] -= l0_weights[capt_ntm][i];
+                accum.white[i] -= l0_weights[w_capt][i];
+                accum.black[i] -= l0_weights[b_capt][i];
             }
         }
 
         if (move.move_type() == MoveType::Promotion) {
-            dst_stm = piecesquare(piece_type_with_color(move.promo_piece_type(), position.STM()), sq_dst, false);
-            dst_ntm = piecesquare(piece_type_with_color(move.promo_piece_type(), position.STM()), sq_dst, true);
+            w_dst = piecesquare(piece_type_with_color(move.promo_piece_type(), position.STM()), sq_dst, false);
+            b_dst = piecesquare(piece_type_with_color(move.promo_piece_type(), position.STM()), sq_dst, true);
         }
 
         for (int i = 0; i < L1_WIDTH; i++) {
-            accum.stm[i] -= l0_weights[src_stm][i];
-            accum.stm[i] += l0_weights[dst_stm][i];
+            accum.white[i] -= l0_weights[w_src][i];
+            accum.white[i] += l0_weights[w_dst][i];
 
-            accum.ntm[i] -= l0_weights[src_ntm][i];
-            accum.ntm[i] += l0_weights[dst_ntm][i];
+            accum.black[i] -= l0_weights[b_src][i];
+            accum.black[i] += l0_weights[b_dst][i];
         }
 
         return accum;
@@ -85,31 +87,35 @@ namespace episteme::nn {
         std::array<Piece, 64> mailbox = position.mailbox_all();
 
         for (size_t i = 0; i < 64; i++) {
-            int stm = piecesquare(mailbox[i], sq_from_idx(i), false);
-            int ntm = piecesquare(mailbox[i], sq_from_idx(i), true);
+            int w_psq = piecesquare(mailbox[i], sq_from_idx(i), false);
+            int b_psq = piecesquare(mailbox[i], sq_from_idx(i), true);
 
-            if (stm != -1) {
+            if (w_psq != -1) {
                 for (int j = 0; j < L1_WIDTH; j++) {
-                    accum.stm[j] += l0_weights[stm][j];
+                    accum.white[j] += l0_weights[w_psq][j];
                 }
             }
 
-            if (ntm != -1) {
+            if (b_psq != -1) {
                 for (int j = 0; j < L1_WIDTH; j++) {
-                    accum.ntm[j] += l0_weights[ntm][j];
+                    accum.black[j] += l0_weights[b_psq][j];
                 }
             }
         }
         
         for (int i = 0; i < L1_WIDTH; i++) {
-            accum.stm[i] += l0_biases[i];
-            accum.ntm[i] += l0_biases[i];
+            accum.white[i] += l0_biases[i];
+            accum.black[i] += l0_biases[i];
         }
         
         return accum;
     }
 
-    int32_t NNUE::l1_forward(const Accumulator& accum) const {
+    int32_t NNUE::l1_forward(const Accumulator& accum, Color stm) const {
+
+        const auto& accum_stm = (!color_idx(stm)) ? (accum.white) : (accum.black);
+        const auto& accum_ntm = (!color_idx(stm)) ? (accum.black) : (accum.white);
+
         __m256i temp_0 = _mm256_setzero_si256();
         __m256i temp_1 = _mm256_setzero_si256();
         __m256i temp_2 = _mm256_setzero_si256();
@@ -117,8 +123,8 @@ namespace episteme::nn {
 
         for (int i = 0; i < L1_WIDTH; i += 64) {
             auto partial = [&](__m256i temp, int offset) {
-                __m256i stm_pre = _mm256_load_si256(reinterpret_cast<const __m256i*>(&accum.stm[i + offset]));
-                __m256i ntm_pre = _mm256_load_si256(reinterpret_cast<const __m256i*>(&accum.ntm[i + offset]));
+                __m256i stm_pre = _mm256_load_si256(reinterpret_cast<const __m256i*>(&accum_stm[i + offset]));
+                __m256i ntm_pre = _mm256_load_si256(reinterpret_cast<const __m256i*>(&accum_ntm[i + offset]));
                 __m256i l1w0 = _mm256_load_si256(reinterpret_cast<const __m256i*>(&l1_weights[0][i + offset]));
                 __m256i l1w1 = _mm256_load_si256(reinterpret_cast<const __m256i*>(&l1_weights[1][i + offset]));
 
