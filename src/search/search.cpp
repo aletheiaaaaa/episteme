@@ -183,13 +183,6 @@ namespace episteme::search {
             pick_move(captures_list, i);
             Move move = captures_list.list(i).move;
 
-            PieceType src = piece_type(position.mailbox(sq_idx(move.from_square())));
-            PieceType dst = piece_type(position.mailbox(sq_idx(move.to_square())));
-            int src_val = piece_vals[piece_type_idx(src)];
-            int dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
-
-            if (dst_val - src_val < 0) continue;
-
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
             position.make_move(move);
