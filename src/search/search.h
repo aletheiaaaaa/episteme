@@ -144,7 +144,9 @@ namespace episteme::search {
                 return generate_scored_targets(position, generate_all_captures, tt_entry);
             }
 
-            int32_t search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
+            template<bool PV_node>
+            int32_t search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits = {});
+
             int32_t quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
 
             ThreadReport run(const Parameters& params, const SearchLimits& limits);

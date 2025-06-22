@@ -3,7 +3,7 @@ project(valhalla)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-mavx2 -g -fsanitize=address -fsanitize=undefined")
-set(CMAKE_CXX_FLAGS_RELEASE "-mavx2 -O3 -flto")
+set(CMAKE_CXX_FLAGS_RELEASE "-mavx2 -O3 -flto=auto")
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
