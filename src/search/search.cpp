@@ -112,14 +112,14 @@ namespace episteme::search {
             if (limits.node_exceeded(nodes)) return 0;
 
             Line candidate = {};
+            int32_t score;
 
-            int32_t score = -search<false>(position, candidate, depth - 1, ply + 1, -beta, -alpha, limits);
             if (!is_PV || num_legal > 1) {
-                score = -search<false>(position, candidate, depth - 1, ply + 1, -alpha - 1, -alpha, limits)
+                score = -search<false>(position, candidate, depth - 1, ply + 1, -alpha - 1, -alpha, limits);
             }
 
             if (is_PV && (num_legal == 1 || score > alpha)) {
-                score = -search<true>(position, candidate, depth - 1, ply + 1, -beta, -alpha, limits)
+                score = -search<true>(position, candidate, depth - 1, ply + 1, -beta, -alpha, limits);
             }
 
             position.unmake_move();
