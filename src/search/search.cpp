@@ -84,6 +84,18 @@ namespace episteme::search {
             if (depth <= 5 && eval >= beta + depth * 100) return eval;
         }
 
+        if (!is_PV && !in_check(position, position.STM()) && depth >= 3) {
+            Line null{};
+
+            position.make_move(Move());
+            int32_t score = -search<false>(position, null, depth - 3, ply + 1, -beta, -beta + 1, limits);
+            position.unmake_move();
+            if (score >= beta) {
+                if (std::abs(score) >= MATE - MAX_SEARCH_PLY) return beta;
+                return score;
+            };
+        }
+
         ScoredList move_list = generate_scored_moves(position, tt_entry);
         int32_t best = -INF;
 
