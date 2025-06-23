@@ -57,7 +57,8 @@ namespace episteme::search {
         return scored_move;
     }
 
-    int32_t Thread::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits = {}) {
+    template<bool PV_node>
+    int32_t Thread::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
         if (limits.time_exceeded()) return 0;
 
         if (position.is_threefold()) return 0;
@@ -75,6 +76,8 @@ namespace episteme::search {
         ) {
             return tt_entry.score;
         }
+
+        constexpr bool is_PV = PV_node;
 
         ScoredList move_list = generate_scored_moves(position, tt_entry);
         int32_t best = -INF;
@@ -109,7 +112,15 @@ namespace episteme::search {
             if (limits.node_exceeded(nodes)) return 0;
 
             Line candidate = {};
-            int32_t score = -search(position, candidate, depth - 1, ply + 1, -beta, -alpha, limits);
+            int32_t score;
+
+            if (!is_PV || num_legal > 1) {
+                score = -search<false>(position, candidate, depth - 1, ply + 1, -alpha - 1, -alpha, limits);
+            }
+
+            if (is_PV && (num_legal == 1 || score > alpha)) {
+                score = -search<true>(position, candidate, depth - 1, ply + 1, -beta, -alpha, limits);
+            }
 
             position.unmake_move();
             accum_history.pop_back();
@@ -237,14 +248,7 @@ namespace episteme::search {
         int32_t beta = (depth == 1) ? MATE : last_score + delta;
 
         auto start = steady_clock::now();
-        int32_t score = search(position, PV, depth, 0, alpha, beta, limits);
-
-        while (score <= alpha || score >= beta) {
-            delta *= 2;
-            alpha = last_score - delta;
-            beta = last_score + delta;
-            score = search(position, PV, depth, 0, alpha, beta, limits);
-        }
+        int32_t score = search<true>(position, PV, params.depth, 0, -INF, INF, limits);
 
         int64_t elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
         int64_t nps = (elapsed > 0) ? (1000 * nodes) / elapsed : nodes;
@@ -282,7 +286,7 @@ namespace episteme::search {
             nodes = 0;
 
             auto start = steady_clock::now();
-            int32_t _ = search(position, PV, depth, 0, -INF, INF);
+            int32_t _ = search<true>(position, PV, depth, 0, -INF, INF);
             auto end = steady_clock::now();
 
             elapsed += duration_cast<milliseconds>(end - start);
