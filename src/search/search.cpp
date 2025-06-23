@@ -79,6 +79,11 @@ namespace episteme::search {
 
         constexpr bool is_PV = PV_node;
 
+        if (!in_check(position, position.STM())) {
+            int32_t eval = eval::evaluate(accumulator);
+            if (!is_PV && depth <= 5 && eval >= beta + depth * 100) return eval;
+        }
+
         ScoredList move_list = generate_scored_moves(position, tt_entry);
         int32_t best = -INF;
 
