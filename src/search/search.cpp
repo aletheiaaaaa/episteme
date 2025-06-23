@@ -248,7 +248,14 @@ namespace episteme::search {
         int32_t beta = (depth == 1) ? MATE : last_score + delta;
 
         auto start = steady_clock::now();
-        int32_t score = search<true>(position, PV, params.depth, 0, -INF, INF, limits);
+        int32_t score = search<true>(position, PV, depth, 0, alpha, beta, limits);
+
+        while (score <= alpha || score >= beta) {
+            delta *= 2;
+            alpha = last_score - delta;
+            beta = last_score + delta;
+            score = search<true>(position, PV, depth, 0, alpha, beta, limits);
+        }
 
         int64_t elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
         int64_t nps = (elapsed > 0) ? (1000 * nodes) / elapsed : nodes;
