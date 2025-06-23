@@ -88,6 +88,7 @@ namespace episteme {
             void from_startpos();
 
             void make_move(const Move& move);
+            void make_null();
             void unmake_move();
 
             bool is_threefold();

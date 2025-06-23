@@ -87,7 +87,7 @@ namespace episteme::search {
         if (!is_PV && !in_check(position, position.STM()) && depth >= 3) {
             Line null{};
 
-            position.make_move(Move());
+            position.make_null();
             int32_t score = -search<false>(position, null, depth - 3, ply + 1, -beta, -beta + 1, limits);
             position.unmake_move();
             if (score >= beta) {

@@ -277,6 +277,24 @@ namespace episteme {
         position_history.emplace_back(state);
     }
 
+    void Position::make_null() {
+        if (state.ep_square != Square::None) {
+            state.hash ^= zobrist::ep_files[file(state.ep_square)];
+            state.ep_square = Square::None;
+        }
+
+        state.half_move_clock++;
+
+        if (STM() == Color::Black) {
+            state.full_move_number++;
+        }
+
+        state.stm = !state.stm;
+        state.hash ^= zobrist::stm;
+
+        position_history.emplace_back(state);
+    }
+    
     void Position::unmake_move() {
         position_history.pop_back();
         const PositionState& prev = position_history.back();
