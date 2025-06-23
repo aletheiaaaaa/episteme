@@ -224,27 +224,37 @@ namespace episteme::search {
         return best;
     }
 
-    ThreadReport Thread::run(const Parameters& params, const SearchLimits& limits) {
-        Line PV = {};
-        int64_t elapsed = 0;
-        int64_t nps = 0;
-
+    ThreadReport Thread::run(int32_t last_score, const Parameters& params, const SearchLimits& limits) {
         Position position = params.position;
         accumulator = eval::reset(position);
         accum_history.emplace_back(accumulator);
 
-        auto start = steady_clock::now();
-        int32_t score = search(position, PV, params.depth, 0, -INF, INF, limits);
+        Line PV{};
+        int16_t depth = params.depth;
+        int32_t delta = DELTA;
 
-        elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
-        nps = (elapsed > 0) ? (1000 * nodes) / elapsed : nodes;
+        int32_t alpha = (depth == 1) ? -MATE : last_score - delta;
+        int32_t beta = (depth == 1) ? MATE : last_score + delta;
+
+        auto start = steady_clock::now();
+        int32_t score = search(position, PV, depth, 0, alpha, beta, limits);
+
+        while (score <= alpha || score >= beta) {
+            delta *= 2;
+            alpha = last_score - delta;
+            beta = last_score + delta;
+            score = search(position, PV, depth, 0, alpha, beta, limits);
+        }
+
+        int64_t elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
+        int64_t nps = (elapsed > 0) ? (1000 * nodes) / elapsed : nodes;
 
         ThreadReport report {
             .depth = params.depth,
             .time = elapsed,
             .nodes = nodes,
             .nps = nps,
-            .score = score,
+            .score = last_score,
             .line = PV
         };
 
@@ -297,16 +307,18 @@ namespace episteme::search {
         thread.reset_nodes();
 
         ThreadReport last_report;
+        int32_t last_score = 0;
 
         for (int depth = 1; depth <= max_depth; ++depth) {
             Parameters iter_params = params;
             iter_params.depth = depth;
 
-            ThreadReport report = thread.run(iter_params, limits);
+            ThreadReport report = thread.run(last_score, iter_params, limits);
             
             if ((target_nodes && limits.node_exceeded(report.nodes)) || (limits.end != time_point<steady_clock>() && limits.time_exceeded())) break;
 
             last_report = report;
+            last_score = report.score;
 
             bool is_mate = std::abs(report.score) >= MATE - MAX_SEARCH_PLY;
             int32_t display_score = is_mate

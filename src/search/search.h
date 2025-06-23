@@ -14,10 +14,6 @@
 namespace episteme::search {
     using namespace std::chrono;
 
-    constexpr int32_t INF = 1048576;
-    constexpr int32_t MATE = 1048575;
-    constexpr int MAX_SEARCH_PLY = 256;
-
     // BEGIN MOVEPICKING //
 
     struct ScoredMove {
@@ -56,6 +52,12 @@ namespace episteme::search {
     void pick_move(ScoredList& scored_list, int start);
 
     // BEGIN SEARCH //
+
+    constexpr int32_t INF = 1048576;
+    constexpr int32_t MATE = 1048575;
+
+    constexpr int32_t DELTA = 20;
+    constexpr int32_t MAX_SEARCH_PLY = 256;
 
     struct Parameters {
         std::array<int32_t, 2> time = {};
@@ -147,7 +149,7 @@ namespace episteme::search {
             int32_t search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
             int32_t quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
 
-            ThreadReport run(const Parameters& params, const SearchLimits& limits);
+            ThreadReport run(int32_t last_score, const Parameters& params, const SearchLimits& limits);
             int32_t eval(const Parameters& params);
             void bench(int depth);
 
