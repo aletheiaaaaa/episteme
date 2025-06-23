@@ -30,9 +30,8 @@ namespace episteme::tt {
                 ttable.resize(entries);
             }
 
-            inline void reset(uint32_t entries) {
-                ttable.clear();
-                ttable.resize(entries);
+            inline void reset() {
+                std::fill(ttable.begin(), ttable.end(), Entry());
             }
 
             [[nodiscard]] inline uint64_t table_index(uint64_t hash) {
@@ -46,10 +45,6 @@ namespace episteme::tt {
                 if (ttable[index].hash == hash) entry = ttable[index];
 
                 return entry;
-            }
-
-            inline size_t size() {
-                return ttable.size();
             }
 
             inline void add(Entry tt_entry) {

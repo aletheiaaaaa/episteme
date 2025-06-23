@@ -176,8 +176,7 @@ namespace episteme::search {
             }
 
             inline void reset_tt() {
-                size_t size = ttable.size();
-                ttable.reset(size);
+                ttable.reset();
             }
 
             inline void reset_history() {
