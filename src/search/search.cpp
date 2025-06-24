@@ -115,7 +115,7 @@ namespace episteme::search {
 
             bool is_quiet = position.mailbox(sq_idx(move.to_square())) == Piece::None && move.move_type() != MoveType::EnPassant;
 
-            if (is_quiet && num_legal >= 3 + depth * depth) continue;
+            if (is_quiet && num_legal >= 6 + 2 * depth * depth) break;
 
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
