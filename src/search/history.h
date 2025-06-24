@@ -25,19 +25,19 @@ namespace episteme::hist {
 
     class Table {
         public:
-            [[nodiscard]] inline const Entry get_butterfly(Color stm, Move move) const {
-                return butterfly[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())];
+            [[nodiscard]] inline const Entry get_quiet_hist(Color stm, Move move) const {
+                return quiet_hist[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())];
             }
 
-            inline void update_butterfly(Color stm, Move move, int16_t bonus) {
-                butterfly[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())].update(bonus);
+            inline void update_quiet_hist(Color stm, Move move, int16_t bonus) {
+                quiet_hist[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())].update(bonus);
             }
 
             inline void reset() {
-                butterfly = {};
+                quiet_hist = {};
             }
 
         private:
-            std::array<std::array<std::array<Entry, 64>, 64>, 2> butterfly = {};
+            std::array<std::array<std::array<Entry, 64>, 64>, 2> quiet_hist = {};
     };
 }

@@ -51,7 +51,7 @@ namespace episteme::search {
 
             scored_move.score += dst_val * 10 - src_val + 100000;
         } else {
-            scored_move.score += history.get_butterfly(position.STM(), move).value;
+            scored_move.score += history.get_quiet_hist(position.STM(), move).value;
         }
 
         return scored_move;
@@ -166,10 +166,10 @@ namespace episteme::search {
 
                 if (score >= beta) {
                     if (is_quiet) {
-                        history.update_butterfly(position.STM(), move, hist::history_bonus(depth));
+                        history.update_quiet_hist(position.STM(), move, hist::history_bonus(depth));
                         for (size_t j = 0; j < explored_quiets.count(); j++) {
                             if (explored_quiets.list(j).data() == move.data()) continue;
-                            history.update_butterfly(position.STM(), explored_quiets.list(j), hist::history_malus(depth));
+                            history.update_quiet_hist(position.STM(), explored_quiets.list(j), hist::history_malus(depth));
                         }
                     }
 
