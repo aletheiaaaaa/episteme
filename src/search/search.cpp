@@ -20,19 +20,19 @@ namespace episteme::search {
     };
 
     template<typename F>
-    ScoredList Thread::generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry) {
+    ScoredList Thread::generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry, std::optional<int32_t> ply) {
         MoveList move_list;
         generator(move_list, position);
         ScoredList scored_list;
 
         for (size_t i = 0; i < move_list.count; i++) {
-            scored_list.add(score_move(position, move_list.list[i], tt_entry));
+            scored_list.add(score_move(position, move_list.list[i], tt_entry, ply));
         }
 
         return scored_list;
     }
 
-    ScoredMove Thread::score_move(const Position& position, const Move& move, const tt::Entry& tt_entry) {
+    ScoredMove Thread::score_move(const Position& position, const Move& move, const tt::Entry& tt_entry, std::optional<int32_t> ply) {
         ScoredMove scored_move{.move = move};
 
         if (tt_entry.move.data() == move.data()) {
@@ -50,7 +50,13 @@ namespace episteme::search {
             int32_t dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
 
             scored_move.score += dst_val * 10 - src_val + 100000;
+
         } else {
+            if (ply && stack[*ply].killer.data() == move.data()) {
+                scored_move.score = 80000;
+                return scored_move;
+            }
+
             scored_move.score += history.get_quiet_hist(position.STM(), move).value;
         }
 
@@ -96,7 +102,7 @@ namespace episteme::search {
             };
         }
 
-        ScoredList move_list = generate_scored_moves(position, tt_entry);
+        ScoredList move_list = generate_scored_moves(position, tt_entry, ply);
         int32_t best = -INF;
 
         MoveList explored_quiets;
@@ -166,6 +172,11 @@ namespace episteme::search {
 
                 if (score >= beta) {
                     if (is_quiet) {
+                        stack[ply] = {
+                            .ply = ply,
+                            .killer = move,
+                        };
+
                         history.update_quiet_hist(position.STM(), move, hist::history_bonus(depth));
                         for (size_t j = 0; j < explored_quiets.count; j++) {
                             if (explored_quiets.list[j].data() == move.data()) continue;

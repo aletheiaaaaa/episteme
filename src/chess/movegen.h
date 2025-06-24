@@ -10,7 +10,7 @@
 namespace episteme {
     struct MoveList {
         std::array<Move, 256> list;
-        uint32_t count = 0;
+        size_t count = 0;
 
         inline void add(const Move& move) {
             list[count] = move;

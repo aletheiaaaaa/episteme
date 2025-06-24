@@ -4,6 +4,7 @@
 #include "../evaluation/evaluate.h"
 #include "ttable.h"
 #include "history.h"
+#include "stack.h"
 
 #include <cstdint>
 #include <chrono>
@@ -123,13 +124,13 @@ namespace episteme::search {
                 nodes = 0;
             }
 
-            ScoredMove score_move(const Position& position, const Move& move, const tt::Entry& tt_entry);
+            ScoredMove score_move(const Position& position, const Move& move, const tt::Entry& tt_entry, std::optional<int32_t> ply);
 
             template<typename F>
-            ScoredList generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry);
+            ScoredList generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry, std::optional<int32_t> ply = std::nullopt);
 
-            inline ScoredList generate_scored_moves(const Position& position, const tt::Entry& tt_entry) {
-                return generate_scored_targets(position, generate_all_moves, tt_entry);
+            inline ScoredList generate_scored_moves(const Position& position, const tt::Entry& tt_entry, int32_t ply) {
+                return generate_scored_targets(position, generate_all_moves, tt_entry, ply);
             }
         
             inline ScoredList generate_scored_captures(const Position& position, const tt::Entry& tt_entry) {
@@ -151,6 +152,7 @@ namespace episteme::search {
 
             tt::Table& ttable;
             hist::Table history;
+            stack::Stack stack;
 
             uint64_t nodes;
     };
