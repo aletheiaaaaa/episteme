@@ -7,8 +7,8 @@ namespace episteme::search {
     using namespace std::chrono;
 
     void pick_move(ScoredList& scored_list, int start) {
-        for (size_t i = start + 1; i < scored_list.count(); i++)    {
-            if (scored_list.list(i).score > scored_list.list(start).score) {
+        for (size_t i = start + 1; i < scored_list.count; i++)    {
+            if (scored_list.list[i].score > scored_list.list[start].score) {
                 scored_list.swap(start, i);
             }
         }
@@ -25,8 +25,8 @@ namespace episteme::search {
         generator(move_list, position);
         ScoredList scored_list;
 
-        for (size_t i = 0; i < move_list.count(); i++) {
-            scored_list.add(score_move(position, move_list.list(i), tt_entry));
+        for (size_t i = 0; i < move_list.count; i++) {
+            scored_list.add(score_move(position, move_list.list[i], tt_entry));
         }
 
         return scored_list;
@@ -103,9 +103,9 @@ namespace episteme::search {
         tt::NodeType node_type = tt::NodeType::AllNode;
         uint32_t num_legal = 0;
 
-        for (size_t i = 0; i < move_list.count(); i++) { 
+        for (size_t i = 0; i < move_list.count; i++) { 
             pick_move(move_list, i);
-            Move move = move_list.list(i).move;
+            Move move = move_list.list[i].move;
 
             bool is_quiet = position.mailbox(sq_idx(move.to_square())) == Piece::None && move.move_type() != MoveType::EnPassant;
 
@@ -167,9 +167,9 @@ namespace episteme::search {
                 if (score >= beta) {
                     if (is_quiet) {
                         history.update_quiet_hist(position.STM(), move, hist::history_bonus(depth));
-                        for (size_t j = 0; j < explored_quiets.count(); j++) {
-                            if (explored_quiets.list(j).data() == move.data()) continue;
-                            history.update_quiet_hist(position.STM(), explored_quiets.list(j), hist::history_malus(depth));
+                        for (size_t j = 0; j < explored_quiets.count; j++) {
+                            if (explored_quiets.list[j].data() == move.data()) continue;
+                            history.update_quiet_hist(position.STM(), explored_quiets.list[j], hist::history_malus(depth));
                         }
                     }
 
@@ -216,9 +216,9 @@ namespace episteme::search {
 
         ScoredList captures_list = generate_scored_captures(position, tt_entry);
 
-        for (size_t i = 0; i < captures_list.count(); i++) {
+        for (size_t i = 0; i < captures_list.count; i++) {
             pick_move(captures_list, i);
-            Move move = captures_list.list(i).move;
+            Move move = captures_list.list[i].move;
 
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);

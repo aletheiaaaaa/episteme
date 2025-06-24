@@ -21,32 +21,22 @@ namespace episteme::search {
         int32_t score = 0;
     };
 
-    class ScoredList {
-        public:
-            inline void add(const ScoredMove& move) {
-                the_list[the_count] = move;
-                the_count++;
-            }
-        
-            inline void clear() {
-                the_count = 0;
-            }
-        
-            [[nodiscard]] inline uint32_t count() const {
-                return the_count;
-            }
-        
-            [[nodiscard]] inline const ScoredMove list(int index) const {
-                return the_list[index];
-            }
+    struct ScoredList {
+        inline void add(const ScoredMove& move) {
+            list[count] = move;
+            count++;
+        }
 
-            inline void swap(int src_idx, int dst_idx) {
-                std::iter_swap(the_list.begin() + src_idx, the_list.begin() + dst_idx);
-            }
+        inline void clear() {
+            count = 0;
+        }
 
-        private:
-            std::array<ScoredMove, 256> the_list;
-            int the_count = 0;
+        inline void swap(int src_idx, int dst_idx) {
+            std::iter_swap(list.begin() + src_idx, list.begin() + dst_idx);
+        }
+
+        std::array<ScoredMove, 256> list;
+        size_t count = 0;
     };
 
     void pick_move(ScoredList& scored_list, int start);

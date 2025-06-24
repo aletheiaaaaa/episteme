@@ -8,27 +8,18 @@
 #include <iostream>
 
 namespace episteme {
-    class MoveList {
-        public:
-            inline void add(const Move& move) {
-                the_list[the_count] = move;
-                the_count++;
-            }
-        
-            inline void clear() {
-                the_count = 0;
-            }
-        
-            [[nodiscard]] inline uint32_t count() const {
-                return the_count;
-            }
-        
-            [[nodiscard]] inline const Move list(int index) const {
-                return the_list[index];
-            }
-        private:
-            std::array<Move, 256> the_list;
-            uint32_t the_count = 0;
+    struct MoveList {
+        std::array<Move, 256> list;
+        uint32_t count = 0;
+
+        inline void add(const Move& move) {
+            list[count] = move;
+            count++;
+        }
+
+        inline void clear() {
+            count = 0;
+        }
     };
 
     struct PawnAttacks {

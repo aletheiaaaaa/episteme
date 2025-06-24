@@ -16,8 +16,8 @@ namespace episteme {
         generate_all_moves(move_list, position);
         uint64_t move_count = 0;
 
-        for (size_t i = 0; i < move_list.count(); i++) {
-            position.make_move(move_list.list(i));
+        for (size_t i = 0; i < move_list.count; i++) {
+            position.make_move(move_list.list[i]);
         
             uint64_t king_bb = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(position.NTM()) + position.COLOR_OFFSET);
                 
@@ -37,8 +37,8 @@ namespace episteme {
     
         uint64_t total = 0;
     
-        for (size_t i = 0; i < move_list.count(); ++i) {
-            Move move = move_list.list(i);
+        for (size_t i = 0; i < move_list.count; ++i) {
+            Move move = move_list.list[i];
             position.make_move(move);
 
             uint64_t king_bb = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(position.NTM()) + position.COLOR_OFFSET);
