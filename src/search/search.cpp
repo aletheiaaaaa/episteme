@@ -129,9 +129,17 @@ namespace episteme::search {
             if (limits.node_exceeded(nodes)) return 0;
 
             Line candidate = {};
-            int32_t score;
+            int32_t score = 0;
 
-            if (!is_PV || num_legal > 1) {
+            if (num_legal >= 4 && depth >= 3) {
+                int16_t reduction = 1;
+                int16_t reduced = std::min(std::max(depth - reduction - 1, 1), depth - 1);
+
+                score = -search<false>(position, candidate, reduced, ply + 1, -alpha - 1, -alpha, limits);
+                if (score > alpha && reduced < depth - 1) {
+                    score = -search<false>(position, candidate, depth - 1, ply + 1, -alpha - 1, -alpha, limits);
+                }
+            } else if (!is_PV || num_legal > 1) {
                 score = -search<false>(position, candidate, depth - 1, ply + 1, -alpha - 1, -alpha, limits);
             }
 
