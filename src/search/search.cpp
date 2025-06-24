@@ -291,7 +291,7 @@ namespace episteme::search {
             .time = elapsed,
             .nodes = nodes,
             .nps = nps,
-            .score = last_score,
+            .score = score,
             .line = PV
         };
 
