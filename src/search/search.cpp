@@ -130,21 +130,22 @@ namespace episteme::search {
 
             Line candidate = {};
             int32_t score = 0;
+            int16_t search_depth = depth - 1;
 
             if (num_legal >= 4 && depth >= 3) {
                 int16_t reduction = 1;
-                int16_t reduced = std::min(std::max(depth - reduction - 1, 1), depth - 1);
+                int16_t reduced = std::min(std::max(search_depth - reduction, 1), search_depth);
 
                 score = -search<false>(position, candidate, reduced, ply + 1, -alpha - 1, -alpha, limits);
                 if (score > alpha && reduced < depth - 1) {
-                    score = -search<false>(position, candidate, depth - 1, ply + 1, -alpha - 1, -alpha, limits);
+                    score = -search<false>(position, candidate, search_depth, ply + 1, -alpha - 1, -alpha, limits);
                 }
             } else if (!is_PV || num_legal > 1) {
-                score = -search<false>(position, candidate, depth - 1, ply + 1, -alpha - 1, -alpha, limits);
+                score = -search<false>(position, candidate, search_depth, ply + 1, -alpha - 1, -alpha, limits);
             }
 
             if (is_PV && (num_legal == 1 || score > alpha)) {
-                score = -search<true>(position, candidate, depth - 1, ply + 1, -beta, -alpha, limits);
+                score = -search<true>(position, candidate, search_depth, ply + 1, -beta, -alpha, limits);
             }
 
             position.unmake_move();
