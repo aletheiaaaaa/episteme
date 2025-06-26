@@ -91,18 +91,22 @@ namespace episteme::search {
             static_eval = eval::evaluate(accumulator, position.STM());
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
             if (depth <= 5 && eval >= beta + depth * 100) return eval;
 >>>>>>> 28864a2 (fix fp)
 =======
             if (depth <= 5 && static_eval >= beta + depth * 100) return static_eval;
 >>>>>>> bb92c82 (fix fp x2)
+=======
+>>>>>>> 5682187 (don't fp in mate pos)
         }
 
         if (!is_PV && !in_check(position, position.STM())) {
             if (depth <= 5 && static_eval >= beta + depth * 100) return static_eval;
 
             if (depth >= 3) {
+<<<<<<< HEAD
                 const uint64_t no_pawns_or_kings = position.color_bb(position.STM()) & ~position.piece_bb(PieceType::King, position.STM()) & ~position.piece_bb(PieceType::Pawn, position.STM());
 
                 if (no_pawns_or_kings) {
@@ -116,6 +120,17 @@ namespace episteme::search {
                         return score;
                     }
                 }
+=======
+                Line null{};
+
+                position.make_null();
+                int32_t score = -search<false>(position, null, depth - 3, ply + 1, -beta, -beta + 1, limits);
+                position.unmake_move();
+                if (score >= beta) {
+                    if (std::abs(score) >= MATE - MAX_SEARCH_PLY) return beta;
+                    return score;
+                };    
+>>>>>>> 5682187 (don't fp in mate pos)
             }
         }
 
@@ -134,7 +149,7 @@ namespace episteme::search {
 
             if (is_quiet && num_legal >= 6 + 2 * depth * depth) break;
 
-            if (!is_PV && is_quiet && !in_check(position, position.STM()) && static_eval + depth * 250 <= alpha) continue;
+            if (!is_PV && is_quiet && !in_check(position, position.STM()) && static_eval + depth * 250 <= alpha && best > -MATE) continue;
 
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
