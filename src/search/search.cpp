@@ -90,9 +90,13 @@ namespace episteme::search {
         if (!is_PV && !in_check(position, position.STM())) {
             static_eval = eval::evaluate(accumulator, position.STM());
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
             if (depth <= 5 && eval >= beta + depth * 100) return eval;
 >>>>>>> 28864a2 (fix fp)
+=======
+            if (depth <= 5 && static_eval >= beta + depth * 100) return static_eval;
+>>>>>>> bb92c82 (fix fp x2)
         }
 
         if (!is_PV && !in_check(position, position.STM())) {
