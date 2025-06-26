@@ -89,6 +89,10 @@ namespace episteme::search {
         int32_t static_eval;
         if (!is_PV && !in_check(position, position.STM())) {
             static_eval = eval::evaluate(accumulator, position.STM());
+<<<<<<< HEAD
+=======
+            if (depth <= 5 && eval >= beta + depth * 100) return eval;
+>>>>>>> 28864a2 (fix fp)
         }
 
         if (!is_PV && !in_check(position, position.STM())) {
@@ -126,10 +130,7 @@ namespace episteme::search {
 
             if (is_quiet && num_legal >= 6 + 2 * depth * depth) break;
 
-            if (!is_PV && is_quiet) {
-                int32_t eval = eval::evaluate(accumulator, position.STM());
-                if (eval + depth * 250 < alpha) continue;
-            }
+            if (!is_PV && !in_check(position, position.STM()) && static_eval + depth * 250 < alpha) continue;
 
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
