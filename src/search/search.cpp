@@ -134,7 +134,7 @@ namespace episteme::search {
 
             if (is_quiet && num_legal >= 6 + 2 * depth * depth) break;
 
-            if (!is_PV && is_quiet && !in_check(position, position.STM()) && static_eval + depth * 250 < alpha) continue;
+            if (!is_PV && is_quiet && !in_check(position, position.STM()) && static_eval + depth * 250 <= alpha) continue;
 
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
