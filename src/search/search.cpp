@@ -86,21 +86,25 @@ namespace episteme::search {
 
         constexpr bool is_PV = PV_node;
 
+        int32_t static_eval;
         if (!is_PV && !in_check(position, position.STM())) {
-            int32_t eval = eval::evaluate(accumulator, position.STM());
-            if (depth <= 5 && eval >= beta + depth * 100) return eval;
+            static_eval = eval::evaluate(accumulator, position.STM());
         }
 
-        if (!is_PV && !in_check(position, position.STM()) && depth >= 3) {
-            Line null{};
+        if (!is_PV && !in_check(position, position.STM())) {
+            if (depth <= 5 && static_eval >= beta + depth * 100) return static_eval;
 
-            position.make_null();
-            int32_t score = -search<false>(position, null, depth - 3, ply + 1, -beta, -beta + 1, limits);
-            position.unmake_move();
-            if (score >= beta) {
-                if (std::abs(score) >= MATE - MAX_SEARCH_PLY) return beta;
-                return score;
-            };
+            if (depth >= 3) {
+                Line null{};
+
+                position.make_null();
+                int32_t score = -search<false>(position, null, depth - 3, ply + 1, -beta, -beta + 1, limits);
+                position.unmake_move();
+                if (score >= beta) {
+                    if (std::abs(score) >= MATE - MAX_SEARCH_PLY) return beta;
+                    return score;
+                };    
+            }
         }
 
         ScoredList move_list = generate_scored_moves(position, tt_entry, ply);
