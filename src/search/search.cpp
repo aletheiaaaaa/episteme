@@ -92,15 +92,18 @@ namespace episteme::search {
         }
 
         if (!is_PV && !in_check(position, position.STM()) && depth >= 3) {
-            Line null{};
+            const uint64_t no_pawns_or_kings = position.total_bb() & ~position.piece_bb(PieceType::King, position.STM()) & ~position.piece_type_bb(PieceType::Pawn);
+            if (no_pawns_or_kings) {
+                Line null{};
 
-            position.make_null();
-            int32_t score = -search<false>(position, null, depth - 3, ply + 1, -beta, -beta + 1, limits);
-            position.unmake_move();
-            if (score >= beta) {
-                if (std::abs(score) >= MATE - MAX_SEARCH_PLY) return beta;
-                return score;
-            };
+                position.make_null();
+                int32_t score = -search<false>(position, null, depth - 3, ply + 1, -beta, -beta + 1, limits);
+                position.unmake_move();
+                if (score >= beta) {
+                    if (std::abs(score) >= MATE - MAX_SEARCH_PLY) return beta;
+                    return score;
+                }    
+            }
         }
 
         ScoredList move_list = generate_scored_moves(position, tt_entry, ply);

@@ -268,6 +268,8 @@ namespace episteme {
 
                 break;
             }
+
+            case MoveType::None: break;
         }
 
         src = Piece::None;
