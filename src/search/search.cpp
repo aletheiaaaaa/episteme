@@ -95,7 +95,7 @@ namespace episteme::search {
             if (depth <= 5 && static_eval >= beta + depth * 100) return static_eval;
 
             if (depth >= 3) {
-                const uint64_t no_pawns_or_kings = position.total_bb() & ~position.piece_bb(PieceType::King, position.STM()) & ~position.piece_type_bb(PieceType::Pawn);
+                const uint64_t no_pawns_or_kings = position.color_bb(position.STM()) & ~position.piece_bb(PieceType::King, position.STM()) & ~position.piece_bb(PieceType::Pawn, position.STM());
 
                 if (no_pawns_or_kings) {
                     Line null{};
