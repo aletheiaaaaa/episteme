@@ -15,8 +15,9 @@ namespace episteme::search {
     }
 
     bool in_check(const Position& position, Color color) {
-        uint64_t kingBB = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(color) + position.COLOR_OFFSET);
-        return is_square_attacked(sq_from_idx(std::countr_zero(kingBB)), position, flip(color));
+        uint64_t king_bb = position.piece_bb(PieceType::King, color);
+
+        return is_square_attacked(sq_from_idx(std::countr_zero(king_bb)), position, flip(color));
     };
 
     template<typename F>
@@ -107,7 +108,7 @@ namespace episteme::search {
 
         MoveList explored_quiets;
         tt::NodeType node_type = tt::NodeType::AllNode;
-        uint32_t num_legal = 0;
+        int32_t num_legal = 0;
 
         for (size_t i = 0; i < move_list.count; i++) { 
             pick_move(move_list, i);

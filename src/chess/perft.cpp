@@ -19,8 +19,8 @@ namespace episteme {
         for (size_t i = 0; i < move_list.count; i++) {
             position.make_move(move_list.list[i]);
         
-            uint64_t king_bb = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(position.NTM()) + position.COLOR_OFFSET);
-                
+            uint64_t king_bb = position.piece_bb(PieceType::King, position.NTM());
+        
             if (!is_square_attacked(sq_from_idx(std::countr_zero(king_bb)), position, position.STM())) {
                 move_count += perft(position, depth - 1);
             }
@@ -41,8 +41,8 @@ namespace episteme {
             Move move = move_list.list[i];
             position.make_move(move);
 
-            uint64_t king_bb = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(position.NTM()) + position.COLOR_OFFSET);
-    
+            uint64_t king_bb = position.piece_bb(PieceType::King, position.NTM());
+
             bool illegal = is_square_attacked(sq_from_idx(std::countr_zero(king_bb)), position, position.STM());
     
             uint64_t nodes = 0;

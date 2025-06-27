@@ -40,6 +40,18 @@ namespace episteme {
         public:
             Position();
 
+            [[nodiscard]] inline uint64_t piece_bb(PieceType piece_type, Color color) const {
+                return (state.bitboards[piece_type_idx(piece_type)] & state.bitboards[color_idx(color) + COLOR_OFFSET]);
+            }
+
+            [[nodiscard]] inline uint64_t piece_type_bb(PieceType piece_type) const {
+                return state.bitboards[piece_type_idx(piece_type)];
+            }
+
+            [[nodiscard]] inline uint64_t color_bb(Color color) const {
+                return state.bitboards[color_idx(color) + COLOR_OFFSET];
+            }
+
             [[nodiscard]] inline std::array<uint64_t, 8> bitboards_all() const {
                 return state.bitboards;
             }

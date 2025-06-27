@@ -212,9 +212,9 @@ namespace episteme {
     const std::array<std::array<uint64_t, 512>, 64> BISHOP_ATTACKS = fill_bishop_attacks();
 
     PawnAttacks get_pawn_attacks_helper(const Position& position, Color stm, bool is_pseudo) {
-        uint64_t us_bb = position.bitboard(color_idx(stm) + position.COLOR_OFFSET);
-        uint64_t them_bb = position.bitboard(color_idx(flip(stm)) + position.COLOR_OFFSET);
-        uint64_t pawn_bb = position.bitboard(piece_type_idx(PieceType::Pawn)) & us_bb;
+        uint64_t us_bb = position.color_bb(stm);
+        uint64_t them_bb = position.color_bb(flip(stm));
+        uint64_t pawn_bb = position.piece_type_bb(PieceType::Pawn) & us_bb;
         
         uint64_t occupied = us_bb | (is_pseudo ? 0ULL : them_bb); 
         uint64_t captures_mask = is_pseudo ? ~0ULL : them_bb;
@@ -238,18 +238,18 @@ namespace episteme {
 
     bool is_square_attacked(Square square, const Position& position, Color nstm) {
         uint64_t square_bb = uint64_t(1) << sq_idx(square);
-        uint64_t them_bb = position.bitboard(color_idx(nstm) + position.COLOR_OFFSET);
+        uint64_t them_bb = position.color_bb(nstm);
         
-        uint64_t knights = position.bitboard(piece_type_idx(PieceType::Knight));
+        uint64_t knights = position.piece_type_bb(PieceType::Knight);
         uint64_t knight_attacks = get_knight_attacks(square) & knights & them_bb;
 
-        uint64_t queens = position.bitboard(piece_type_idx(PieceType::Queen));
-        uint64_t bishops_and_queens = position.bitboard(piece_type_idx(PieceType::Bishop)) | queens;
+        uint64_t queens = position.piece_type_bb(PieceType::Queen);
+        uint64_t bishops_and_queens = position.piece_type_bb(PieceType::Bishop) | queens;
         uint64_t bishop_attacks = get_bishop_attacks(square, position) & bishops_and_queens & them_bb;
-        uint64_t rooks_and_queens = position.bitboard(piece_type_idx(PieceType::Rook)) | queens;
+        uint64_t rooks_and_queens = position.piece_type_bb(PieceType::Rook) | queens;
         uint64_t rook_attacks = get_rook_attacks(square, position) & rooks_and_queens & them_bb;
         
-        uint64_t kings = position.bitboard(piece_type_idx(PieceType::King));
+        uint64_t kings = position.piece_type_bb(PieceType::King);
         uint64_t king_attacks = get_king_attacks(square) & kings & them_bb;
     
         if ((knight_attacks | bishop_attacks | rook_attacks | king_attacks) != 0) {
@@ -266,9 +266,9 @@ namespace episteme {
     
     template<PieceType PT, typename F>
     void generate_piece_targets(MoveList& move_list, const Position& position, F get_attacks, bool include_quiets) {
-        uint64_t us_bb = position.bitboard(color_idx(position.STM()) + position.COLOR_OFFSET);
-        uint64_t them_bb = position.bitboard(color_idx(position.NTM()) + position.COLOR_OFFSET);
-        uint64_t piece_bb = position.bitboard(piece_type_idx(PT)) & us_bb;
+        uint64_t us_bb = position.color_bb(position.STM());
+        uint64_t them_bb = position.color_bb(position.NTM());
+        uint64_t piece_bb = position.piece_type_bb(PT) & us_bb;
 
         while (piece_bb != 0) {
             Square from_sq = sq_from_idx(std::countr_zero(piece_bb));
@@ -343,7 +343,7 @@ namespace episteme {
         Square ep_sq = position.ep_square();
         Color stm = position.STM();
         uint64_t ep_bb = (uint64_t)1 << sq_idx(ep_sq);
-        uint64_t pawn_bb = position.bitboard(piece_type_idx(PieceType::Pawn)) & position.bitboard(color_idx(stm) + position.COLOR_OFFSET);
+        uint64_t pawn_bb = position.piece_bb(PieceType::Pawn, position.STM());
 
         uint64_t left_attacks = (stm == Color::White) ? (((ep_bb & ~FILE_A) >> 9) & pawn_bb) : (((ep_bb & ~FILE_A) << 7) & pawn_bb);
         uint64_t right_attacks = (stm == Color::White) ? (((ep_bb & ~FILE_H) >> 7) & pawn_bb) : (((ep_bb & ~FILE_H) << 9) & pawn_bb);
@@ -360,7 +360,7 @@ namespace episteme {
 
     void generate_castles(MoveList& move_list, const Position& position, bool is_kingside) {
         Color stm = position.STM();
-        uint64_t king_bb = position.bitboard(piece_type_idx(PieceType::King)) & position.bitboard(color_idx(stm) + position.COLOR_OFFSET);
+        uint64_t king_bb = position.piece_bb(PieceType::King, stm);
         constexpr std::array<std::array<Square, 2>, 2> king_ends = {{
             {Square::C1, Square::G1},
             {Square::C8, Square::G8}
