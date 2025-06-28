@@ -66,7 +66,7 @@ namespace episteme::search {
 
     template<bool PV_node>
     int32_t Thread::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
-        if (nodes % 10000 == 0 && limits.time_exceeded()) return 0;
+        if (nodes % 2000 == 0 && limits.time_exceeded()) return 0;
 
         if (position.is_threefold()) return 0;
 
@@ -177,7 +177,7 @@ namespace episteme::search {
             accum_history.pop_back();
             accumulator = accum_history.back();
             
-            if (nodes % 10000 == 0 && limits.time_exceeded()) return 0;
+            if (nodes % 2000 == 0 && limits.time_exceeded()) return 0;
             
             if (score > best) {
                 best = score;
@@ -223,7 +223,7 @@ namespace episteme::search {
     }
 
     int32_t Thread::quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
-        if (nodes % 10000 == 0 && limits.time_exceeded()) return 0;
+        if (nodes % 2000 == 0 && limits.time_exceeded()) return 0;
         
         tt::Entry tt_entry = ttable.probe(position.zobrist());
         if ((tt_entry.node_type == tt::NodeType::PVNode)
@@ -273,7 +273,7 @@ namespace episteme::search {
             accum_history.pop_back();
             accumulator = accum_history.back();
             
-            if (nodes % 10000 == 0 && limits.time_exceeded()) return 0;
+            if (nodes % 2000 == 0 && limits.time_exceeded()) return 0;
 
             if (score > best) {
                 best = score;
