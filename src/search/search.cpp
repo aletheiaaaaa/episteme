@@ -103,6 +103,9 @@ namespace episteme::search {
                     position.make_null();
                     int32_t score = -search<false>(position, null, depth - 3, ply + 1, -beta, -beta + 1, limits);
                     position.unmake_move();
+
+                    if (nodes % 2000 == 0 && limits.time_exceeded()) return 0;
+
                     if (score >= beta) {
                         if (std::abs(score) >= MATE - MAX_SEARCH_PLY) return beta;
                         return score;
@@ -111,10 +114,9 @@ namespace episteme::search {
             }
         }
 
-        int search_depth = depth - 1;
         bool no_tt_move = tt_entry.hash != position.zobrist() || tt_entry.move.data() == 0x0000;
 
-        if (no_tt_move && depth >= 4) search_depth--;
+        if (no_tt_move && depth >= 4) depth--;
 
         ScoredList move_list = generate_scored_moves(position, tt_entry, ply);
         int32_t best = -INF;
@@ -122,7 +124,6 @@ namespace episteme::search {
         MoveList explored_quiets;
         tt::NodeType node_type = tt::NodeType::AllNode;
         int32_t num_legal = 0;
-
 
         for (size_t i = 0; i < move_list.count; i++) { 
             pick_move(move_list, i);
@@ -157,21 +158,22 @@ namespace episteme::search {
 
             Line candidate = {};
             int32_t score = 0;
+            int16_t new_depth = depth - 1;
 
             if (num_legal >= 4 && depth >= 3) {
                 int16_t reduction = 1;
-                int16_t reduced = std::min(std::max(search_depth - reduction, 1), search_depth);
+                int16_t reduced = std::min(std::max(new_depth - reduction, 1), static_cast<int>(new_depth));
 
                 score = -search<false>(position, candidate, reduced, ply + 1, -alpha - 1, -alpha, limits);
                 if (score > alpha && reduced < depth - 1) {
-                    score = -search<false>(position, candidate, search_depth, ply + 1, -alpha - 1, -alpha, limits);
+                    score = -search<false>(position, candidate, new_depth, ply + 1, -alpha - 1, -alpha, limits);
                 }
             } else if (!is_PV || num_legal > 1) {
-                score = -search<false>(position, candidate, search_depth, ply + 1, -alpha - 1, -alpha, limits);
+                score = -search<false>(position, candidate, new_depth, ply + 1, -alpha - 1, -alpha, limits);
             }
 
             if (is_PV && (num_legal == 1 || score > alpha)) {
-                score = -search<true>(position, candidate, search_depth, ply + 1, -beta, -alpha, limits);
+                score = -search<true>(position, candidate, new_depth, ply + 1, -beta, -alpha, limits);
             }
 
             position.unmake_move();
