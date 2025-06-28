@@ -108,9 +108,10 @@ namespace episteme::search {
 
                 if (no_pawns_or_kings) {
                     Line null{};
+                    int16_t reduction = 3 + improving;
 
                     position.make_null();
-                    int32_t score = -search<false>(position, null, depth - 3, ply + 1, -beta, -beta + 1, limits);
+                    int32_t score = -search<false>(position, null, depth - reduction, ply + 1, -beta, -beta + 1, limits);
                     position.unmake_move();
 
                     if (nodes % 2000 == 0 && limits.time_exceeded()) return 0;
