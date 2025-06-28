@@ -111,7 +111,7 @@ namespace episteme::search {
             }
         }
 
-        int16_t search_depth = depth - 1;
+        int search_depth = depth - 1;
         bool no_tt_move = tt_entry.hash != position.zobrist() || tt_entry.move.data() == 0x0000;
 
         if (no_tt_move && depth >= 4) search_depth--;
