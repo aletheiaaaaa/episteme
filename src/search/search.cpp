@@ -86,15 +86,24 @@ namespace episteme::search {
 
         constexpr bool is_PV = PV_node;
 
-        int32_t static_eval;
-        if (!is_PV && !in_check(position, position.STM())) {
+        int32_t static_eval = -INF;
+        if (!in_check(position, position.STM())) {
             static_eval = eval::evaluate(accumulator, position.STM());
+            stack[ply] = {.eval = static_eval};
+        } 
+
+        bool improving = false;
+
+        if (!in_check(position, position.STM())) {
+            if (ply > 1 && stack[ply - 2].eval != -INF) {
+                improving = static_eval > stack[ply - 2].eval;
+            }
         }
 
-        if (!is_PV && !in_check(position, position.STM())) {
-            if (depth <= 5 && static_eval >= beta + depth * 100) return static_eval;
+        if (!in_check(position, position.STM())) {
+            if (!is_PV && depth <= 5 && static_eval >= beta + std::min(depth - improving, 0) * 100) return static_eval;
 
-            if (depth >= 3) {
+            if (!is_PV && depth >= 3) {
                 const uint64_t no_pawns_or_kings = position.color_bb(position.STM()) & ~position.piece_bb(PieceType::King, position.STM()) & ~position.piece_bb(PieceType::Pawn, position.STM());
 
                 if (no_pawns_or_kings) {
@@ -113,9 +122,6 @@ namespace episteme::search {
                 }
             }
         }
-
-        bool no_tt_move = tt_entry.hash != position.zobrist() || tt_entry.move.data() == 0x0000;
-        if (is_PV && no_tt_move && depth >= 4) depth--;
 
         ScoredList move_list = generate_scored_moves(position, tt_entry, ply);
         int32_t best = -INF;
