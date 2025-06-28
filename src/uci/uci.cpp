@@ -98,7 +98,7 @@ namespace episteme::uci {
     }
     
     auto bench(const std::string& args, search::Config& cfg) {
-        int depth = (args.empty()) ? 6 : std::stoi(args);
+        int depth = (args.empty()) ? 8 : std::stoi(args);
         if (!cfg.hash_size) cfg.hash_size = 32;
 
         search::Instance instance(cfg);
@@ -106,7 +106,7 @@ namespace episteme::uci {
     }
 
     auto perft(const std::string& args, search::Config& cfg) {
-        int depth = (args.empty()) ? 8 : std::stoi(args);
+        int depth = (args.empty()) ? 6 : std::stoi(args);
         Position& position = cfg.params.position;
 
         time_perft(position, depth);
