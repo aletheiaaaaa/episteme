@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../chess/move.h"
 
 #include <array>

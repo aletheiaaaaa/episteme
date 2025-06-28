@@ -86,15 +86,24 @@ namespace episteme::search {
 
         constexpr bool is_PV = PV_node;
 
-        int32_t static_eval;
-        if (!is_PV && !in_check(position, position.STM())) {
+        int32_t static_eval = -INF;
+        if (!in_check(position, position.STM())) {
             static_eval = eval::evaluate(accumulator, position.STM());
+            stack[ply].eval = static_eval;
+        } 
+
+        bool improving = false;
+
+        if (!in_check(position, position.STM())) {
+            if (ply > 1 && stack[ply - 2].eval != -INF) {
+                improving = static_eval > stack[ply - 2].eval;
+            }
         }
 
-        if (!is_PV && !in_check(position, position.STM())) {
-            if (depth <= 5 && static_eval >= beta + depth * 100) return static_eval;
+        if (!in_check(position, position.STM())) {
+            if (!is_PV && depth <= 5 && static_eval >= beta + std::max(depth - improving, 0) * 100) return static_eval;
 
-            if (depth >= 3) {
+            if (!is_PV && depth >= 3) {
                 const uint64_t no_pawns_or_kings = position.color_bb(position.STM()) & ~position.piece_bb(PieceType::King, position.STM()) & ~position.piece_bb(PieceType::Pawn, position.STM());
 
                 if (no_pawns_or_kings) {
@@ -154,22 +163,22 @@ namespace episteme::search {
 
             Line candidate = {};
             int32_t score = 0;
-            int search_depth = depth - 1;
+            int16_t new_depth = depth - 1;
 
             if (num_legal >= 4 && depth >= 3) {
                 int16_t reduction = 1;
-                int16_t reduced = std::min(std::max(search_depth - reduction, 1), search_depth);
+                int16_t reduced = std::min(std::max(new_depth - reduction, 1), static_cast<int>(new_depth));
 
                 score = -search<false>(position, candidate, reduced, ply + 1, -alpha - 1, -alpha, limits);
                 if (score > alpha && reduced < depth - 1) {
-                    score = -search<false>(position, candidate, search_depth, ply + 1, -alpha - 1, -alpha, limits);
+                    score = -search<false>(position, candidate, new_depth, ply + 1, -alpha - 1, -alpha, limits);
                 }
             } else if (!is_PV || num_legal > 1) {
-                score = -search<false>(position, candidate, search_depth, ply + 1, -alpha - 1, -alpha, limits);
+                score = -search<false>(position, candidate, new_depth, ply + 1, -alpha - 1, -alpha, limits);
             }
 
             if (is_PV && (num_legal == 1 || score > alpha)) {
-                score = -search<true>(position, candidate, search_depth, ply + 1, -beta, -alpha, limits);
+                score = -search<true>(position, candidate, new_depth, ply + 1, -beta, -alpha, limits);
             }
 
             position.unmake_move();
@@ -190,10 +199,7 @@ namespace episteme::search {
 
                 if (score >= beta) {
                     if (is_quiet) {
-                        stack[ply] = {
-                            .ply = ply,
-                            .killer = move,
-                        };
+                        stack[ply].killer = move;
 
                         history.update_quiet_hist(position.STM(), move, hist::history_bonus(depth));
                         for (size_t j = 0; j < explored_quiets.count; j++) {
