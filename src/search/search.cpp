@@ -111,6 +111,11 @@ namespace episteme::search {
             }
         }
 
+        int16_t search_depth = depth - 1;
+        bool no_tt_move = tt_entry.hash != position.zobrist() || tt_entry.move.data() == 0x0000;
+
+        if (no_tt_move && depth >= 4) search_depth--;
+
         ScoredList move_list = generate_scored_moves(position, tt_entry, ply);
         int32_t best = -INF;
 
@@ -118,7 +123,6 @@ namespace episteme::search {
         tt::NodeType node_type = tt::NodeType::AllNode;
         int32_t num_legal = 0;
 
-        bool no_tt_move = tt_entry.hash != position.zobrist() || tt_entry.move.data() == 0x0000;
 
         for (size_t i = 0; i < move_list.count; i++) { 
             pick_move(move_list, i);
@@ -154,8 +158,6 @@ namespace episteme::search {
             Line candidate = {};
             int32_t score = 0;
             int search_depth = depth - 1;
-
-            if (no_tt_move && depth >= 5) search_depth--;
 
             if (num_legal >= 4 && depth >= 3) {
                 int16_t reduction = 1;
