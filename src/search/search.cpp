@@ -89,7 +89,7 @@ namespace episteme::search {
         int32_t static_eval = -INF;
         if (!in_check(position, position.STM())) {
             static_eval = eval::evaluate(accumulator, position.STM());
-            stack[ply] = {.eval = static_eval};
+            stack[ply].eval = static_eval;
         } 
 
         bool improving = false;
@@ -199,10 +199,7 @@ namespace episteme::search {
 
                 if (score >= beta) {
                     if (is_quiet) {
-                        stack[ply] = {
-                            .ply = ply,
-                            .killer = move,
-                        };
+                        stack[ply].killer = move;
 
                         history.update_quiet_hist(position.STM(), move, hist::history_bonus(depth));
                         for (size_t j = 0; j < explored_quiets.count; j++) {
