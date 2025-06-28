@@ -103,6 +103,9 @@ namespace episteme::search {
                     position.make_null();
                     int32_t score = -search<false>(position, null, depth - 3, ply + 1, -beta, -beta + 1, limits);
                     position.unmake_move();
+
+                    if (nodes % 2000 == 0 && limits.time_exceeded()) return 0;
+
                     if (score >= beta) {
                         if (std::abs(score) >= MATE - MAX_SEARCH_PLY) return beta;
                         return score;
