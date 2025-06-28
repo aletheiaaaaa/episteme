@@ -157,7 +157,6 @@ namespace episteme::search {
 
             Line candidate = {};
             int32_t score = 0;
-            int search_depth = depth - 1;
 
             if (num_legal >= 4 && depth >= 3) {
                 int16_t reduction = 1;
