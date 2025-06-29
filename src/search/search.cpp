@@ -141,7 +141,7 @@ namespace episteme::search {
             bool is_quiet = position.mailbox(sq_idx(move.to_square())) == Piece::None && move.move_type() != MoveType::EnPassant;
 
             if (best > -MATE + MAX_SEARCH_PLY) {
-                if (is_quiet && num_legal >= (3 + depth * depth) / (2 - improving)) break;
+                if (is_quiet && num_legal >= (6 + 2 * depth * depth) / (2 - improving)) break;
             
                 if (!is_PV && is_quiet && !in_check(position, position.STM()) && static_eval + depth * 250 <= alpha) break;
             }
