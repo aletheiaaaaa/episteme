@@ -163,7 +163,10 @@ namespace episteme::search {
 
             if (is_quiet) explored_quiets.add(move);
 
-            if (limits.node_exceeded(nodes)) return 0;
+            if (limits.node_exceeded(nodes)) {
+                should_stop = true;
+                return 0;
+            };
 
             Line candidate = {};
             int32_t score = 0;
@@ -276,7 +279,10 @@ namespace episteme::search {
             }
 
             nodes++;
-            if (limits.node_exceeded(nodes)) return 0;
+            if (limits.node_exceeded(nodes)) {
+                should_stop = true;
+                return 0;
+            };
 
             Line candidate = {};
             int32_t score = -quiesce(position, candidate, ply + 1, -beta, -alpha, limits);
