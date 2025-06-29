@@ -82,15 +82,14 @@ namespace episteme::uci {
             }
         }
 
-        instance.reset_history();
+        instance.reset_go();
         instance.update_params(cfg.params);
         instance.run();
     }
 
     auto ucinewgame(search::Config& cfg, search::Instance& instance) {
         cfg.params = {};
-        instance.reset_tt();
-        instance.reset_history();
+        instance.reset_game();
     }
     
     auto eval(search::Config& cfg, search::Instance& instance) {

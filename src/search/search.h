@@ -124,6 +124,14 @@ namespace episteme::search {
                 nodes = 0;
             }
 
+            inline void reset_stop() {
+                should_stop = false;
+            }
+
+            inline bool stopped() {
+                return should_stop;
+            }
+
             ScoredMove score_move(const Position& position, const Move& move, const tt::Entry& tt_entry, std::optional<int32_t> ply);
 
             template<typename F>
@@ -170,12 +178,15 @@ namespace episteme::search {
                 params = new_params;
             }
 
-            inline void reset_tt() {
-                ttable.reset();
+            inline void reset_go() {
+                thread.reset_history();
+                thread.reset_stop();
             }
 
-            inline void reset_history() {
+            inline void reset_game() {
+                ttable.reset();
                 thread.reset_history();
+                thread.reset_stop();
             }
 
             void run();

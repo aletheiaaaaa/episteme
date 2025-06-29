@@ -412,7 +412,7 @@ namespace episteme::search {
 
             ThreadReport report = thread.run(last_score, iter_params, limits);
             
-            if ((target_nodes && limits.node_exceeded(report.nodes)) || (limits.end != time_point<steady_clock>() && limits.time_exceeded())) break;
+            if (thread.stopped()) break;
 
             last_report = report;
             last_score = report.score;
