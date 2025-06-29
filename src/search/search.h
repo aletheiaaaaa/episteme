@@ -114,7 +114,7 @@ namespace episteme::search {
 
     class Thread {
         public:
-            Thread(tt::Table& ttable) : ttable(ttable) {};
+            Thread(tt::Table& ttable) : ttable(ttable), should_stop(false) {};
 
             inline void reset_history() {
                 history.reset();
@@ -155,6 +155,7 @@ namespace episteme::search {
             stack::Stack stack;
 
             uint64_t nodes;
+            bool should_stop;
     };
 
     class Instance {

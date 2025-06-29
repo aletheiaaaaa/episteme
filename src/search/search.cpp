@@ -66,7 +66,10 @@ namespace episteme::search {
 
     template<bool PV_node>
     int32_t Thread::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
-        if (nodes % 2000 == 0 && limits.time_exceeded()) return 0;
+        if (nodes % 2000 == 0 && limits.time_exceeded()) {
+            should_stop = true;
+            return 0;
+        };
 
         if (position.is_threefold()) return 0;
 
@@ -114,7 +117,7 @@ namespace episteme::search {
                     int32_t score = -search<false>(position, null, depth - reduction, ply + 1, -beta, -beta + 1, limits);
                     position.unmake_move();
 
-                    if (nodes % 2000 == 0 && limits.time_exceeded()) return 0;
+                    if (should_stop) return 0;
 
                     if (score >= beta) {
                         if (std::abs(score) >= MATE - MAX_SEARCH_PLY) return beta;
@@ -186,7 +189,7 @@ namespace episteme::search {
             accum_history.pop_back();
             accumulator = accum_history.back();
             
-            if (nodes % 2000 == 0 && limits.time_exceeded()) return 0;
+            if (should_stop) return 0;
             
             if (score > best) {
                 best = score;
@@ -229,7 +232,10 @@ namespace episteme::search {
     }
 
     int32_t Thread::quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
-        if (nodes % 2000 == 0 && limits.time_exceeded()) return 0;
+        if (nodes % 2000 == 0 && limits.time_exceeded()) {
+            should_stop = true;
+            return 0;
+        };
         
         tt::Entry tt_entry = ttable.probe(position.zobrist());
         if ((tt_entry.node_type == tt::NodeType::PVNode)
@@ -279,7 +285,7 @@ namespace episteme::search {
             accum_history.pop_back();
             accumulator = accum_history.back();
             
-            if (nodes % 2000 == 0 && limits.time_exceeded()) return 0;
+            if (should_stop) return 0;
 
             if (score > best) {
                 best = score;
