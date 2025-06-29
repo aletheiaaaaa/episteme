@@ -87,7 +87,11 @@ namespace episteme {
             [[nodiscard]] inline AllowedCastles::RookPair castling_rights(Color stm) const {
                 return state.allowed_castles.rooks[color_idx(stm)];
             }
-        
+
+            [[nodiscard]] inline Piece mailbox(Square square) const {
+                return state.mailbox[sq_idx(square)];
+            }
+
             [[nodiscard]] inline Piece mailbox(int index) const {
                 return state.mailbox[index];
             }

@@ -7,7 +7,7 @@
 #include <random>
 #include <iostream>
 
-namespace episteme {
+namespace episteme::gen {
     struct MoveList {
         std::array<Move, 256> list;
         size_t count = 0;

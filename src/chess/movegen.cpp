@@ -1,6 +1,6 @@
 #include "movegen.h"
 
-namespace episteme {
+namespace episteme::gen {
     std::array<uint64_t, 64> fill_king_attacks() {
         std::array<uint64_t, 64> king_attacks;
         king_attacks.fill(0);

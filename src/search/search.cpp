@@ -17,12 +17,12 @@ namespace episteme::search {
     bool in_check(const Position& position, Color color) {
         uint64_t king_bb = position.piece_bb(PieceType::King, color);
 
-        return is_square_attacked(sq_from_idx(std::countr_zero(king_bb)), position, flip(color));
+        return gen::is_square_attacked(sq_from_idx(std::countr_zero(king_bb)), position, flip(color));
     };
 
     template<typename F>
     ScoredList Thread::generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry, std::optional<int32_t> ply) {
-        MoveList move_list;
+        gen::MoveList move_list;
         generator(move_list, position);
         ScoredList scored_list;
 
@@ -41,8 +41,8 @@ namespace episteme::search {
             return scored_move;
         }
 
-        Piece src = position.mailbox(sq_idx(move.from_square()));
-        Piece dst = position.mailbox(sq_idx(move.to_square()));
+        Piece src = position.mailbox(move.from_square());
+        Piece dst = position.mailbox(move.to_square());
 
         bool is_capture = dst != Piece::None || move.move_type() == MoveType::EnPassant;
 
@@ -130,7 +130,7 @@ namespace episteme::search {
         ScoredList move_list = generate_scored_moves(position, tt_entry, ply);
         int32_t best = -INF;
 
-        MoveList explored_quiets;
+        gen::MoveList explored_quiets;
         tt::NodeType node_type = tt::NodeType::AllNode;
         int32_t num_legal = 0;
 
@@ -138,7 +138,7 @@ namespace episteme::search {
             pick_move(move_list, i);
             Move move = move_list.list[i].move;
 
-            bool is_quiet = position.mailbox(sq_idx(move.to_square())) == Piece::None && move.move_type() != MoveType::EnPassant;
+            bool is_quiet = position.mailbox(move.to_square()) == Piece::None && move.move_type() != MoveType::EnPassant;
 
             if (best > -MATE + MAX_SEARCH_PLY) {
                 if (is_quiet && num_legal >= 6 + 2 * depth * depth) break;
