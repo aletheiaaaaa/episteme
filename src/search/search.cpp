@@ -173,7 +173,7 @@ namespace episteme::search {
             int16_t new_depth = depth - 1;
 
             if (num_legal >= 4 && depth >= 3) {
-                int16_t reduction = 1;
+                int16_t reduction = 1 + !improving;
                 int16_t reduced = std::min(std::max(new_depth - reduction, 1), static_cast<int>(new_depth));
 
                 score = -search<false>(position, candidate, reduced, ply + 1, -alpha - 1, -alpha, limits);
