@@ -1,6 +1,6 @@
 #include "movegen.h"
 
-namespace episteme::gen {
+namespace episteme {
     std::array<uint64_t, 64> fill_king_attacks() {
         std::array<uint64_t, 64> king_attacks;
         king_attacks.fill(0);
@@ -130,7 +130,7 @@ namespace episteme::gen {
     }
 
     template<size_t NUM_BITS, typename F>
-    std::pair<uint64_t, std::array<uint64_t, 1 << NUM_BITS>> find_magics(Square square, std::array<uint64_t, 64> MASKS, F slow_attacks) {
+    std::pair<uint64_t, std::array<uint64_t, (1 << NUM_BITS)>> find_magics(Square square, std::array<uint64_t, 64> MASKS, F slow_attacks) {
         constexpr size_t ARR_SIZE = 1 << NUM_BITS;
         auto attacks = fill_sq_attack<NUM_BITS>(square, MASKS, slow_attacks);
         std::array<uint64_t, ARR_SIZE> submasks;

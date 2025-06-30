@@ -17,12 +17,12 @@ namespace episteme::search {
     bool in_check(const Position& position, Color color) {
         uint64_t king_bb = position.piece_bb(PieceType::King, color);
 
-        return gen::is_square_attacked(sq_from_idx(std::countr_zero(king_bb)), position, flip(color));
+        return is_square_attacked(sq_from_idx(std::countr_zero(king_bb)), position, flip(color));
     };
 
     template<typename F>
     ScoredList Thread::generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry, std::optional<int32_t> ply) {
-        gen::MoveList move_list;
+        MoveList move_list;
         generator(move_list, position);
         ScoredList scored_list;
 
@@ -130,7 +130,7 @@ namespace episteme::search {
         ScoredList move_list = generate_scored_moves(position, tt_entry, ply);
         int32_t best = -INF;
 
-        gen::MoveList explored_quiets;
+        MoveList explored_quiets;
         tt::NodeType node_type = tt::NodeType::AllNode;
         int32_t num_legal = 0;
 
@@ -266,6 +266,8 @@ namespace episteme::search {
             pick_move(captures_list, i);
             Move move = captures_list.list[i].move;
 
+            if (!eval::SEE(position, move, 0)) continue;
+
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
             position.make_move(move);
@@ -279,6 +281,7 @@ namespace episteme::search {
             }
 
             nodes++;
+
             if (limits.node_exceeded(nodes)) {
                 should_stop = true;
                 return 0;

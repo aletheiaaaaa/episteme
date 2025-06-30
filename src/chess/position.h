@@ -41,7 +41,7 @@ namespace episteme {
             Position();
 
             [[nodiscard]] inline uint64_t total_bb() const {
-                return (state.bitboards[color_idx(Color::White) + COLOR_OFFSET] & state.bitboards[color_idx(Color::Black) + COLOR_OFFSET]);
+                return (state.bitboards[color_idx(Color::White) + COLOR_OFFSET] | state.bitboards[color_idx(Color::Black) + COLOR_OFFSET]);
             }
 
             [[nodiscard]] inline uint64_t piece_bb(PieceType piece_type, Color color) const {

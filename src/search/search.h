@@ -138,11 +138,11 @@ namespace episteme::search {
             ScoredList generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry, std::optional<int32_t> ply = std::nullopt);
 
             inline ScoredList generate_scored_moves(const Position& position, const tt::Entry& tt_entry, int32_t ply) {
-                return generate_scored_targets(position, gen::generate_all_moves, tt_entry, ply);
+                return generate_scored_targets(position, generate_all_moves, tt_entry, ply);
             }
         
             inline ScoredList generate_scored_captures(const Position& position, const tt::Entry& tt_entry) {
-                return generate_scored_targets(position, gen::generate_all_captures, tt_entry);
+                return generate_scored_targets(position, generate_all_captures, tt_entry);
             }
 
             template<bool PV_node>

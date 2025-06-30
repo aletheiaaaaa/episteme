@@ -7,7 +7,7 @@
 #include <random>
 #include <iostream>
 
-namespace episteme::gen {
+namespace episteme {
     struct MoveList {
         std::array<Move, 256> list;
         size_t count = 0;
@@ -200,26 +200,47 @@ namespace episteme::gen {
     extern const std::array<std::array<uint64_t, 4096>, 64> ROOK_ATTACKS;
     extern const std::array<std::array<uint64_t, 512>, 64> BISHOP_ATTACKS;
 
-    [[nodiscard]] inline uint64_t get_rook_attacks(Square square, const Position& position) {
+    template<size_t NUM_BITS>
+    [[nodiscard]] inline uint64_t get_slider_attacks(Square square, const Position& position, const std::array<uint64_t, 64>& MASKS, const std::array<uint64_t, 64>& MAGICS, const std::array<std::array<uint64_t, (1 << NUM_BITS)>, 64>& ATTACKS) {
         size_t sq = sq_idx(square);
-        uint64_t blockers = (position.bitboard(color_idx(Color::White) + position.COLOR_OFFSET) | position.bitboard(color_idx(Color::Black) + position.COLOR_OFFSET));
-        uint64_t rel_blockers = (blockers & ROOK_MASKS[sq]);
-        uint64_t data = rel_blockers * ROOK_MAGICS[sq];
-        uint64_t idx = data >> (64 - 12);
-        return ROOK_ATTACKS[sq][idx];
+        uint64_t blockers = position.total_bb();
+        uint64_t rel_blockers = (blockers & MASKS[sq]);
+        uint64_t data = rel_blockers * MAGICS[sq];
+        uint64_t idx = data >> (64 - NUM_BITS);
+        return ATTACKS[sq][idx];
+    }
+
+    [[nodiscard]] inline uint64_t get_rook_attacks(Square square, const Position& position) {
+        return get_slider_attacks<12>(square, position, ROOK_MASKS, ROOK_MAGICS, ROOK_ATTACKS);
     }
 
     [[nodiscard]] inline uint64_t get_bishop_attacks(Square square, const Position& position) {
-        size_t sq = sq_idx(square);
-        uint64_t blockers = (position.bitboard(color_idx(Color::White) + position.COLOR_OFFSET) | position.bitboard(color_idx(Color::Black) + position.COLOR_OFFSET));
-        uint64_t rel_blockers = (blockers & BISHOP_MASKS[sq]);
-        uint64_t data = rel_blockers * BISHOP_MAGICS[sq];
-        uint64_t idx = data >> (64 - 9);
-        return BISHOP_ATTACKS[sq][idx];
+        return get_slider_attacks<9>(square, position, BISHOP_MASKS, BISHOP_MAGICS, BISHOP_ATTACKS);
     }
 
     [[nodiscard]] inline uint64_t get_queen_attacks(Square square, const Position& position) {
         return (get_bishop_attacks(square, position) | get_rook_attacks(square, position));
+    }
+
+    template<size_t NUM_BITS>
+    inline uint64_t get_slider_attacks_direct(Square square, uint64_t blockers, const std::array<uint64_t, 64>& MASKS, const std::array<uint64_t, 64>& MAGICS, const std::array<std::array<uint64_t, (1 << NUM_BITS)>, 64>& ATTACKS) {
+        size_t sq = sq_idx(square);
+        uint64_t rel_blockers = (blockers & MASKS[sq]);
+        uint64_t data = rel_blockers * MAGICS[sq];
+        uint64_t idx = data >> (64 - NUM_BITS);
+        return ATTACKS[sq][idx];
+    }
+
+    [[nodiscard]] inline uint64_t get_rook_attacks_direct(Square square, uint64_t blockers) {
+        return get_slider_attacks_direct<12>(square, blockers, ROOK_MASKS, ROOK_MAGICS, ROOK_ATTACKS);
+    }
+
+    [[nodiscard]] inline uint64_t get_bishop_attacks_direct(Square square, uint64_t blockers) {
+        return get_slider_attacks_direct<9>(square, blockers, BISHOP_MASKS, BISHOP_MAGICS, BISHOP_ATTACKS);
+    }
+
+    [[nodiscard]] inline uint64_t get_queen_attacks_direct(Square square, uint64_t blockers) {
+        return (get_bishop_attacks_direct(square, blockers) | get_rook_attacks_direct(square, blockers));
     }
 
     extern PawnAttacks get_pawn_attacks_helper(const Position& position, Color stm, bool is_pseudo);
