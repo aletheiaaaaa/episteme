@@ -25,7 +25,7 @@ TARGET  := $(BIN_DIR)/$(EXE)
 SRCS    := $(shell find $(SRC_DIR) -name '*.cpp')
 OBJS    := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 
-all: check_net $(TARGET)
+# all: check_net $(TARGET)
 
 # check_net:
 # 	@if [ ! -f $(EVALFILE) ]; then \
