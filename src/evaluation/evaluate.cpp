@@ -65,7 +65,7 @@ namespace episteme::eval {
             pawn_threats | knight_threats | bishop_threats | rook_threats | queen_threats | king_threats 
         );
 
-        occupied_bb &= all_threats;
+        all_threats &= occupied_bb;
 
         Color stm = position.STM();
         Color win = position.STM();
