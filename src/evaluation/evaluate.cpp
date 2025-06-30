@@ -34,8 +34,8 @@ namespace episteme::eval {
         int32_t score = piece_vals[piece_type_idx(position.mailbox(from_sq))] - threshold;
         if (score < 0) return false;
 
-        score -= piece_vals[piece_type_idx(position.mailbox(to_sq))];
-        if (score >= 0) return true;
+        score = piece_vals[piece_type_idx(position.mailbox(to_sq))] - score;
+        if (score <= 0) return true;
 
         const uint64_t pawn_bb = position.piece_type_bb(PieceType::Pawn);
         const uint64_t knight_bb = position.piece_type_bb(PieceType::Knight);
