@@ -13,16 +13,16 @@ set(CMAKE_CXX_STANDARD 23)
 set(SRC "${CMAKE_SOURCE_DIR}/src")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_executable(episteme
-    "${SRC}/chess/position.cpp" 
-    "${SRC}/chess/move.cpp" 
-    "${SRC}/chess/movegen.cpp" 
-    "${SRC}/chess/perft.cpp" 
-    "${SRC}/chess/zobrist.cpp" 
-    "${SRC}/evaluation/evaluate.cpp" 
-    "${SRC}/evaluation/nnue.cpp" 
-    "${SRC}/search/search.cpp" 
-    "${SRC}/search/ttable.cpp"
-    "${SRC}/uci/uci.cpp" 
+    "${SRC}/engine/chess/position.cpp" 
+    "${SRC}/engine/chess/move.cpp" 
+    "${SRC}/engine/chess/movegen.cpp" 
+    "${SRC}/engine/chess/perft.cpp" 
+    "${SRC}/engine/chess/zobrist.cpp" 
+    "${SRC}/engine/evaluation/evaluate.cpp" 
+    "${SRC}/engine/evaluation/nnue.cpp" 
+    "${SRC}/engine/search/search.cpp" 
+    "${SRC}/engine/search/ttable.cpp"
+    "${SRC}/engine/uci/uci.cpp" 
     "${SRC}/main.cpp"
 )
 
