@@ -1,11 +1,13 @@
 #include "evaluate.h"
 
-INCBIN(NNUE, EVALFILE);
+// INCBIN(NNUE, EVALFILE);
 
 namespace episteme::eval {
     using namespace nn;
 
-    const NNUE* nnue = reinterpret_cast<const NNUE*>(gNNUEData);
+    // const NNUE* nnue = reinterpret_cast<const NNUE*>(gNNUEData);
+
+    NNUE* nnue = []{ auto p = new NNUE; p->init_random(); return p; }();
 
     Accumulator update(const Position& position, const Move& move, Accumulator accum) {
         accum = nnue->update_accumulator(position, move, accum);

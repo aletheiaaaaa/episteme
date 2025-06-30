@@ -58,6 +58,9 @@ namespace episteme::search {
         uint64_t nodes = 0;
 
         Position position;
+
+        int32_t gen_count = 0;
+        uint64_t gen_seed = 0;
     };
 
     struct SearchLimits {
@@ -154,6 +157,8 @@ namespace episteme::search {
             int32_t eval(const Parameters& params);
             void bench(int depth);
 
+            void genfens(const Parameters& params);
+
         private:
             nn::Accumulator accumulator;
             std::vector<nn::Accumulator> accum_history;
@@ -192,12 +197,15 @@ namespace episteme::search {
             void run();
             void eval(const Parameters& params);
             void bench(int depth);
+
+            inline void genfens() {
+                thread.genfens(params);
+            }
+
         private:
             tt::Table ttable;
             Parameters params;
 
             Thread thread;
     };
-
-    bool in_check(const Position& position, Color color);
 }

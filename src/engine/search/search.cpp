@@ -14,12 +14,6 @@ namespace episteme::search {
         }
     }
 
-    bool in_check(const Position& position, Color color) {
-        uint64_t king_bb = position.piece_bb(PieceType::King, color);
-
-        return is_square_attacked(sq_from_idx(std::countr_zero(king_bb)), position, flip(color));
-    };
-
     template<typename F>
     ScoredList Thread::generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry, std::optional<int32_t> ply) {
         MoveList move_list;

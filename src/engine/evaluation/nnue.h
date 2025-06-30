@@ -10,13 +10,14 @@
 #include <algorithm>
 #include <cstring>
 #include <immintrin.h>
+#include <random>
 
 namespace episteme::nn {
     constexpr int16_t QA = 255;
     constexpr int16_t QB = 64;
     constexpr int16_t EVAL_SCALE = 400;
 
-    constexpr int L1_WIDTH = 1024;
+    constexpr int L1_WIDTH = 64;
 
     struct Accumulator {
         alignas(32) std::array<int16_t, L1_WIDTH> white = {};
@@ -28,6 +29,8 @@ namespace episteme::nn {
             Accumulator update_accumulator(const Position& position, const Move& move, Accumulator accum) const;
             Accumulator reset_accumulator(const Position& position) const;
             int32_t l1_forward(const Accumulator& accum, Color stm) const; 
+
+            void init_random();
 
         private:
             using L0Weights = std::array<std::array<int16_t, L1_WIDTH>, 768>;

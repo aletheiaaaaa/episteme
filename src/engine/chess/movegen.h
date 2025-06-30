@@ -170,6 +170,11 @@ namespace episteme {
 
     [[nodiscard]] bool is_square_attacked(Square square, const Position& position, Color stm);
 
+    [[nodiscard]] inline bool in_check(const Position& position, Color color) {
+        uint64_t king_bb = position.piece_bb(PieceType::King, color);
+        return is_square_attacked(sq_from_idx(std::countr_zero(king_bb)), position, flip(color));
+    };
+
     extern const std::array<uint64_t, 64> KING_ATTACKS;
     extern const std::array<uint64_t, 64> KNIGHT_ATTACKS;
 

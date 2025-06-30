@@ -171,4 +171,22 @@ namespace episteme::nn {
 
         return out;
     }
+
+    void NNUE::init_random() {
+        std::mt19937 gen(42);
+        std::uniform_int_distribution<int16_t> dist(-255, 255);
+
+        for (auto& arr : l0_weights)
+            for (auto& val : arr)
+                val = dist(gen);
+
+        for (auto& val : l0_biases)
+            val = dist(gen);
+
+        for (auto& arr : l1_weights)
+            for (auto& val : arr)
+                val = dist(gen);
+
+        l1_bias = dist(gen);
+    }
 }
