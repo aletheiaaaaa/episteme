@@ -31,10 +31,10 @@ namespace episteme::eval {
 
         if (move.move_type() == MoveType::EnPassant) return (threshold <= 0);
 
-        int32_t score = piece_vals[piece_type_idx(position.mailbox(from_sq))] - threshold;
+        int32_t score = piece_vals[piece_type_idx(position.mailbox(to_sq))] - threshold;
         if (score < 0) return false;
 
-        score = piece_vals[piece_type_idx(position.mailbox(to_sq))] - score;
+        score = piece_vals[piece_type_idx(position.mailbox(from_sq))] - score;
         if (score <= 0) return true;
 
         const uint64_t pawn_bb = position.piece_type_bb(PieceType::Pawn);
@@ -105,7 +105,7 @@ namespace episteme::eval {
                 return (all_threats & position.color_bb(flip(stm))) ? position.STM() != win : position.STM() == win;
             }
 
-            score = -score + 1 + threat_val;
+            score = threat_val - score;
             if (score <= 0) break;
         }
 
