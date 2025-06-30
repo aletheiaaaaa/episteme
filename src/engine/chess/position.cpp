@@ -304,7 +304,7 @@ namespace episteme {
     }
 
     bool Position::is_threefold() {
-        uint8_t rep_counter = 0;
+        uint8_t rep_counter = 1;
         for (PositionState prev_state : position_history) {
             if (prev_state.hash == state.hash) {
                 rep_counter++;

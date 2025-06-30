@@ -71,7 +71,7 @@ namespace episteme::search {
             return 0;
         };
 
-        if (position.is_threefold()) return 0;
+        if (ply > 0 && position.is_threefold()) return 0;
 
         if (depth <= 0) {
             return quiesce(position, PV, ply, alpha, beta, limits);
