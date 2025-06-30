@@ -77,7 +77,7 @@ namespace episteme::eval {
             uint64_t our_threats = all_threats & position.color_bb(stm);
             if (!our_threats) break;
 
-            win = flip(stm);
+            win = flip(win);
 
             uint64_t next_threat;
             int32_t threat_val;
