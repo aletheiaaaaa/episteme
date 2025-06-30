@@ -119,7 +119,7 @@ namespace episteme::uci {
             if (token == "genfens" && iss >> token) cfg.params.gen_count = std::stoi(token);
             else if (token == "seed" && iss >> token) cfg.params.gen_seed = std::stoi(token);
             else {
-                std::cout << "invalid command\n";
+                if (token != "book") std::cout << "invalid command\n";
                 break;
             }
         }
