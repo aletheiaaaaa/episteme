@@ -6,5 +6,5 @@
 #include <random>
 
 namespace episteme::datagen {
-    bool play_random(Position& position, int32_t num_moves, uint64_t seed);
+    bool play_random(Position& position, int32_t num_moves);
 }

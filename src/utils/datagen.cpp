@@ -1,14 +1,15 @@
 #include "datagen.h"
 
 namespace episteme::datagen {
-    bool play_random(Position& position, int32_t num_moves, uint64_t seed) {
+    bool play_random(Position& position, int32_t num_moves) {
         MoveList move_list;
         generate_all_moves(move_list, position);
 
-        std::mt19937 gen(seed);
+        std::random_device rd;
+        std::mt19937 gen(rd());
         std::uniform_int_distribution dist(1, 100);
 
-        if (move_list.list.empty()) return false;
+        if (!move_list.count) return false;
 
         if (num_moves == 0) {
             std::cout << "info string genfens " << position.to_FEN() << std::endl;
@@ -17,7 +18,7 @@ namespace episteme::datagen {
 
         Move move{};
         while (!move.data()) {
-            int r = dist(gen) % 100;
+            int r = dist(gen);
             PieceType random_type = (
                 r < 35 ? PieceType::Pawn : r < 50 ? PieceType::Knight : r < 65 ? PieceType::Bishop : r < 80 ? PieceType::Queen: r < 95 ? PieceType::King : PieceType::Rook
             );
@@ -29,19 +30,19 @@ namespace episteme::datagen {
                     position.unmake_move();
                     continue;
                 }
+                position.unmake_move();
 
-                if (piece_type(position.mailbox(move.from_square())) == random_type) {
+                if (piece_type(position.mailbox(move_list.list[i].from_square())) == random_type) {
                     random_moves.add(move_list.list[i]);
                 }
-                position.unmake_move();
             }
 
-            if (!move_list.list.empty()) {
+            if (random_moves.count) {
                 move = random_moves.list[dist(gen) % random_moves.count];
             }
         }
 
         position.make_move(move);
-        return play_random(position, num_moves - 1, seed);
+        return play_random(position, num_moves - 1);
     }    
 }

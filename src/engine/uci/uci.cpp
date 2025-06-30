@@ -124,6 +124,7 @@ namespace episteme::uci {
             }
         }
 
+        instance.update_params(cfg.params);
         instance.genfens();
     }
 
@@ -150,6 +151,7 @@ namespace episteme::uci {
         }
 
         else if (keyword == "eval") eval(cfg, instance);
+        else if (keyword == "genfens") genfens(cmd, cfg, instance);
 
         else std::cout << "invalid command\n";
 

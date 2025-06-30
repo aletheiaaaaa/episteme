@@ -387,6 +387,19 @@ namespace episteme::search {
         std::cout << total << " nodes " << nps << " nps" << std::endl;
     }
 
+    void Thread::genfens(const Parameters& params) {
+        std::mt19937 gen(params.gen_seed);
+
+        int32_t num_fens = 0;
+        while (num_fens < params.gen_count) {
+            Position position;
+            position.from_startpos();
+            eval::reset(position);
+
+            if (datagen::play_random(position, 8)) num_fens++;
+        }
+    }
+
     void Instance::run() {
         Position position = params.position;
         int16_t max_depth = params.depth;
