@@ -47,7 +47,6 @@ CXXFLAGS += -DEVALFILE=\"$(EVALFILE)\"
 >>>>>>> 61ac67e (hopefully final net fix)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	# @echo "Compiling $< with EVALFILE=$(EVALFILE)"
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
