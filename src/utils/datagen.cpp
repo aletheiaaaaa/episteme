@@ -20,7 +20,7 @@ namespace episteme::datagen {
         while (!move.data()) {
             int r = dist(gen);
             PieceType random_type = (
-                r < 35 ? PieceType::Pawn : r < 50 ? PieceType::Knight : r < 65 ? PieceType::Bishop : r < 80 ? PieceType::Queen: r < 95 ? PieceType::King : PieceType::Rook
+                r < 25 ? PieceType::Pawn : r < 40 ? PieceType::Knight : r < 55 ? PieceType::Bishop : r < 70 ? PieceType::Queen: r < 85 ? PieceType::King : PieceType::Rook
             );
 
             MoveList random_moves;
