@@ -112,6 +112,7 @@ namespace episteme {
             void unmake_move();
 
             bool is_threefold();
+            bool is_insufficient();
 
             std::string to_FEN() const; 
             uint64_t explicit_zobrist();

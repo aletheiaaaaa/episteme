@@ -57,11 +57,9 @@ namespace episteme::search {
 
         int16_t depth = MAX_SEARCH_PLY;
         uint64_t nodes = 0;
+        uint64_t soft_nodes = 0;
 
         Position position;
-
-        int32_t gen_count = 0;
-        uint64_t gen_seed = 0;
     };
 
     struct SearchLimits {
@@ -136,6 +134,10 @@ namespace episteme::search {
                 return should_stop;
             }
 
+            [[nodiscard]] inline uint64_t node_count() {
+                return soft_nodes;
+            }
+
             ScoredMove score_move(const Position& position, const Move& move, const tt::Entry& tt_entry, std::optional<int32_t> ply);
 
             template<typename F>
@@ -154,11 +156,9 @@ namespace episteme::search {
 
             int32_t quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
 
-            ThreadReport run(int32_t last_score, const Parameters& params, const SearchLimits& limits);
+            ThreadReport run(int32_t last_score, const Parameters& params, const SearchLimits& limits, bool is_absolute);
             int32_t eval(const Parameters& params);
             void bench(int depth);
-
-            void genfens(const Parameters& params);
 
         private:
             nn::Accumulator accumulator;
@@ -169,6 +169,8 @@ namespace episteme::search {
             stack::Stack stack;
 
             uint64_t nodes;
+            uint64_t soft_nodes;
+
             bool should_stop;
     };
 
@@ -176,7 +178,7 @@ namespace episteme::search {
         public:
             Instance(Config& cfg) : ttable(cfg.hash_size), params(cfg.params), thread(ttable) {};
 
-            inline void set_cfg(search::Config& cfg) {
+            inline void set_hash(search::Config& cfg) {
                 ttable.resize(cfg.hash_size);
             }
 
@@ -196,12 +198,9 @@ namespace episteme::search {
             }
 
             void run();
+            ScoredMove datagen();
             void eval(const Parameters& params);
             void bench(int depth);
-
-            inline void genfens() {
-                thread.genfens(params);
-            }
 
         private:
             tt::Table ttable;

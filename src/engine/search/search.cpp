@@ -318,7 +318,7 @@ namespace episteme::search {
         return best;
     }
 
-    ThreadReport Thread::run(int32_t last_score, const Parameters& params, const SearchLimits& limits) {
+    ThreadReport Thread::run(int32_t last_score, const Parameters& params, const SearchLimits& limits, bool is_absolute) {
         Position position = params.position;
         accumulator = eval::reset(position);
         accum_history.emplace_back(accumulator);
@@ -342,6 +342,8 @@ namespace episteme::search {
 
         int64_t elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
         int64_t nps = (elapsed > 0) ? (1000 * nodes) / elapsed : nodes;
+
+        score = (is_absolute) ? score * (!color_idx(position.STM()) ? 1 : -1) : score;
 
         ThreadReport report {
             .depth = params.depth,
@@ -387,19 +389,6 @@ namespace episteme::search {
         std::cout << total << " nodes " << nps << " nps" << std::endl;
     }
 
-    void Thread::genfens(const Parameters& params) {
-        std::mt19937 gen(params.gen_seed);
-
-        int32_t num_fens = 0;
-        while (num_fens < params.gen_count) {
-            Position position;
-            position.from_startpos();
-            eval::reset(position);
-
-            if (datagen::play_random(position, 8)) num_fens++;
-        }
-    }
-
     void Instance::run() {
         Position position = params.position;
         int16_t max_depth = params.depth;
@@ -420,17 +409,15 @@ namespace episteme::search {
             Parameters iter_params = params;
             iter_params.depth = depth;
 
-            ThreadReport report = thread.run(last_score, iter_params, limits);
-            
+            ThreadReport report = thread.run(last_score, iter_params, limits, false);
+
             if (thread.stopped()) break;
 
             last_report = report;
             last_score = report.score;
 
             bool is_mate = std::abs(report.score) >= MATE - MAX_SEARCH_PLY;
-            int32_t display_score = is_mate
-                ? ((1 + MATE - std::abs(report.score)) / 2)
-                : report.score;
+            int32_t display_score = is_mate ? ((1 + MATE - std::abs(report.score)) / 2) * ((report.score > 0) ? 1 : -1) : report.score;
 
             std::cout << "info depth " << report.depth
                 << " time " << report.time
@@ -447,6 +434,33 @@ namespace episteme::search {
     
         Move best = last_report.line.moves[0];
         std::cout << "bestmove " << best.to_string() << std::endl;
+    }
+
+    ScoredMove Instance::datagen() {
+        Position position = params.position;
+        uint64_t soft_nodes = params.soft_nodes;
+        int16_t max_depth = params.depth;
+
+        thread.reset_nodes();
+
+        ThreadReport report;
+        int32_t last_score = 0;
+
+        for (int depth = 1; depth <= max_depth; ++depth) {
+            Parameters iter_params = params;
+            iter_params.depth = depth;
+
+            report = thread.run(last_score, iter_params, {}, true);
+
+            if (thread.node_count() > soft_nodes) break;
+        }
+
+        ScoredMove best{
+            .move = report.line.moves[0],
+            .score = report.score
+        };
+
+        return best;
     }
 
     void Instance::eval(const Parameters& params) {

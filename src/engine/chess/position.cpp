@@ -314,6 +314,18 @@ namespace episteme {
         return false;
     }
 
+    bool Position::is_insufficient() {
+        if (state.bitboards[piece_type_idx(PieceType::Pawn)]) return false;
+        if (state.bitboards[piece_type_idx(PieceType::Queen)] | state.bitboards[piece_type_idx(PieceType::Rook)]) return false;
+        if (
+            (state.bitboards[piece_type_idx(PieceType::Bishop)] & state.bitboards[color_idx(Color::White) + COLOR_OFFSET]) &&
+            (state.bitboards[piece_type_idx(PieceType::Bishop)] & state.bitboards[color_idx(Color::Black) + COLOR_OFFSET])
+        ) return false;
+        if (state.bitboards[piece_type_idx(PieceType::Bishop)] && state.bitboards[piece_type_idx(PieceType::Knight)]) return false;
+        if (std::popcount(state.bitboards[piece_type_idx(PieceType::Knight)])) return false;
+        return true;
+    }
+
     std::string Position::to_FEN() const {
         std::string fen;
     

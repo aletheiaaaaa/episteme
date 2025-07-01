@@ -10,11 +10,7 @@ namespace episteme::datagen {
         std::uniform_int_distribution dist(1, 100);
 
         if (!move_list.count) return false;
-
-        if (num_moves == 0) {
-            std::cout << "info string genfens " << position.to_FEN() << std::endl;
-            return true;
-        }
+        if (num_moves == 0) return true;
 
         Move move{};
         while (!move.data()) {
@@ -44,5 +40,51 @@ namespace episteme::datagen {
 
         position.make_move(move);
         return play_random(position, num_moves - 1);
-    }    
+    }
+
+    void game_loop(const Parameters& params) {
+        Position position;
+        position.from_startpos();
+
+        search::Parameters search_params{
+            .nodes = params.hard_limit,
+            .soft_nodes = params.soft_limit,
+            .position = position
+        };
+
+        search::Config cfg{
+            .params = search_params,
+            .hash_size = 32,
+            .num_threads = 1,
+        };
+
+        search::Instance instance(cfg);
+
+        bool stop = false;
+        for (int i = 0; i < (params.num_games) && !stop; i++) {
+            if (play_random(position, 8)) {
+                instance.reset_game();
+                std::optional<double> wdl;
+                while (!stop) {
+                    const search::ScoredMove scored_move = instance.datagen();
+
+                    if (!scored_move.move.data()) {
+                        wdl = in_check(position, position.STM()) ? position.STM() == Color::Black : 0.5;
+                        break;
+                    }
+                    position.make_move(scored_move.move);
+                    if (position.is_threefold() || position.is_insufficient()) {
+                        wdl = 0.5;
+                        break;
+                    }
+
+                    instance.reset_go();
+                    if (wdl) break;
+                }
+
+            position.from_startpos();
+            instance.reset_game();    
+            }
+        }
+    }
 }

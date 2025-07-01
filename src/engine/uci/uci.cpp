@@ -27,7 +27,7 @@ namespace episteme::uci {
             std::cout << "invalid option" << std::endl;
         }
 
-        instance.set_cfg(cfg);
+        instance.set_hash(cfg);
     }
 
     auto isready() {
@@ -111,23 +111,6 @@ namespace episteme::uci {
         time_perft(position, depth);
     }
 
-    auto genfens(const std::string& args, search::Config& cfg, search::Instance& instance) {
-        std::istringstream iss(args);
-        std::string token;
-
-        while (iss >> token) {
-            if (token == "genfens" && iss >> token) cfg.params.gen_count = std::stoi(token);
-            else if (token == "seed" && iss >> token) cfg.params.gen_seed = std::stoi(token);
-            else {
-                if (token != "book") std::cout << "invalid command\n";
-                break;
-            }
-        }
-
-        instance.update_params(cfg.params);
-        instance.genfens();
-    }
-
     int parse(const std::string& cmd, search::Config& cfg, search::Instance& instance) {
         std::string keyword = cmd.substr(0, cmd.find(' '));
 
@@ -151,7 +134,6 @@ namespace episteme::uci {
         }
 
         else if (keyword == "eval") eval(cfg, instance);
-        else if (keyword == "genfens") genfens(cmd, cfg, instance);
 
         else std::cout << "invalid command\n";
 
