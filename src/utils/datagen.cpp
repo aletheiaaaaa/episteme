@@ -1,5 +1,7 @@
 #include "datagen.h"
 
+#include <cassert>
+
 namespace episteme::datagen {
     namespace fs = std::filesystem;
 
@@ -11,10 +13,7 @@ namespace episteme::datagen {
         std::mt19937 gen(rd());
         std::uniform_int_distribution dist(1, 100);
 
-        if (!move_list.count || num_moves == 0) {
-            std::cout << position.to_FEN() << std::endl;
-            return;
-        };
+        if (!move_list.count || num_moves == 0) return;
 
         Move move{};
         while (!move.data()) {
@@ -71,7 +70,7 @@ namespace episteme::datagen {
             formatter.init(position);
             instance.reset_game();
 
-            const search::ScoredMove initial = instance.datagen();
+            search::ScoredMove initial = instance.datagen();
             if (initial.score >= INITIAL_MAX) continue;
 
             uint64_t win_plies = 0, draw_plies = 0, loss_plies = 0;
@@ -116,7 +115,6 @@ namespace episteme::datagen {
             }
 
             position.from_startpos();
-            instance.reset_game();  
         }
     }
 

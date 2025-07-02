@@ -460,7 +460,24 @@ namespace episteme::search {
 
             last_report = report;
             last_score = report.score;
+
+            bool is_mate = std::abs(report.score) >= MATE - MAX_SEARCH_PLY;
+            int32_t display_score = is_mate ? ((1 + MATE - std::abs(report.score)) / 2) * ((report.score > 0) ? 1 : -1) : report.score;
+
+            std::cout << "info depth " << report.depth
+                << " time " << report.time
+                << " nodes " << report.nodes
+                << " nps " << report.nps
+                << " score " << (is_mate ? "mate " : "cp ") << display_score
+                << " pv ";
+
+            for (size_t i = 0; i < report.line.length; ++i) {
+                std::cout << report.line.moves[i].to_string() << " ";
+            }
+            std::cout << std::endl;
         }
+
+        std::cout << "bestmove " << last_report.line.moves[0].to_string() << std::endl;
 
         ScoredMove best{
             .move = last_report.line.moves[0],
