@@ -58,6 +58,7 @@ namespace episteme::search {
         int16_t depth = MAX_SEARCH_PLY;
         uint64_t nodes = 0;
         uint64_t soft_nodes = 0;
+        int32_t num_games = 0;
 
         Position position;
     };
@@ -130,12 +131,12 @@ namespace episteme::search {
                 should_stop = false;
             }
 
-            inline bool stopped() {
+            [[nodiscard]] inline bool stopped() {
                 return should_stop;
             }
 
             [[nodiscard]] inline uint64_t node_count() {
-                return soft_nodes;
+                return nodes;
             }
 
             ScoredMove score_move(const Position& position, const Move& move, const tt::Entry& tt_entry, std::optional<int32_t> ply);
@@ -169,7 +170,6 @@ namespace episteme::search {
             stack::Stack stack;
 
             uint64_t nodes;
-            uint64_t soft_nodes;
 
             bool should_stop;
     };

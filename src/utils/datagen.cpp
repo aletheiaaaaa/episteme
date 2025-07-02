@@ -1,7 +1,7 @@
 #include "datagen.h"
 
 namespace episteme::datagen {
-    bool play_random(Position& position, int32_t num_moves) {
+    void play_random(Position& position, int32_t num_moves) {
         MoveList move_list;
         generate_all_moves(move_list, position);
 
@@ -9,8 +9,7 @@ namespace episteme::datagen {
         std::mt19937 gen(rd());
         std::uniform_int_distribution dist(1, 100);
 
-        if (!move_list.count) return false;
-        if (num_moves == 0) return true;
+        if (!move_list.count || num_moves == 0) return;
 
         Move move{};
         while (!move.data()) {
@@ -39,21 +38,17 @@ namespace episteme::datagen {
         }
 
         position.make_move(move);
-        return play_random(position, num_moves - 1);
+        play_random(position, num_moves - 1);
     }
 
-    void game_loop(const Parameters& params) {
+    void game_loop(search::Parameters& params) {
         Position position;
         position.from_startpos();
 
-        search::Parameters search_params{
-            .nodes = params.hard_limit,
-            .soft_nodes = params.soft_limit,
-            .position = position
-        };
+        params.position = position;
 
         search::Config cfg{
-            .params = search_params,
+            .params = params,
             .hash_size = 32,
             .num_threads = 1,
         };
@@ -62,29 +57,48 @@ namespace episteme::datagen {
 
         bool stop = false;
         for (int i = 0; i < (params.num_games) && !stop; i++) {
-            if (play_random(position, 8)) {
-                instance.reset_game();
-                std::optional<double> wdl;
-                while (!stop) {
-                    const search::ScoredMove scored_move = instance.datagen();
+            play_random(position, 8);
+            instance.reset_game();
 
-                    if (!scored_move.move.data()) {
-                        wdl = in_check(position, position.STM()) ? position.STM() == Color::Black : 0.5;
-                        break;
-                    }
-                    position.make_move(scored_move.move);
-                    if (position.is_threefold() || position.is_insufficient()) {
-                        wdl = 0.5;
-                        break;
-                    }
+            const search::ScoredMove initial = instance.datagen();
+            if (initial.score >= INITIAL_MAX) continue;
 
-                    instance.reset_go();
-                    if (wdl) break;
+            uint64_t win_plies = 0, draw_plies = 0, loss_plies = 0;
+            std::optional<double> wdl;
+
+            while (!stop) {
+                const search::ScoredMove scored_move = instance.datagen();
+
+                if (!scored_move.move.data()) {
+                    wdl = in_check(position, position.STM()) ? position.STM() == Color::Black : 0.5;
+                    break;
+                } else {
+                    if (std::abs(scored_move.score) >= search::MATE - search::MAX_SEARCH_PLY) wdl = scored_move.score > 0;
+                    else {
+                        if (scored_move.score >= WIN_SCORE_MIN) win_plies++, draw_plies = loss_plies = 0;
+                        else if (scored_move.score <= -WIN_SCORE_MIN) loss_plies++, win_plies = draw_plies = 0;
+                        else if (std::abs(scored_move.score) <= DRAW_SCORE_MAX && position.half_move_clock() >= 100) draw_plies++, win_plies = loss_plies = 0;
+
+                        if (win_plies >= WIN_PLIES_MIN) wdl = 1.0;
+                        else if (loss_plies >= WIN_PLIES_MIN) wdl = 0,0;
+                        else if (draw_plies >= DRAW_PLIES_MIN) wdl = 0.5;    
+                    }
                 }
 
+                position.make_move(scored_move.move);
+                params.position = position;
+                instance.update_params(params);
+
+                if (position.is_threefold() || position.is_insufficient()) {
+                    wdl = 0.5;
+                    break;
+                }
+
+                instance.reset_go();
+                if (wdl) break;
+            }
             position.from_startpos();
             instance.reset_game();    
-            }
         }
     }
 }

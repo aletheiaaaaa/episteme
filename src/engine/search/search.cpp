@@ -438,6 +438,7 @@ namespace episteme::search {
 
     ScoredMove Instance::datagen() {
         Position position = params.position;
+        uint64_t hard_nodes = params.nodes;
         uint64_t soft_nodes = params.soft_nodes;
         int16_t max_depth = params.depth;
 
@@ -450,7 +451,7 @@ namespace episteme::search {
             Parameters iter_params = params;
             iter_params.depth = depth;
 
-            report = thread.run(last_score, iter_params, {}, true);
+            report = thread.run(last_score, iter_params, {.max_nodes=hard_nodes}, true);
 
             if (thread.node_count() > soft_nodes) break;
         }
