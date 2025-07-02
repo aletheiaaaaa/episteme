@@ -13,7 +13,6 @@
 #include <filesystem>
 #include <fstream>
 #include <atomic>
-#include <chrono>
 
 namespace episteme::datagen {
     constexpr int32_t WIN_SCORE_MIN = 2500;
@@ -25,17 +24,17 @@ namespace episteme::datagen {
     inline std::atomic<bool> stop = false;
 
     struct Parameters {
-        uint32_t soft_limit = 0;
-        uint32_t hard_limit = 0;
+        uint32_t soft_limit = 5000;
+        uint32_t hard_limit = 1000000;
         int32_t num_games = 100000;
 
         uint16_t num_threads = 1;
         uint32_t hash_size = 32; 
 
-        std::string out_dir;
+        std::string out_dir = "data";
     };
 
     void play_random(Position& position, int32_t num_moves);
-    void game_loop(const Parameters& params, int16_t id, std::ostream& stream);
+    void game_loop(const Parameters& params, std::ostream& stream);
     void run(Parameters& params);
 }

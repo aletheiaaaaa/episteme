@@ -2,7 +2,6 @@
 
 namespace episteme::datagen {
     namespace fs = std::filesystem;
-    using namespace std::chrono;
 
     void play_random(Position& position, int32_t num_moves) {
         MoveList move_list;
@@ -12,7 +11,10 @@ namespace episteme::datagen {
         std::mt19937 gen(rd());
         std::uniform_int_distribution dist(1, 100);
 
-        if (!move_list.count || num_moves == 0) return;
+        if (!move_list.count || num_moves == 0) {
+            std::cout << position.to_FEN() << std::endl;
+            return;
+        };
 
         Move move{};
         while (!move.data()) {
@@ -44,7 +46,7 @@ namespace episteme::datagen {
         play_random(position, num_moves - 1);
     }
 
-    void game_loop(const Parameters& params, int16_t id, std::ostream& stream) {
+    void game_loop(const Parameters& params, std::ostream& stream) {
         Position position;
         position.from_startpos();
 
@@ -63,9 +65,6 @@ namespace episteme::datagen {
         };
 
         search::Instance instance(cfg);
-
-        auto start = steady_clock::now();
-        uint32_t total{};
 
         for (int i = 0; i < (params.num_games / params.num_threads) && !stop; i++) {
             play_random(position, 8);
@@ -113,7 +112,7 @@ namespace episteme::datagen {
             }
 
             if (wdl) {
-                total += formatter.write(stream, static_cast<uint8_t>(*wdl * 2));
+                formatter.write(stream, static_cast<uint8_t>(*wdl * 2));
             }
 
             position.from_startpos();
@@ -136,17 +135,16 @@ namespace episteme::datagen {
             files.push_back(file);
 
             threads.emplace_back(
-                [&params, file = std::move(file), i]() {
+                [params, file = std::move(file), i]() {
                     std::ofstream stream(file, std::ios::binary | std::ios::app);
                     if (!stream) {
-                        std::cout << std::format("Failed to open file {} for thread {}", file, i) << std::endl;
+                        std::cout << std::format("Failed to open file {} for thread {}", file.string(), i) << std::endl;
                     }
 
-                    game_loop(params, i, stream);
+                    game_loop(params, stream);
                     stream.close();
 
-                    if (stream.good()) stream.flush();
-                    else {
+                    if (!stream.good()) {
                         std::cout << std::format("Error encountered on thread {} when closing", i) << std::endl;
                     }
                 }

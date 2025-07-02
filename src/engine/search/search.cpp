@@ -410,7 +410,6 @@ namespace episteme::search {
             iter_params.depth = depth;
 
             ThreadReport report = thread.run(last_score, iter_params, limits, false);
-
             if (thread.stopped()) break;
 
             last_report = report;
@@ -449,21 +448,23 @@ namespace episteme::search {
             .max_nodes=hard_nodes
         };
 
-        ThreadReport report;
+        ThreadReport last_report;
         int32_t last_score = 0;
 
         for (int depth = 1; depth <= max_depth; ++depth) {
             Parameters iter_params = params;
             iter_params.depth = depth;
 
-            report = thread.run(last_score, iter_params, limits, true);
+            ThreadReport report = thread.run(last_score, iter_params, limits, true);
+            if (thread.stopped() || thread.node_count() > soft_nodes) break;
 
-            if (thread.node_count() > soft_nodes) break;
+            last_report = report;
+            last_score = report.score;
         }
 
         ScoredMove best{
-            .move = report.line.moves[0],
-            .score = report.score
+            .move = last_report.line.moves[0],
+            .score = last_report.score
         };
 
         return best;

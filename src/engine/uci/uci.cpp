@@ -111,6 +111,27 @@ namespace episteme::uci {
         time_perft(position, depth);
     }
 
+    auto datagen(const std::string& args) {
+        std::istringstream iss(args);
+        std::string token;
+
+        datagen::Parameters params;
+
+        while (iss >> token) {
+            if (token == "softnodes" && iss >> token) params.soft_limit = std::stoi(token);
+            else if (token == "hardnodes" && iss >> token) params.hard_limit = std::stoi(token);
+            else if (token == "games" && iss >> token) params.num_games = std::stoi(token);
+            else if (token == "threads" && iss >> token) params.num_threads = std::stoi(token);
+            else if (token == "hash" && iss >> token) params.hash_size = std::stoi(token);
+            else if (token == "dir" && iss >> token) params.out_dir = token;
+            else {
+                std::cout << "invalid command" << std::endl;
+            }
+        }
+
+        datagen::run(params);
+    }
+
     int parse(const std::string& cmd, search::Config& cfg, search::Instance& instance) {
         std::string keyword = cmd.substr(0, cmd.find(' '));
 
@@ -134,6 +155,7 @@ namespace episteme::uci {
         }
 
         else if (keyword == "eval") eval(cfg, instance);
+        else if (keyword == "datagen") datagen(cmd.substr(cmd.find(" ")+1));
 
         else std::cout << "invalid command\n";
 

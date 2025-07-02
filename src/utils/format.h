@@ -17,12 +17,11 @@ namespace episteme::datagen {
             constexpr U4& operator=(uint8_t x) {
                 if (high) value = ((value & 0x0F) | (x << 4));
                 else value = ((value & 0xF0) | (x & 0x0F));
-
                 return *this;
             }
 
         private:
-            uint8_t value;
+            uint8_t& value;
             bool high;
     };
 
@@ -33,9 +32,6 @@ namespace episteme::datagen {
                 return U4(data[i / 2], (i % 2) == 1);
             }
 
-            constexpr uint8_t operator[](size_t i) {
-                return data[i / 2] >> ((i & 2) * 4);
-            } 
         private:
             std::array<uint8_t, SIZE / 2> data{};
     };
@@ -60,6 +56,7 @@ namespace episteme::datagen {
             U4Array<32> pieces{};
 
             uint64_t temp_bb = bitboard;
+            size_t i = 0;
             while (temp_bb) {
                 Square square = sq_from_idx(std::countr_zero(temp_bb));
                 Piece piece = position.mailbox(square);
@@ -69,7 +66,7 @@ namespace episteme::datagen {
 
                 if (piece_type(piece) == PieceType::Rook && position.all_rights().is_castling(square)) type = 0b0110;
 
-                pieces[std::countr_zero(temp_bb)] = (color << 3) | type;
+                pieces[i++] = (color << 3) | type;
 
                 temp_bb &= (temp_bb - 1);
             }
@@ -84,7 +81,8 @@ namespace episteme::datagen {
                 .stm_ep_square = stm_ep_square,
                 .half_move_clock = half_move_clock,
                 .full_move_number = full_move_number,
-                .score = score
+                .score = score,
+                .wdl = UINT8_MAX
             };
 
             return packed;
@@ -97,18 +95,18 @@ namespace episteme::datagen {
 
             Format();
 
-            inline void Format::init(const Position& position) {
+            inline void init(const Position& position) {
                 initial = PackedBoard::pack(position, 0);
                 moves.clear();
             }
         
-            inline void Format::push(Move move, int32_t score) {
+            inline void push(Move move, int32_t score) {
                 moves.push_back({
                     .move = move.data(), .score = static_cast<int16_t>(score)}
                 );
             }
 
-            uint32_t write(std::ostream& stream, uint8_t wdl);
+            void write(std::ostream& stream, uint8_t wdl);
         private:
             PackedBoard initial{};
             std::vector<ScoredMove> moves;
