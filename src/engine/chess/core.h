@@ -76,16 +76,12 @@ namespace episteme {
             Square queenside{Square::None};
 
             [[nodiscard]] inline bool is_kingside_set() const {
-                if (kingside != Square::None) {
-                    return true;
-                }
+                if (kingside != Square::None) return true;
                 return false;            
             };
 
             [[nodiscard]] inline bool is_queenside_set() const {
-                if (queenside != Square::None) {
-                    return true;
-                }
+                if (queenside != Square::None) return true;
                 return false;
             };
 
@@ -112,6 +108,11 @@ namespace episteme {
             if (rooks[1].is_queenside_set()) mask |= BLACK_QUEENSIDE;  
 
             return mask;
+        }
+
+        bool is_castling(Square square) {
+            if (rooks[0].kingside == square || rooks[0].queenside == square || rooks[1].kingside == square || rooks[1].queenside == square) return true;
+            return false;
         }
     };
 
@@ -177,6 +178,10 @@ namespace episteme {
 
     [[nodiscard]] inline uint16_t color_idx(Color color) {
         return static_cast<uint16_t>(color);
+    }
+
+    [[nodiscard]] inline uint16_t color_idx(Piece piece) {
+        return static_cast<uint16_t>(piece) & 0b1;
     }
 
     [[nodiscard]] inline uint16_t file(Square square) {

@@ -6,7 +6,7 @@
 
 namespace episteme {
     enum class MoveType : uint16_t {
-        Normal, Castling, EnPassant, Promotion, 
+        Normal, EnPassant, Castling, Promotion, 
         None
     };
 
@@ -32,18 +32,18 @@ namespace episteme {
                 return static_cast<Square>((move_data >> 6) & 0b111111);
             }
         
-            [[nodiscard]] inline MoveType move_type() const {
-                return static_cast<MoveType>((move_data >> 12) & 0b11);
-            }
-        
             [[nodiscard]] inline PromoPiece promo_piece() const {
-                return static_cast<PromoPiece>((move_data >> 14) & 0b11);
+                return static_cast<PromoPiece>((move_data >> 12) & 0b11);
             }
         
             [[nodiscard]] inline PieceType promo_piece_type() const {
-                return static_cast<PieceType>(((move_data >> 14) & 0b11) + 1);
+                return static_cast<PieceType>(((move_data >> 12) & 0b11) + 1);
             }
 
+            [[nodiscard]] inline MoveType move_type() const {
+                return static_cast<MoveType>((move_data >> 14) & 0b11);
+            }
+        
             [[nodiscard]] inline bool is_empty() const {
                 return (move_data == 0x0000);
             }

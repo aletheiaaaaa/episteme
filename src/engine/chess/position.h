@@ -30,7 +30,7 @@ namespace episteme {
     
         bool stm = color_idx(Color::White);
         uint8_t half_move_clock = 0;
-        uint32_t full_move_number = 0;
+        uint16_t full_move_number = 0;
         Square ep_square = Square::None;
 
         uint64_t hash = 0;
@@ -82,6 +82,10 @@ namespace episteme {
         
             [[nodiscard]] inline Square ep_square() const {
                 return state.ep_square;    
+            }
+
+            [[nodiscard]] inline AllowedCastles all_rights() const {
+                return state.allowed_castles;
             }
         
             [[nodiscard]] inline AllowedCastles::RookPair castling_rights(Color stm) const {

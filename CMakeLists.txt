@@ -24,6 +24,7 @@ add_executable(episteme
     "${SRC}/engine/search/ttable.cpp"
     "${SRC}/engine/uci/uci.cpp" 
     "${SRC}/utils/datagen.cpp"
+    "${SRC}/utils/format.cpp"
     "${SRC}/main.cpp"
 )
 

@@ -444,6 +444,11 @@ namespace episteme::search {
 
         thread.reset_nodes();
 
+        SearchLimits limits{
+            .end=std::nullopt, 
+            .max_nodes=hard_nodes
+        };
+
         ThreadReport report;
         int32_t last_score = 0;
 
@@ -451,7 +456,7 @@ namespace episteme::search {
             Parameters iter_params = params;
             iter_params.depth = depth;
 
-            report = thread.run(last_score, iter_params, {.max_nodes=hard_nodes}, true);
+            report = thread.run(last_score, iter_params, limits, true);
 
             if (thread.node_count() > soft_nodes) break;
         }

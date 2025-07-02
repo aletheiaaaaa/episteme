@@ -1,6 +1,9 @@
 #include "datagen.h"
 
 namespace episteme::datagen {
+    namespace fs = std::filesystem;
+    using namespace std::chrono;
+
     void play_random(Position& position, int32_t num_moves) {
         MoveList move_list;
         generate_all_moves(move_list, position);
@@ -41,9 +44,11 @@ namespace episteme::datagen {
         play_random(position, num_moves - 1);
     }
 
-    void game_loop(const Parameters& params) {
+    void game_loop(const Parameters& params, int16_t id, std::ostream& stream) {
         Position position;
         position.from_startpos();
+
+        Format formatter{};
 
         search::Parameters search_params{
             .nodes = params.hard_limit,
@@ -59,9 +64,12 @@ namespace episteme::datagen {
 
         search::Instance instance(cfg);
 
-        bool stop = false;
-        for (int i = 0; i < (params.num_games) && !stop; i++) {
+        auto start = steady_clock::now();
+        uint32_t total{};
+
+        for (int i = 0; i < (params.num_games / params.num_threads) && !stop; i++) {
             play_random(position, 8);
+            formatter.init(position);
             instance.reset_game();
 
             const search::ScoredMove initial = instance.datagen();
@@ -84,7 +92,7 @@ namespace episteme::datagen {
                         else if (std::abs(scored_move.score) <= DRAW_SCORE_MAX && position.half_move_clock() >= 100) draw_plies++, win_plies = loss_plies = 0;
 
                         if (win_plies >= WIN_PLIES_MIN) wdl = 1.0;
-                        else if (loss_plies >= WIN_PLIES_MIN) wdl = 0,0;
+                        else if (loss_plies >= WIN_PLIES_MIN) wdl = 0.0;
                         else if (draw_plies >= DRAW_PLIES_MIN) wdl = 0.5;    
                     }
                 }
@@ -98,11 +106,53 @@ namespace episteme::datagen {
                     break;
                 }
 
+                formatter.push(scored_move.move, scored_move.score);
                 instance.reset_go();
+
                 if (wdl) break;
             }
+
+            if (wdl) {
+                total += formatter.write(stream, static_cast<uint8_t>(*wdl * 2));
+            }
+
             position.from_startpos();
-            instance.reset_game();    
+            instance.reset_game();  
         }
+    }
+
+    void run(Parameters& params) {
+        std::cout << "Beginning datagen" << std::endl;
+
+        std::signal(SIGINT, []([[maybe_unused]] int signum){stop = true;});
+
+        params.num_games = params.num_threads * (params.num_games / params.num_threads);
+
+        std::vector<std::thread> threads;
+        std::vector<std::string> files;
+
+        for (size_t i = 0; i < params.num_threads; i++) {
+            const auto file = fs::path(std::format("{}/temp_{}.{}", params.out_dir, i, Format::EXTENSION));
+            files.push_back(file);
+
+            threads.emplace_back(
+                [&params, file = std::move(file), i]() {
+                    std::ofstream stream(file, std::ios::binary | std::ios::app);
+                    if (!stream) {
+                        std::cout << std::format("Failed to open file {} for thread {}", file, i) << std::endl;
+                    }
+
+                    game_loop(params, i, stream);
+                    stream.close();
+
+                    if (stream.good()) stream.flush();
+                    else {
+                        std::cout << std::format("Error encountered on thread {} when closing", i) << std::endl;
+                    }
+                }
+            );
+        }
+
+        for (auto& thread : threads) thread.join();
     }
 }
