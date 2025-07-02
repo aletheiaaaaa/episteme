@@ -63,7 +63,7 @@ namespace episteme::datagen {
             .num_threads = params.num_threads,
         };
 
-        search::Instance instance(cfg);
+        search::Engine instance(cfg);
 
         for (int i = 0; i < (params.num_games / params.num_threads) && !stop; i++) {
             play_random(position, 8);

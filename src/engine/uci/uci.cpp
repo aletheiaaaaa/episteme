@@ -9,7 +9,7 @@ namespace episteme::uci {
         std::cout << "uciok\n";
     }
 
-    auto setoption(const std::string& args, search::Config& cfg, search::Instance& instance) {
+    auto setoption(const std::string& args, search::Config& cfg, search::Engine& instance) {
         std::istringstream iss(args);
         std::string name, option_name, value, option_value;
     
@@ -65,7 +65,7 @@ namespace episteme::uci {
         cfg.params.position = position;
     }
 
-    auto go(const std::string& args, search::Config& cfg, search::Instance& instance) {
+    auto go(const std::string& args, search::Config& cfg, search::Engine& instance) {
         std::istringstream iss(args);
         std::string token;
 
@@ -87,12 +87,12 @@ namespace episteme::uci {
         instance.run();
     }
 
-    auto ucinewgame(search::Config& cfg, search::Instance& instance) {
+    auto ucinewgame(search::Config& cfg, search::Engine& instance) {
         cfg.params = {};
         instance.reset_game();
     }
     
-    auto eval(search::Config& cfg, search::Instance& instance) {
+    auto eval(search::Config& cfg, search::Engine& instance) {
         instance.eval(cfg.params);
     }
     
@@ -100,7 +100,7 @@ namespace episteme::uci {
         int depth = (args.empty()) ? 8 : std::stoi(args);
         if (!cfg.hash_size) cfg.hash_size = 32;
 
-        search::Instance instance(cfg);
+        search::Engine instance(cfg);
         instance.bench(depth);
     }
 
@@ -132,7 +132,7 @@ namespace episteme::uci {
         datagen::run(params);
     }
 
-    int parse(const std::string& cmd, search::Config& cfg, search::Instance& instance) {
+    int parse(const std::string& cmd, search::Config& cfg, search::Engine& instance) {
         std::string keyword = cmd.substr(0, cmd.find(' '));
 
         if (keyword == "uci") uci();

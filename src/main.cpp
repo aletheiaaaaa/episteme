@@ -16,7 +16,7 @@ using namespace episteme;
 int main(int argc, char *argv[]) {
     zobrist::init();
     search::Config cfg = {};
-    search::Instance instance(cfg);
+    search::Engine instance(cfg);
 
     if (argc > 1) {
         std::string cmd;

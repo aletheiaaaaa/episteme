@@ -15,7 +15,7 @@ namespace episteme::search {
     }
 
     template<typename F>
-    ScoredList Thread::generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry, std::optional<int32_t> ply) {
+    ScoredList Worker::generate_scored_targets(const Position& position, F generator, const tt::Entry& tt_entry, std::optional<int32_t> ply) {
         MoveList move_list;
         generator(move_list, position);
         ScoredList scored_list;
@@ -27,7 +27,7 @@ namespace episteme::search {
         return scored_list;
     }
 
-    ScoredMove Thread::score_move(const Position& position, const Move& move, const tt::Entry& tt_entry, std::optional<int32_t> ply) {
+    ScoredMove Worker::score_move(const Position& position, const Move& move, const tt::Entry& tt_entry, std::optional<int32_t> ply) {
         ScoredMove scored_move{.move = move};
 
         if (tt_entry.move.data() == move.data()) {
@@ -59,7 +59,7 @@ namespace episteme::search {
     }
 
     template<bool PV_node>
-    int32_t Thread::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
+    int32_t Worker::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
         if (nodes % 2000 == 0 && limits.time_exceeded()) {
             should_stop = true;
             return 0;
@@ -228,7 +228,7 @@ namespace episteme::search {
         return best;
     }
 
-    int32_t Thread::quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
+    int32_t Worker::quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
         if (nodes % 2000 == 0 && limits.time_exceeded()) {
             should_stop = true;
             return 0;
@@ -318,7 +318,7 @@ namespace episteme::search {
         return best;
     }
 
-    ThreadReport Thread::run(int32_t last_score, const Parameters& params, const SearchLimits& limits, bool is_absolute) {
+    ThreadReport Worker::run(int32_t last_score, const Parameters& params, const SearchLimits& limits, bool is_absolute) {
         Position position = params.position;
         accumulator = eval::reset(position);
         accum_history.emplace_back(accumulator);
@@ -357,14 +357,14 @@ namespace episteme::search {
         return report;
     }
 
-    int32_t Thread::eval(const Parameters& params) {
+    int32_t Worker::eval(const Parameters& params) {
         Position position = params.position;
         accumulator = eval::reset(position);
 
         return eval::evaluate(accumulator, position.STM());
     }
 
-    void Thread::bench(int depth) {
+    void Worker::bench(int depth) {
         uint64_t total = 0;
         milliseconds elapsed = 0ms;
         for (std::string fen : fens) {
@@ -389,7 +389,7 @@ namespace episteme::search {
         std::cout << total << " nodes " << nps << " nps" << std::endl;
     }
 
-    void Instance::run() {
+    void Engine::run() {
         Position position = params.position;
         int16_t max_depth = params.depth;
         uint64_t target_nodes = params.nodes;
@@ -435,7 +435,7 @@ namespace episteme::search {
         std::cout << "bestmove " << best.to_string() << std::endl;
     }
 
-    ScoredMove Instance::datagen() {
+    ScoredMove Engine::datagen() {
         Position position = params.position;
         uint64_t hard_nodes = params.nodes;
         uint64_t soft_nodes = params.soft_nodes;
@@ -487,11 +487,11 @@ namespace episteme::search {
         return best;
     }
 
-    void Instance::eval(const Parameters& params) {
+    void Engine::eval(const Parameters& params) {
         std::cout << "info score cp " << thread.eval(params) << std::endl;
     }
 
-    void Instance::bench(int depth) {
+    void Engine::bench(int depth) {
         thread.bench(depth);
     }
 }

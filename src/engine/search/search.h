@@ -115,9 +115,9 @@ namespace episteme::search {
         Line line;
     };
 
-    class Thread {
+    class Worker {
         public:
-            Thread(tt::Table& ttable) : ttable(ttable), should_stop(false) {};
+            Worker(tt::Table& ttable) : ttable(ttable), should_stop(false) {};
 
             inline void reset_history() {
                 history.reset();
@@ -174,9 +174,9 @@ namespace episteme::search {
             bool should_stop;
     };
 
-    class Instance {
+    class Engine {
         public:
-            Instance(Config& cfg) : ttable(cfg.hash_size), params(cfg.params), thread(ttable) {};
+            Engine(Config& cfg) : ttable(cfg.hash_size), params(cfg.params), thread(ttable) {};
 
             inline void set_hash(search::Config& cfg) {
                 ttable.resize(cfg.hash_size);
@@ -206,6 +206,6 @@ namespace episteme::search {
             tt::Table ttable;
             Parameters params;
 
-            Thread thread;
+            Worker thread;
     };
 }
