@@ -41,16 +41,20 @@ namespace episteme::datagen {
         play_random(position, num_moves - 1);
     }
 
-    void game_loop(search::Parameters& params) {
+    void game_loop(const Parameters& params) {
         Position position;
         position.from_startpos();
 
-        params.position = position;
+        search::Parameters search_params{
+            .nodes = params.hard_limit,
+            .soft_nodes = params.soft_limit,
+            .position = position,
+        };
 
         search::Config cfg{
-            .params = params,
-            .hash_size = 32,
-            .num_threads = 1,
+            .params = search_params,
+            .hash_size = params.hash_size,
+            .num_threads = params.num_threads,
         };
 
         search::Instance instance(cfg);
@@ -86,8 +90,8 @@ namespace episteme::datagen {
                 }
 
                 position.make_move(scored_move.move);
-                params.position = position;
-                instance.update_params(params);
+                search_params.position = position;
+                instance.update_params(search_params);
 
                 if (position.is_threefold() || position.is_insufficient()) {
                     wdl = 0.5;
