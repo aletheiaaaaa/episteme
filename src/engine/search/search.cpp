@@ -432,10 +432,9 @@ namespace episteme::search {
         std::cout << "bestmove " << best.to_string() << std::endl;
     }
 
-    ScoredMove Engine::search(Position& position) {
+    ScoredMove Engine::datagen_search(Position& position) {
         uint64_t hard_nodes = params.nodes;
         uint64_t soft_nodes = params.soft_nodes;
-        int16_t max_depth = params.depth;
 
         SearchLimits limits{};
         limits.max_nodes = hard_nodes;
@@ -445,7 +444,7 @@ namespace episteme::search {
         ThreadReport last_report;
         int32_t last_score = 0;
 
-        for (int depth = 1; depth <= max_depth; depth++) {
+        for (int depth = 1; depth <= 10; depth++) {
             Parameters iter_params = params;
             iter_params.depth = depth;
 

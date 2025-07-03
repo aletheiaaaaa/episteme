@@ -199,7 +199,7 @@ namespace episteme::search {
             }
 
             void run(Position& position);
-            ScoredMove search(Position& position);
+            ScoredMove datagen_search(Position& position);
             void eval(Position& position);
             void bench(int depth);
 

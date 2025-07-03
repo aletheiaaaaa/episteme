@@ -55,7 +55,7 @@ namespace episteme::datagen {
 
             formatter.init(position);
 
-            search::ScoredMove initial = engine.search(position);
+            search::ScoredMove initial = engine.datagen_search(position);
             if (initial.score >= INITIAL_MAX) {
                 i--;
                 position.from_startpos();
@@ -63,13 +63,13 @@ namespace episteme::datagen {
             };
 
             uint64_t win_plies = 0, draw_plies = 0, loss_plies = 0;
-            std::optional<double> wdl;
+            std::optional<uint8_t> wdl{};
 
             while (!stop) {
-                const search::ScoredMove scored_move = engine.search(position);
+                const search::ScoredMove scored_move = engine.datagen_search(position);
 
                 if (!scored_move.move.data()) {
-                    wdl = in_check(position, position.STM()) ? position.STM() == Color::Black : 0.5;
+                    wdl = in_check(position, position.STM()) ? (position.STM() == Color::Black ? 2 : 0) : 1;
                     break;
                 }
                 // } else {
@@ -88,7 +88,7 @@ namespace episteme::datagen {
                 position.make_move(scored_move.move);
 
                 if (position.is_threefold() || position.is_insufficient()) {
-                    wdl = 0.5;
+                    wdl = 1;
                     break;
                 }
 
@@ -98,10 +98,8 @@ namespace episteme::datagen {
                 if (wdl) break;
             }
 
-            if (wdl) {
-                games++;
-                positions += formatter.write(stream, static_cast<uint8_t>(*wdl * 2));
-            }
+            games++;
+            positions += formatter.write(stream, static_cast<uint8_t>(*wdl));
 
             position.from_startpos();
 
@@ -127,6 +125,8 @@ namespace episteme::datagen {
 
         std::signal(SIGINT, []([[maybe_unused]] int signum){
             stop = true;
+            std::cout << "Datagen interrupted" << std::endl;
+            return;
         });
 
         params.num_games = params.num_threads * (params.num_games / params.num_threads);
@@ -143,6 +143,7 @@ namespace episteme::datagen {
                     std::ofstream stream(file, std::ios::binary | std::ios::app);
                     if (!stream) {
                         std::cout << std::format("Failed to open file {} for thread {}", file.string(), i) << std::endl;
+                        return;
                     }
 
                     game_loop(params, stream, i);
@@ -152,11 +153,6 @@ namespace episteme::datagen {
                     }
                 }
             );
-        }
-
-        if (stop.load()) {
-            std::cout << "Datagen interrupted" << std::endl;
-            return;
         }
 
         for (auto& thread : threads) thread.join();
