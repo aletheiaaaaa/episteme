@@ -29,7 +29,7 @@ namespace episteme::datagen {
         int32_t num_games = 100000;
 
         uint16_t num_threads = 1;
-        uint32_t hash_size = 32; 
+        uint32_t hash_size = 16; 
 
         std::string out_dir = "data";
     };
