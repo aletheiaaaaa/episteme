@@ -5,17 +5,8 @@ SRC_DIR   := src
 OBJ_DIR   := ./obj
 BIN_DIR   := .
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-DEFAULT_NET := ./episteme_dev_net.bin
-EVALFILE    ?= $(DEFAULT_NET)
-=======
-EVAL_DIR = ./episteme_dev_net.bin
->>>>>>> 61ac67e (hopefully final net fix)
-=======
 # DEFAULT_NET := ./episteme_dev_net.bin
 # EVALFILE    ?= $(DEFAULT_NET)
->>>>>>> 40c362c (fix makefile)
 
 # CXXFLAGS  += -DEVALFILE=\"$(EVALFILE)\"
 
@@ -38,13 +29,10 @@ $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-<<<<<<< HEAD
-=======
-# Add the macro definition directly to CXXFLAGS
-CXXFLAGS += -DEVALFILE=\"$(EVALFILE)\"
+# # Add the macro definition directly to CXXFLAGS
+# CXXFLAGS += -DEVALFILE=\"$(EVALFILE)\"
 
 # Compile sources
->>>>>>> 61ac67e (hopefully final net fix)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
