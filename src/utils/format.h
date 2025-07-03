@@ -99,14 +99,9 @@ namespace episteme::datagen {
                 initial = PackedBoard::pack(position, 0);
                 moves.clear();
             }
-        
-            inline void push(Move move, int32_t score) {
-                moves.push_back({
-                    .move = move.data(), .score = static_cast<int16_t>(score)}
-                );
-            }
 
-            void write(std::ostream& stream, uint8_t wdl);
+            void push(Move move, int32_t score);
+            size_t write(std::ostream& stream, uint8_t wdl);
         private:
             PackedBoard initial{};
             std::vector<ScoredMove> moves;

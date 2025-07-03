@@ -32,22 +32,38 @@ namespace episteme {
                 return static_cast<Square>((move_data >> 6) & 0b111111);
             }
         
+            [[nodiscard]] inline MoveType move_type() const {
+                return static_cast<MoveType>((move_data >> 12) & 0b11);
+            }
+        
             [[nodiscard]] inline PromoPiece promo_piece() const {
-                return static_cast<PromoPiece>((move_data >> 12) & 0b11);
+                return static_cast<PromoPiece>((move_data >> 14) & 0b11);
             }
         
             [[nodiscard]] inline PieceType promo_piece_type() const {
-                return static_cast<PieceType>(((move_data >> 12) & 0b11) + 1);
+                return static_cast<PieceType>(((move_data >> 14) & 0b11) + 1);
             }
 
-            [[nodiscard]] inline MoveType move_type() const {
-                return static_cast<MoveType>((move_data >> 14) & 0b11);
+            [[nodiscard]] inline uint16_t from_idx() const {
+                return move_data & 0b111111;
             }
-        
+
+            [[nodiscard]] inline uint16_t to_idx() const {
+                return (move_data >> 6) & 0b111111;
+            }
+
+            [[nodiscard]] inline uint16_t type_idx() const {
+                return (move_data >> 12) & 0b11;
+            }
+
+            [[nodiscard]] inline uint16_t promo_idx() const {
+                return (move_data >> 14) & 0b11;
+            }
+
             [[nodiscard]] inline bool is_empty() const {
                 return (move_data == 0x0000);
             }
-        
+
             std::string to_string() const;
         private:
             uint16_t move_data;

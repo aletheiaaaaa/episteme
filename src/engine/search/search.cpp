@@ -318,8 +318,7 @@ namespace episteme::search {
         return best;
     }
 
-    ThreadReport Worker::run(int32_t last_score, const Parameters& params, const SearchLimits& limits, bool is_absolute) {
-        Position position = params.position;
+    ThreadReport Worker::run(int32_t last_score, const Parameters& params, Position& position, const SearchLimits& limits, bool is_absolute) {
         accumulator = eval::reset(position);
         accum_history.emplace_back(accumulator);
 
@@ -357,8 +356,7 @@ namespace episteme::search {
         return report;
     }
 
-    int32_t Worker::eval(const Parameters& params) {
-        Position position = params.position;
+    int32_t Worker::eval(Position& position) {
         accumulator = eval::reset(position);
 
         return eval::evaluate(accumulator, position.STM());
@@ -389,8 +387,7 @@ namespace episteme::search {
         std::cout << total << " nodes " << nps << " nps" << std::endl;
     }
 
-    void Engine::run() {
-        Position position = params.position;
+    void Engine::run(Position& position) {
         int16_t max_depth = params.depth;
         uint64_t target_nodes = params.nodes;
         int32_t time = params.time[color_idx(position.STM())];
@@ -405,11 +402,11 @@ namespace episteme::search {
         ThreadReport last_report;
         int32_t last_score = 0;
 
-        for (int depth = 1; depth <= max_depth; ++depth) {
+        for (int depth = 1; depth <= max_depth; depth++) {
             Parameters iter_params = params;
             iter_params.depth = depth;
 
-            ThreadReport report = thread.run(last_score, iter_params, limits, false);
+            ThreadReport report = thread.run(last_score, iter_params, position, limits, false);
             if (thread.stopped()) break;
 
             last_report = report;
@@ -435,49 +432,31 @@ namespace episteme::search {
         std::cout << "bestmove " << best.to_string() << std::endl;
     }
 
-    ScoredMove Engine::datagen() {
-        Position position = params.position;
+    ScoredMove Engine::search(Position& position) {
         uint64_t hard_nodes = params.nodes;
         uint64_t soft_nodes = params.soft_nodes;
         int16_t max_depth = params.depth;
 
-        thread.reset_nodes();
+        SearchLimits limits{};
+        limits.max_nodes = hard_nodes;
 
-        SearchLimits limits{
-            .end=std::nullopt, 
-            .max_nodes=hard_nodes
-        };
+        thread.reset_nodes();
 
         ThreadReport last_report;
         int32_t last_score = 0;
 
-        for (int depth = 1; depth <= max_depth; ++depth) {
+        for (int depth = 1; depth <= max_depth; depth++) {
             Parameters iter_params = params;
             iter_params.depth = depth;
 
-            ThreadReport report = thread.run(last_score, iter_params, limits, true);
-            if (thread.stopped() || thread.node_count() > soft_nodes) break;
+            ThreadReport report = thread.run(last_score, iter_params, position, limits, true);
+            if (thread.stopped()) break;
 
             last_report = report;
             last_score = report.score;
 
-            bool is_mate = std::abs(report.score) >= MATE - MAX_SEARCH_PLY;
-            int32_t display_score = is_mate ? ((1 + MATE - std::abs(report.score)) / 2) * ((report.score > 0) ? 1 : -1) : report.score;
-
-            std::cout << "info depth " << report.depth
-                << " time " << report.time
-                << " nodes " << report.nodes
-                << " nps " << report.nps
-                << " score " << (is_mate ? "mate " : "cp ") << display_score
-                << " pv ";
-
-            for (size_t i = 0; i < report.line.length; ++i) {
-                std::cout << report.line.moves[i].to_string() << " ";
-            }
-            std::cout << std::endl;
+            if (thread.node_count() > soft_nodes) break;
         }
-
-        std::cout << "bestmove " << last_report.line.moves[0].to_string() << std::endl;
 
         ScoredMove best{
             .move = last_report.line.moves[0],
@@ -487,8 +466,8 @@ namespace episteme::search {
         return best;
     }
 
-    void Engine::eval(const Parameters& params) {
-        std::cout << "info score cp " << thread.eval(params) << std::endl;
+    void Engine::eval(Position& position) {
+        std::cout << "info score cp " << thread.eval(position) << std::endl;
     }
 
     void Engine::bench(int depth) {

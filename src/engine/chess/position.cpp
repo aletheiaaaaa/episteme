@@ -72,6 +72,8 @@ namespace episteme {
         state.bitboards[color_idx(Color::White) + COLOR_OFFSET] = 0x000000000000FFFF;
         state.bitboards[color_idx(Color::Black) + COLOR_OFFSET] = 0xFFFF000000000000;
 
+        state.mailbox.fill(Piece::None);
+
         auto setup_rank = [&](int rank, Color color) {
             state.mailbox[sq_idx(static_cast<Square>(rank * 8 + 0))] = piece_type_with_color(PieceType::Rook, color);
             state.mailbox[sq_idx(static_cast<Square>(rank * 8 + 1))] = piece_type_with_color(PieceType::Knight, color);
@@ -91,13 +93,15 @@ namespace episteme {
             state.mailbox[sq_idx(static_cast<Square>(48 + file))] = Piece::BlackPawn;
         }
 
-        state.half_move_clock = 0;
-        state.full_move_number = 1;
-
         state.allowed_castles.rooks[color_idx(Color::White)].kingside  = Square::H1;
         state.allowed_castles.rooks[color_idx(Color::White)].queenside = Square::A1;
         state.allowed_castles.rooks[color_idx(Color::Black)].kingside  = Square::H8;
         state.allowed_castles.rooks[color_idx(Color::Black)].queenside = Square::A8;
+
+        state.stm = 0;
+        state.half_move_clock = 0;
+        state.full_move_number = 1;
+        state.ep_square = Square::None;
 
         state.hash = 0x33dc8684cf354d4a;
 

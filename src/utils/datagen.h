@@ -31,10 +31,12 @@ namespace episteme::datagen {
         uint16_t num_threads = 1;
         uint32_t hash_size = 32; 
 
+        uint64_t seed = 42;
+
         std::string out_dir = "data";
     };
 
     void play_random(Position& position, int32_t num_moves);
-    void game_loop(const Parameters& params, std::ostream& stream);
+    void game_loop(const Parameters& params, std::ostream& stream, uint32_t id);
     void run(Parameters& params);
 }

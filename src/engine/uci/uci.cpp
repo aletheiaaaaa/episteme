@@ -9,7 +9,7 @@ namespace episteme::uci {
         std::cout << "uciok\n";
     }
 
-    auto setoption(const std::string& args, search::Config& cfg, search::Engine& instance) {
+    auto setoption(const std::string& args, search::Config& cfg, search::Engine& engine) {
         std::istringstream iss(args);
         std::string name, option_name, value, option_value;
     
@@ -27,7 +27,7 @@ namespace episteme::uci {
             std::cout << "invalid option" << std::endl;
         }
 
-        instance.set_hash(cfg);
+        engine.set_hash(cfg);
     }
 
     auto isready() {
@@ -62,10 +62,10 @@ namespace episteme::uci {
             }
         }
 
-        cfg.params.position = position;
+        cfg.position = position;
     }
 
-    auto go(const std::string& args, search::Config& cfg, search::Engine& instance) {
+    auto go(const std::string& args, search::Config& cfg, search::Engine& engine) {
         std::istringstream iss(args);
         std::string token;
 
@@ -82,31 +82,32 @@ namespace episteme::uci {
             }
         }
 
-        instance.reset_go();
-        instance.update_params(cfg.params);
-        instance.run();
+        engine.reset_go();
+        engine.update_params(cfg.params);
+        engine.run(cfg.position);
     }
 
-    auto ucinewgame(search::Config& cfg, search::Engine& instance) {
+    auto ucinewgame(search::Config& cfg, search::Engine& engine) {
         cfg.params = {};
-        instance.reset_game();
+        cfg.position = {};
+        engine.reset_game();
     }
     
-    auto eval(search::Config& cfg, search::Engine& instance) {
-        instance.eval(cfg.params);
+    auto eval(search::Config& cfg, search::Engine& engine) {
+        engine.eval(cfg.position);
     }
     
     auto bench(const std::string& args, search::Config& cfg) {
         int depth = (args.empty()) ? 8 : std::stoi(args);
         if (!cfg.hash_size) cfg.hash_size = 32;
 
-        search::Engine instance(cfg);
-        instance.bench(depth);
+        search::Engine engine(cfg);
+        engine.bench(depth);
     }
 
     auto perft(const std::string& args, search::Config& cfg) {
         int depth = (args.empty()) ? 6 : std::stoi(args);
-        Position& position = cfg.params.position;
+        Position& position = cfg.position;
 
         time_perft(position, depth);
     }
@@ -132,15 +133,15 @@ namespace episteme::uci {
         datagen::run(params);
     }
 
-    int parse(const std::string& cmd, search::Config& cfg, search::Engine& instance) {
+    int parse(const std::string& cmd, search::Config& cfg, search::Engine& engine) {
         std::string keyword = cmd.substr(0, cmd.find(' '));
 
         if (keyword == "uci") uci();
-        else if (keyword == "setoption") setoption(cmd.substr(cmd.find(" ")+1), cfg, instance);
+        else if (keyword == "setoption") setoption(cmd.substr(cmd.find(" ")+1), cfg, engine);
         else if (keyword == "isready") isready();
         else if (keyword == "position") position(cmd.substr(cmd.find(" ")+1), cfg);
-        else if (keyword == "go") go(cmd.substr(cmd.find(" ")+1), cfg, instance);
-        else if (keyword == "ucinewgame") ucinewgame(cfg, instance);
+        else if (keyword == "go") go(cmd.substr(cmd.find(" ")+1), cfg, engine);
+        else if (keyword == "ucinewgame") ucinewgame(cfg, engine);
         else if (keyword == "quit") std::exit(0);
 
         else if (keyword == "bench") {
@@ -154,7 +155,7 @@ namespace episteme::uci {
             perft(arg, cfg);
         }
 
-        else if (keyword == "eval") eval(cfg, instance);
+        else if (keyword == "eval") eval(cfg, engine);
         else if (keyword == "datagen") datagen(cmd.substr(cmd.find(" ")+1));
 
         else std::cout << "invalid command\n";

@@ -6,6 +6,8 @@
 #include <bit>
 #include <random>
 #include <iostream>
+#include <algorithm>
+#include <random>
 
 namespace episteme {
     struct MoveList {
@@ -19,6 +21,12 @@ namespace episteme {
 
         inline void clear() {
             count = 0;
+        }
+
+        inline void shuffle() {
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::shuffle(list.begin(), list.begin() + count, gen);
         }
     };
 

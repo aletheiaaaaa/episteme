@@ -59,8 +59,6 @@ namespace episteme::search {
         uint64_t nodes = 0;
         uint64_t soft_nodes = 0;
         int32_t num_games = 0;
-
-        Position position;
     };
 
     struct SearchLimits {
@@ -75,12 +73,6 @@ namespace episteme::search {
             return max_nodes && current_nodes >= *max_nodes;
         }
     };    
-
-    struct Config {
-        Parameters params = {};
-        uint32_t hash_size = 32;
-        uint16_t num_threads = 1;
-    };
 
     struct Line {
         size_t length = 0;
@@ -157,13 +149,15 @@ namespace episteme::search {
 
             int32_t quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
 
-            ThreadReport run(int32_t last_score, const Parameters& params, const SearchLimits& limits, bool is_absolute);
-            int32_t eval(const Parameters& params);
+            ThreadReport run(int32_t last_score, const Parameters& params, Position& position, const SearchLimits& limits, bool is_absolute);
+            int32_t eval(Position& position);
             void bench(int depth);
 
         private:
             nn::Accumulator accumulator;
             std::vector<nn::Accumulator> accum_history;
+
+            Position position;
 
             tt::Table& ttable;
             hist::Table history;
@@ -172,6 +166,13 @@ namespace episteme::search {
             uint64_t nodes;
 
             bool should_stop;
+    };
+
+    struct Config {
+        Parameters params = {};
+        uint32_t hash_size = 32;
+        uint16_t num_threads = 1;
+        Position position;
     };
 
     class Engine {
@@ -197,9 +198,9 @@ namespace episteme::search {
                 thread.reset_stop();
             }
 
-            void run();
-            ScoredMove datagen();
-            void eval(const Parameters& params);
+            void run(Position& position);
+            ScoredMove search(Position& position);
+            void eval(Position& position);
             void bench(int depth);
 
         private:
