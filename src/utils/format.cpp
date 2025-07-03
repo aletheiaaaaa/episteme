@@ -5,15 +5,22 @@ namespace episteme::datagen {
         moves.reserve(256);
     }
 
+    void Format::init(const Position& position) {
+        initial = PackedBoard::pack(position, 0);
+        moves.clear();
+    }
+
     void Format::push(Move move, int32_t score) {
-        static constexpr std::array<uint16_t, 4> move_types = {0x0000, 0x8000, 0x4000, 0xC000};
+        uint16_t to_idx = move.to_idx();
+        if (move.move_type() == MoveType::Castling) {
+            bool is_kingside = move.to_idx() > move.from_idx();
+            to_idx += (is_kingside ? 1 : -2);
+        }
 
         uint16_t viri_move = 0;
-        viri_move |= (move.from_idx() | (move.to_idx() << 6) | (move.promo_idx() << 12) | move_types[move.type_idx()]);
+        viri_move |= (move.from_idx() | (to_idx << 6) | (move.promo_idx() << 12) | (move.type_idx() << 14));
 
-        moves.push_back({
-            .move = viri_move, .score = static_cast<int16_t>(score)}
-        );
+        moves.push_back({viri_move, static_cast<int16_t>(score)});
     }
 
     size_t Format::write(std::ostream& stream, uint8_t wdl) {

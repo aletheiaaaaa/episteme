@@ -9,7 +9,6 @@
 #include <format>
 
 namespace episteme::datagen {
-
     class U4 {
         public:
             U4(uint8_t& value, bool high) : value{value}, high{high} {};
@@ -36,10 +35,7 @@ namespace episteme::datagen {
             std::array<uint8_t, SIZE / 2> data{};
     };
 
-    struct ScoredMove {
-        uint16_t move;
-        int16_t score;
-    };
+    typedef std::pair<uint16_t, int16_t> ScoredMove;
 
     struct PackedBoard {
         uint64_t bitboard;
@@ -49,6 +45,7 @@ namespace episteme::datagen {
         uint16_t full_move_number;
         int16_t score;
         uint8_t wdl;
+        uint8_t unused;
 
         [[nodiscard]] static PackedBoard pack(const Position& position, int16_t score) {
             uint64_t bitboard = position.total_bb();
@@ -82,7 +79,8 @@ namespace episteme::datagen {
                 .half_move_clock = half_move_clock,
                 .full_move_number = full_move_number,
                 .score = score,
-                .wdl = UINT8_MAX
+                .wdl = UINT8_MAX,
+                .unused = 0
             };
 
             return packed;
@@ -95,11 +93,7 @@ namespace episteme::datagen {
 
             Format();
 
-            inline void init(const Position& position) {
-                initial = PackedBoard::pack(position, 0);
-                moves.clear();
-            }
-
+            void init(const Position& position);
             void push(Move move, int32_t score);
             size_t write(std::ostream& stream, uint8_t wdl);
         private:

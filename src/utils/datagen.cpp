@@ -52,7 +52,6 @@ namespace episteme::datagen {
         for (int i = 0; i < (params.num_games / params.num_threads) && !stop; i++) {
             engine.reset_game();
             play_random(position, 8);
-
             formatter.init(position);
 
             search::ScoredMove initial = engine.datagen_search(position);
@@ -88,6 +87,7 @@ namespace episteme::datagen {
                 position.make_move(scored_move.move);
 
                 if (position.is_threefold() || position.is_insufficient()) {
+                    formatter.push(scored_move.move, 0);
                     wdl = 1;
                     break;
                 }
