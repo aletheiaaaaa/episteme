@@ -106,7 +106,7 @@ namespace episteme::datagen {
             if ((i + 1) % 10 == 0) {
                 time_point end = steady_clock::now();
                 int32_t elapsed = duration_cast<milliseconds>(end - start).count() / 1000;
-                std::cout << "Wrote " << positions << " positions from " << games << " games on thread " << i << " in " << elapsed << " seconds (" << positions / (elapsed > 0 ? elapsed : 1) << " pos/sec)" << std::endl;
+                std::cout << "Wrote " << positions << " positions from " << games << " games on thread " << id << " in " << elapsed << " seconds (" << positions / (elapsed > 0 ? elapsed : 1) << " pos/sec)" << std::endl;
                 start = steady_clock::now();
                 positions = games = 0;
             }
