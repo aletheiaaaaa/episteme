@@ -318,7 +318,7 @@ namespace episteme::search {
         return best;
     }
 
-    ThreadReport Worker::run(int32_t last_score, const Parameters& params, Position& position, const SearchLimits& limits, bool is_absolute) {
+    Report Worker::run(int32_t last_score, const Parameters& params, Position& position, const SearchLimits& limits, bool is_absolute) {
         accumulator = eval::reset(position);
         accum_history.emplace_back(accumulator);
 
@@ -344,7 +344,7 @@ namespace episteme::search {
 
         score = (is_absolute) ? score * (!color_idx(position.STM()) ? 1 : -1) : score;
 
-        ThreadReport report {
+        Report report {
             .depth = params.depth,
             .time = elapsed,
             .nodes = nodes,
@@ -397,17 +397,17 @@ namespace episteme::search {
         if (target_nodes) limits.max_nodes = target_nodes;
         if (time)limits.end = steady_clock::now() + milliseconds(time / 20 + inc / 2);
 
-        thread.reset_nodes();
+        worker.reset_nodes();
 
-        ThreadReport last_report;
+        Report last_report;
         int32_t last_score = 0;
 
         for (int depth = 1; depth <= max_depth; depth++) {
             Parameters iter_params = params;
             iter_params.depth = depth;
 
-            ThreadReport report = thread.run(last_score, iter_params, position, limits, false);
-            if (thread.stopped()) break;
+            Report report = worker.run(last_score, iter_params, position, limits, false);
+            if (worker.stopped()) break;
 
             last_report = report;
             last_score = report.score;
@@ -439,22 +439,22 @@ namespace episteme::search {
         SearchLimits limits{};
         limits.max_nodes = hard_nodes;
 
-        thread.reset_nodes();
+        worker.reset_nodes();
 
-        ThreadReport last_report;
+        Report last_report;
         int32_t last_score = 0;
 
         for (int depth = 1; depth <= 10; depth++) {
             Parameters iter_params = params;
             iter_params.depth = depth;
 
-            ThreadReport report = thread.run(last_score, iter_params, position, limits, true);
-            if (thread.stopped()) break;
+            Report report = worker.run(last_score, iter_params, position, limits, true);
+            if (worker.stopped()) break;
 
             last_report = report;
             last_score = report.score;
 
-            if (thread.node_count() > soft_nodes) break;
+            if (worker.node_count() > soft_nodes) break;
         }
 
         ScoredMove best{
@@ -466,10 +466,10 @@ namespace episteme::search {
     }
 
     void Engine::eval(Position& position) {
-        std::cout << "info score cp " << thread.eval(position) << std::endl;
+        std::cout << "info score cp " << worker.eval(position) << std::endl;
     }
 
     void Engine::bench(int depth) {
-        thread.bench(depth);
+        worker.bench(depth);
     }
 }

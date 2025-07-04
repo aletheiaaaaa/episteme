@@ -98,7 +98,7 @@ namespace episteme::search {
         }
     };
 
-    struct ThreadReport {
+    struct Report {
         int16_t depth;
         int64_t time;
         uint64_t nodes;
@@ -149,7 +149,7 @@ namespace episteme::search {
 
             int32_t quiesce(Position& position, Line& PV, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits);
 
-            ThreadReport run(int32_t last_score, const Parameters& params, Position& position, const SearchLimits& limits, bool is_absolute);
+            Report run(int32_t last_score, const Parameters& params, Position& position, const SearchLimits& limits, bool is_absolute);
             int32_t eval(Position& position);
             void bench(int depth);
 
@@ -177,7 +177,7 @@ namespace episteme::search {
 
     class Engine {
         public:
-            Engine(Config& cfg) : ttable(cfg.hash_size), params(cfg.params), thread(ttable) {};
+            Engine(Config& cfg) : ttable(cfg.hash_size), params(cfg.params), worker(ttable) {};
 
             inline void set_hash(search::Config& cfg) {
                 ttable.resize(cfg.hash_size);
@@ -188,14 +188,14 @@ namespace episteme::search {
             }
 
             inline void reset_go() {
-                thread.reset_history();
-                thread.reset_stop();
+                worker.reset_history();
+                worker.reset_stop();
             }
 
             inline void reset_game() {
                 ttable.reset();
-                thread.reset_history();
-                thread.reset_stop();
+                worker.reset_history();
+                worker.reset_stop();
             }
 
             void run(Position& position);
@@ -207,6 +207,6 @@ namespace episteme::search {
             tt::Table ttable;
             Parameters params;
 
-            Worker thread;
+            Worker worker;
     };
 }
