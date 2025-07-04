@@ -9,6 +9,7 @@
 #include <ranges>
 #include <cstdint>
 #include <cstdlib>
+#include <sstream>
 
 namespace episteme {
     static constexpr std::array<Piece, 64> empty_mailbox() {
@@ -108,7 +109,7 @@ namespace episteme {
                 return state.hash;
             }
 
-            void from_FEN(std::string_view FEN);
+            void from_FEN(const std::string& FEN);
             void from_startpos();
 
             void make_move(const Move& move);

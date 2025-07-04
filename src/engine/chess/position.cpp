@@ -5,15 +5,16 @@ namespace episteme {
         position_history.reserve(1024);
     }
 
-    void Position::from_FEN(std::string_view FEN) {
+    void Position::from_FEN(const std::string& FEN) {
         std::array<std::string, 6> tokens;
         size_t i = 0;
 
-        for (auto&& token : FEN | std::views::split(' ')) {
-            if (i >= tokens.size()) break;
-            tokens[i++] = std::string(std::ranges::begin(token), std::ranges::end(token));
+        std::istringstream iss(FEN);
+        std::string token;
+        while (iss >> token && i < tokens.size()) {
+            tokens[i++] = token;
         }
-
+        
         size_t square_idx = 56;
         for (char c : tokens[0]) {
             if (c == '/') {
