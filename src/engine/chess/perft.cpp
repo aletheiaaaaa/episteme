@@ -1,7 +1,7 @@
 #include "perft.h"
 
 namespace episteme {
-    Position fen_to_position(std::string_view FEN) {
+    Position fen_to_position(const std::string& FEN) {
         Position position;
         position.from_FEN(FEN);
         return position;
