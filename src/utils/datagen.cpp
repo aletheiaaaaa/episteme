@@ -106,14 +106,7 @@ namespace episteme::datagen {
             if ((i + 1) % 10 == 0) {
                 time_point end = steady_clock::now();
                 int32_t elapsed = duration_cast<milliseconds>(end - start).count() / 1000;
-                std::cout << std::format(
-                    "Wrote {} positions from {} games on thread {} in {} seconds ({} pos/sec)",
-                    positions,
-                    games,
-                    id,
-                    elapsed,
-                    positions / (elapsed > 0 ? elapsed : 1)
-                ) << std::endl;
+                std::cout << "Wrote " << positions << " positions from " << games << " games on thread " << i << " in " << elapsed << " seconds (" << positions / (elapsed > 0 ? elapsed : 1) << " pos/sec)" << std::endl;
                 start = steady_clock::now();
                 positions = games = 0;
             }
@@ -135,21 +128,24 @@ namespace episteme::datagen {
         std::vector<std::string> files;
 
         for (size_t i = 0; i < params.num_threads; i++) {
-            const auto file = std::filesystem::path(std::format("{}/temp_{}.{}", params.out_dir, i, Format::EXTENSION));
+
+            std::ostringstream oss;
+            oss << params.out_dir << "/temp_" << i << "." << Format::EXTENSION;
+            const auto file = std::filesystem::path(oss.str());
             files.push_back(file);
 
             threads.emplace_back(
                 [&params, file = std::move(file), i]() {
                     std::ofstream stream(file, std::ios::binary | std::ios::app);
                     if (!stream) {
-                        std::cout << std::format("Failed to open file {} for thread {}", file.string(), i) << std::endl;
+                        std::cout << "Failed to open " << file.string() << " on thread " << i << std::endl;
                         return;
                     }
 
                     game_loop(params, stream, i);
 
                     if (!stream.good()) {
-                        std::cout << std::format("Error encountered on thread {} when closing", i) << std::endl;
+                        std::cout << "Error encountered on thread " << i << " when closing" << std::endl;
                     }
                 }
             );

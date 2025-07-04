@@ -6,7 +6,6 @@
 #include <cstdint>
 #include <array>
 #include <ostream>
-#include <format>
 
 namespace episteme::datagen {
     class U4 {

@@ -13,6 +13,7 @@
 #include <filesystem>
 #include <fstream>
 #include <atomic>
+#include <sstream>
 
 namespace episteme::datagen {
     constexpr int32_t WIN_SCORE_MIN = 2500;
