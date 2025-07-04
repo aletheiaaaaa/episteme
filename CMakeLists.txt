@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.0)
-project(valhalla)
+project(episteme)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-mavx2 -g -fsanitize=address -fsanitize=undefined")

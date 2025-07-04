@@ -16,7 +16,9 @@ namespace episteme {
         while (iss >> token && i < tokens.size()) {
             tokens[i++] = token;
         }
-        
+
+        state.mailbox.fill(Piece::None);
+
         size_t square_idx = 56;
         for (char c : tokens[0]) {
             if (c == '/') {
