@@ -103,7 +103,7 @@ namespace episteme::datagen {
 
             position.from_startpos();
 
-            if ((i + 1) % 10 == 0) {
+            if ((i + 1) % 100 == 0) {
                 time_point end = steady_clock::now();
                 int32_t elapsed = duration_cast<milliseconds>(end - start).count() / 1000;
                 std::cout << std::format(
