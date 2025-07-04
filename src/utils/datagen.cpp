@@ -127,6 +127,8 @@ namespace episteme::datagen {
         std::vector<std::thread> threads;
         std::vector<std::string> files;
 
+        std::filesystem::create_directory(std::filesystem::path(params.out_dir));
+
         for (size_t i = 0; i < params.num_threads; i++) {
 
             std::ostringstream oss;
@@ -136,7 +138,7 @@ namespace episteme::datagen {
 
             threads.emplace_back(
                 [&params, file = std::move(file), i]() {
-                    std::ofstream stream(file, std::ios::binary | std::ios::app);
+                    std::ofstream stream{file, std::ios::binary | std::ios::app};
                     if (!stream) {
                         std::cout << "Failed to open " << file.string() << " on thread " << i << std::endl;
                         return;
