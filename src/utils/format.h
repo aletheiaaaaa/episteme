@@ -88,7 +88,7 @@ namespace episteme::datagen {
 
     class Format {
         public:
-            static constexpr std::string EXTENSION = "vf";
+            static constexpr std::string_view EXTENSION = "vf";
 
             Format();
 
