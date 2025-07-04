@@ -114,11 +114,11 @@ namespace episteme::datagen {
     }
 
     void run(Parameters& params) {
-        std::cout << "Beginning datagen" << std::endl;
+        std::cout << "Beginning datagen." << std::endl;
 
         std::signal(SIGINT, []([[maybe_unused]] int signum){
             stop = true;
-            std::cout << "Datagen interrupted" << std::endl;
+            std::cout << "Datagen interrupted." << std::endl;
             return;
         });
 
@@ -138,7 +138,7 @@ namespace episteme::datagen {
 
             threads.emplace_back(
                 [&params, file = std::move(file), i]() {
-                    std::ofstream stream{file, std::ios::binary | std::ios::app};
+                    std::ofstream stream(file, std::ios::binary | std::ios::app);
                     if (!stream) {
                         std::cout << "Failed to open " << file.string() << " on thread " << i << std::endl;
                         return;
@@ -154,6 +154,33 @@ namespace episteme::datagen {
         }
 
         for (auto& thread : threads) thread.join();
-        std::cout << "Datagen complete" << std::endl;
+
+        std::cout << "Generated " << params.num_threads << " data files. Concatenating." << std::endl;
+
+        std::ostringstream oss;
+        oss << params.out_dir << "/data." << Format::EXTENSION;
+        const auto output = std::filesystem::path(oss.str());
+
+        std::ofstream final(output, std::ios::binary);
+        if (!final) {
+            std::cout << "Failed to open output file " << output.string() << std::endl;
+        }
+
+        int32_t concats = 0;
+        for (const auto& file : files) {
+            std::ifstream input(file, std::ios::binary);
+            if (input) {
+                final << input.rdbuf();
+                input.close();
+
+                if (std::remove(file.c_str()) == 0) concats++;
+                else std::cout << "Error removing file " << file << " after concatenation" << std::endl;
+            } else {
+                std::cout << "Error opening file " << file << " during concatenation" << std::endl;
+            }
+        }
+
+        std::cout << "Concatenated " << params.num_threads << " files" << std::endl;
+        std::cout << "Datagen complete." << std::endl;
     }
 }
