@@ -18,6 +18,7 @@ namespace episteme {
         }
 
         state.mailbox.fill(Piece::None);
+        state.bitboards.fill(0);
 
         size_t square_idx = 56;
         for (char c : tokens[0]) {
@@ -287,7 +288,7 @@ namespace episteme {
         state.stm = !state.stm;
         state.hash ^= zobrist::stm;
 
-        position_history.emplace_back(state);
+        position_history.push_back(state);
     }
 
     void Position::make_null() {
@@ -305,7 +306,7 @@ namespace episteme {
         state.stm = !state.stm;
         state.hash ^= zobrist::stm;
 
-        position_history.emplace_back(state);
+        position_history.push_back(state);
     }
     
     void Position::unmake_move() {

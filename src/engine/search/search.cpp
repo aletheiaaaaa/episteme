@@ -159,6 +159,7 @@ namespace episteme::search {
 
             if (limits.node_exceeded(nodes)) {
                 should_stop = true;
+                position.unmake_move();
                 return 0;
             };
 
@@ -278,6 +279,7 @@ namespace episteme::search {
 
             if (limits.node_exceeded(nodes)) {
                 should_stop = true;
+                position.unmake_move();
                 return 0;
             };
 
