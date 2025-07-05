@@ -72,15 +72,15 @@ namespace episteme::datagen {
                     wdl = in_check(position, position.STM()) ? (position.STM() == Color::Black ? 2 : 0) : 1;
                     break;
                 } else {
-                    if (std::abs(scored_move.score) >= search::MATE - search::MAX_SEARCH_PLY) wdl = scored_move.score > 0;
+                    if (std::abs(scored_move.score) >= search::MATE - search::MAX_SEARCH_PLY) wdl = 2 * (scored_move.score > 0);
                     else {
                         if (scored_move.score >= WIN_SCORE_MIN) win_plies++, draw_plies = loss_plies = 0;
                         else if (scored_move.score <= -WIN_SCORE_MIN) loss_plies++, win_plies = draw_plies = 0;
                         else if (std::abs(scored_move.score) <= DRAW_SCORE_MAX && position.half_move_clock() >= 100) draw_plies++, win_plies = loss_plies = 0;
 
-                        if (win_plies >= WIN_PLIES_MIN) wdl = 1.0;
-                        else if (loss_plies >= WIN_PLIES_MIN) wdl = 0.0;
-                        else if (draw_plies >= DRAW_PLIES_MIN) wdl = 0.5;    
+                        if (win_plies >= WIN_PLIES_MIN) wdl = 2;
+                        else if (loss_plies >= WIN_PLIES_MIN) wdl = 0;
+                        else if (draw_plies >= DRAW_PLIES_MIN) wdl = 1;    
                     }
                 }
 
