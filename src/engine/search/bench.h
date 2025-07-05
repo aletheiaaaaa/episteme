@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <string>
 
 namespace episteme::search {
     const std::array<std::string, 50> fens = {

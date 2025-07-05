@@ -409,7 +409,7 @@ namespace episteme {
         std::string src_str = move.substr(0, 2);
         std::string dst_str = move.substr(2, 2);
 
-        auto str2Sq = [](std::string square) {
+        auto str2Sq = [](const std::string& square) {
             int file = square[0] - 'a';
             int rank = square[1] - '1';
             return static_cast<Square>(rank * 8 + file);

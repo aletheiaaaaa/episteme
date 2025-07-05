@@ -378,7 +378,7 @@ namespace episteme::search {
             nodes = 0;
 
             auto start = steady_clock::now();
-            int32_t _ = search<true>(position, PV, depth, 0, -INF, INF);
+            (void)search<true>(position, PV, depth, 0, -INF, INF);
             auto end = steady_clock::now();
 
             elapsed += duration_cast<milliseconds>(end - start);

@@ -181,7 +181,7 @@ namespace episteme::datagen {
             }
         }
 
-        std::cout << "Concatenated " << params.num_threads << " files" << std::endl;
+        std::cout << "Concatenated " << concats << " files" << std::endl;
         std::cout << "Datagen complete." << std::endl;
     }
 }
