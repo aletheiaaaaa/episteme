@@ -103,13 +103,13 @@ namespace episteme::datagen {
 
             position.from_startpos();
 
-            if ((i + 1) % 10 == 0) {
+            if ((i + 1) % 64 == 0 || (i + 1) == workload) {
                 time_point end = steady_clock::now();
                 int32_t elapsed = duration_cast<milliseconds>(end - start).count() / 1000;
                 std::cout << "Thread " << id << ": " << games << "/" << workload << " games completed at " << positions / (elapsed > 0 ? elapsed : 1) << " pos/sec" << std::endl;
 
                 start = steady_clock::now();
-                positions = games = 0;
+                positions = 0;
             }
         }
     }
