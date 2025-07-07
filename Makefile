@@ -5,7 +5,7 @@ SRC_DIR   := src
 OBJ_DIR   := ./obj
 BIN_DIR   := .
 
-DEFAULT_NET := ./64_v2.bin
+DEFAULT_NET := ./64_v3.bin
 EVALFILE    ?= $(DEFAULT_NET)
 
 CXXFLAGS  += -DEVALFILE=\"$(EVALFILE)\"
