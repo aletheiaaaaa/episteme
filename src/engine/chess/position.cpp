@@ -7,6 +7,7 @@ namespace episteme {
 
     void Position::from_FEN(const std::string& FEN) {
         position_history.clear();
+        position_history.shrink_to_fit();
 
         std::array<std::string, 6> tokens;
         size_t i = 0;
@@ -69,6 +70,7 @@ namespace episteme {
 
     void Position::from_startpos() {
         position_history.clear();
+        position_history.shrink_to_fit();
 
         state.bitboards[piece_type_idx(PieceType::Pawn)]   = 0x00FF00000000FF00;
         state.bitboards[piece_type_idx(PieceType::Knight)] = 0x4200000000000042;
