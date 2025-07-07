@@ -20,9 +20,6 @@ $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-# Add the macro definition directly to CXXFLAGS
-CXXFLAGS += -DEVALFILE=\"$(EVALFILE)\"
-
 # Compile sources
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
