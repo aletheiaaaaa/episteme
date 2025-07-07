@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10.0)
 project(episteme)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-set(CMAKE_CXX_FLAGS_DEBUG "-mavx2 -g -fsanitize=address -fsanitize=undefined")
+set(CMAKE_CXX_FLAGS_DEBUG "-mavx2 -g -fsanitize=address,undefined,leak")
 set(CMAKE_CXX_FLAGS_RELEASE "-mavx2 -O3 -flto=auto")
 
 if(NOT CMAKE_BUILD_TYPE)

@@ -111,6 +111,12 @@ namespace episteme::search {
         public:
             Worker(tt::Table& ttable) : ttable(ttable), should_stop(false) {};
 
+            inline void reset_accum() {
+                accumulator = {};
+                accum_history.clear();
+                accum_history.shrink_to_fit();
+            }
+
             inline void reset_history() {
                 history.reset();
             }
@@ -194,6 +200,7 @@ namespace episteme::search {
 
             inline void reset_game() {
                 ttable.reset();
+                worker.reset_accum();
                 worker.reset_history();
                 worker.reset_stop();
             }

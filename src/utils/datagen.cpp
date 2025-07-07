@@ -84,6 +84,8 @@ namespace episteme::datagen {
                     }
                 }
 
+                if (wdl) break;
+
                 position.make_move(scored_move.move);
 
                 if (position.is_threefold() || position.is_insufficient()) {
@@ -94,8 +96,6 @@ namespace episteme::datagen {
 
                 formatter.push(scored_move.move, scored_move.score);
                 engine.reset_go();
-
-                if (wdl) break;
             }
 
             games++;
