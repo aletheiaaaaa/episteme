@@ -133,12 +133,16 @@ namespace episteme::search {
             Move move = move_list.list[i].move;
 
             bool is_quiet = position.mailbox(move.to_square()) == Piece::None && move.move_type() != MoveType::EnPassant;
-            int32_t threshold = -30 * depth * depth;
 
             if (best > -MATE + MAX_SEARCH_PLY) {
-                if (is_quiet && num_legal >= 6 + 2 * depth * depth) break;
-                if (!is_PV && is_quiet && !in_check(position, position.STM()) && static_eval + depth * 250 <= alpha) break;
-                if (!eval::SEE(position, move, threshold)) continue;
+                const int32_t lmp_threshold = 6 + 2 * depth * depth;
+                if (is_quiet && num_legal >= lmp_threshold) break;
+
+                const int32_t fp_margin = depth * 250;
+                if (!is_PV && is_quiet && !in_check(position, position.STM()) && static_eval + fp_margin <= alpha) break;
+
+                const int32_t see_threshold = -30 * depth * depth;
+                if (!is_PV && !is_quiet && !eval::SEE(position, move, see_threshold)) continue;
             }
 
             accumulator = eval::update(position, move, accumulator);
