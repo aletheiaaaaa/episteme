@@ -28,6 +28,6 @@ add_executable(episteme
     "${SRC}/main.cpp"
 )
 
-set(EVAL_BIN "${CMAKE_SOURCE_DIR}/128_v2.bin")
+set(EVAL_BIN "${CMAKE_SOURCE_DIR}/256_v0_05.bin")
 
 target_compile_definitions(episteme PRIVATE EVALFILE="${EVAL_BIN}")
