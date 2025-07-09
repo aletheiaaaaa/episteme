@@ -84,22 +84,22 @@ namespace episteme::eval {
 
             if ((next_threat = our_threats & pawn_bb)) {
                 threat_val = piece_vals[piece_type_idx(PieceType::Pawn)];
-                occupied_bb ^= ((uint64_t)1 << std::countr_zero(next_threat));
+                occupied_bb &= ~((uint64_t)1 << std::countr_zero(next_threat));
                 all_threats |= get_bishop_attacks_direct(to_sq, occupied_bb) & (bishop_bb | queen_bb);
             } else if ((next_threat = our_threats & knight_bb)) {
                 threat_val = piece_vals[piece_type_idx(PieceType::Knight)];
-                occupied_bb ^= ((uint64_t)1 << std::countr_zero(next_threat));
+                occupied_bb &= ~((uint64_t)1 << std::countr_zero(next_threat));
             } else if ((next_threat = our_threats & bishop_bb)) {
                 threat_val = piece_vals[piece_type_idx(PieceType::Bishop)];
-                occupied_bb ^= ((uint64_t)1 << std::countr_zero(next_threat));
+                occupied_bb &= ~((uint64_t)1 << std::countr_zero(next_threat));
                 all_threats |= get_bishop_attacks_direct(to_sq, occupied_bb) & (bishop_bb | queen_bb);
             } else if ((next_threat = our_threats & rook_bb)) {
                 threat_val = piece_vals[piece_type_idx(PieceType::Rook)];
-                occupied_bb ^= ((uint64_t)1 << std::countr_zero(next_threat));
+                occupied_bb &= ~((uint64_t)1 << std::countr_zero(next_threat));
                 all_threats |= get_rook_attacks_direct(to_sq, occupied_bb) & (rook_bb | queen_bb);
             } else if ((next_threat = our_threats & queen_bb)) {
                 threat_val = piece_vals[piece_type_idx(PieceType::Queen)];
-                occupied_bb ^= ((uint64_t)1 << std::countr_zero(next_threat));
+                occupied_bb &= ~((uint64_t)1 << std::countr_zero(next_threat));
                 all_threats |= (get_bishop_attacks_direct(to_sq, occupied_bb) & (bishop_bb | queen_bb)) | (get_rook_attacks_direct(to_sq, occupied_bb) & (rook_bb | queen_bb));
             } else {
                 return (all_threats & position.color_bb(flip(stm))) ? position.STM() != win : position.STM() == win;
