@@ -45,10 +45,7 @@ namespace episteme::eval {
         const uint64_t king_bb = position.piece_type_bb(PieceType::King);
 
         uint64_t occupied_bb = position.total_bb();
-        occupied_bb ^= from_bb ^ to_bb;
-
-        const PawnAttacks w_attacks = get_pawn_attacks(position, Color::White);
-        const PawnAttacks b_attacks = get_pawn_attacks(position, Color::Black);
+        occupied_bb &= ~(from_bb | to_bb);
 
         uint64_t pawn_threats = (
             (get_pawn_sq_attacks(to_sq, Color::White) & position.piece_bb(PieceType::Pawn, Color::Black)) | 
