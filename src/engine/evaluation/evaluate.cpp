@@ -45,14 +45,11 @@ namespace episteme::eval {
         const uint64_t king_bb = position.piece_type_bb(PieceType::King);
 
         uint64_t occupied_bb = position.total_bb();
-        occupied_bb ^= from_bb ^ to_bb;
-
-        const PawnAttacks w_attacks = get_pawn_attacks(position, Color::White);
-        const PawnAttacks b_attacks = get_pawn_attacks(position, Color::Black);
+        occupied_bb &= ~(from_bb | to_bb);
 
         uint64_t pawn_threats = (
-            ((w_attacks.left_captures | w_attacks.right_captures) & position.piece_bb(PieceType::Pawn, Color::White)) | 
-            ((b_attacks.left_captures | b_attacks.right_captures) & position.piece_bb(PieceType::Pawn, Color::Black))
+            (get_pawn_sq_attacks(to_sq, Color::White) & position.piece_bb(PieceType::Pawn, Color::Black)) | 
+            (get_pawn_sq_attacks(to_sq, Color::Black) & position.piece_bb(PieceType::Pawn, Color::White))
         );
 
         uint64_t knight_threats = get_knight_attacks(to_sq) & knight_bb;
@@ -105,7 +102,7 @@ namespace episteme::eval {
                 return (all_threats & position.color_bb(flip(stm))) ? position.STM() != win : position.STM() == win;
             }
 
-            score = threat_val - score;
+            score = threat_val - score + 1;
             if (score <= 0) break;
         }
 

@@ -266,6 +266,13 @@ namespace episteme {
         return get_pawn_attacks_helper(position, stm, true);
     }    
 
+    [[nodiscard]] inline uint64_t get_pawn_sq_attacks(Square square, Color stm) {
+        uint64_t sq_bb = (uint64_t)1 << sq_idx(square);
+
+        if (stm == Color::White) return ((sq_bb & ~FILE_A) << 7) | ((sq_bb & ~FILE_H) << 9);
+        else return ((sq_bb & ~FILE_A) >> 9) | ((sq_bb & ~FILE_H) >> 7);
+    }
+
     template<PieceType PT, typename F>
     extern void generate_piece_targets(MoveList& move_list, const Position& position, F get_attacks, bool include_quiets);
 

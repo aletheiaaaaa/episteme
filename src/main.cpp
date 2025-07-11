@@ -4,11 +4,6 @@
 #include "engine/search/bench.h"
 #include "engine/uci/uci.h"
 
-#include <cstdint>
-#include <array>
-#include <iostream>
-#include <chrono>
-#include <iomanip>
 #include <string>
 
 using namespace episteme;
