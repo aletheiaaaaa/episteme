@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../chess/move.h"
+#include "stack.h"
 
 #include <array>
 #include <cstdint>
@@ -31,8 +32,22 @@ namespace episteme::hist {
                 return quiet_hist[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())];
             }
 
+            [[nodiscard]] inline const Entry get_cont_hist(stack::Stack& stack, Piece piece, Move move, int16_t ply, int16_t diff) const {
+                Move prev_move = stack[ply - diff].move;
+                Piece prev_piece = stack[ply - diff].piece;
+
+                return cont_hist[color_idx(piece)][piece_type_idx(piece)][sq_idx(move.to_square())][color_idx(prev_piece)][piece_type_idx(prev_piece)][sq_idx(prev_move.to_square())];
+            }
+
             inline void update_quiet_hist(Color stm, Move move, int16_t bonus) {
                 quiet_hist[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())].update(bonus);
+            }
+
+            inline void update_cont_hist(stack::Stack& stack, Piece piece, Move move, int16_t bonus, int16_t ply, int16_t diff) {
+                Move prev_move = stack[ply - diff].move;
+                Piece prev_piece = stack[ply - diff].piece;
+
+                cont_hist[color_idx(piece)][piece_type_idx(piece)][sq_idx(move.to_square())][color_idx(prev_piece)][piece_type_idx(prev_piece)][sq_idx(prev_move.to_square())].update(bonus);
             }
 
             inline void reset() {
@@ -40,6 +55,7 @@ namespace episteme::hist {
             }
 
         private:
-            std::array<std::array<std::array<Entry, 64>, 64>, 2> quiet_hist = {};
+            std::array<std::array<std::array<Entry, 64>, 64>, 2> quiet_hist{};
+            std::array<std::array<std::array<std::array<std::array<std::array<Entry, 64>, 6>, 2>, 64>, 6>, 2> cont_hist{};
     };
 }

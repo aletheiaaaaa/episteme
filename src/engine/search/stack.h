@@ -9,6 +9,8 @@ namespace episteme::stack {
 
     struct Entry {
         int32_t eval = -INF;
+        Move move{};
+        Piece piece;
 
         Move excluded{};
         Move killer{};

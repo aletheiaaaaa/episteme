@@ -31,7 +31,7 @@ namespace episteme::search {
         ScoredMove scored_move{.move = move};
 
         if (tt_entry.move.data() == move.data()) {
-            scored_move.score = 1000000;
+            scored_move.score = 10000000;
             return scored_move;
         }
 
@@ -45,14 +45,15 @@ namespace episteme::search {
             int32_t dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
 
             scored_move.score += dst_val * 10 - src_val;
-            if (eval::SEE(position, move, 0)) scored_move.score += 100000;
+            if (eval::SEE(position, move, 0)) scored_move.score += 1000000;
         } else {
-            if (ply && stack[*ply].killer.data() == move.data()) {
-                scored_move.score = 80000;
+            if (stack[*ply].killer.data() == move.data()) {
+                scored_move.score = 800000;
                 return scored_move;
             }
 
             scored_move.score += history.get_quiet_hist(position.STM(), move).value;
+            scored_move.score += history.get_cont_hist(stack, src, move, *ply, 1).value;
         }
 
         return scored_move;
@@ -143,6 +144,7 @@ namespace episteme::search {
         for (size_t i = 0; i < move_list.count; i++) { 
             pick_move(move_list, i);
             Move move = move_list.list[i].move;
+            Piece piece = position.mailbox(move.from_square());
 
             bool is_quiet = position.mailbox(move.to_square()) == Piece::None && move.move_type() != MoveType::EnPassant;
 
@@ -188,6 +190,8 @@ namespace episteme::search {
 
             nodes++;
             num_legal++;
+            stack[ply].move = move;
+            stack[ply].piece = piece;
 
             if (is_quiet) explored_quiets.add(move);
 
@@ -237,7 +241,9 @@ namespace episteme::search {
                     if (is_quiet) {
                         stack[ply].killer = move;
 
-                        history.update_quiet_hist(position.STM(), move, hist::history_bonus(depth));
+                        int16_t bonus = hist::history_bonus(depth);
+                        history.update_quiet_hist(position.STM(), move, bonus);
+                        history.update_cont_hist(stack, piece, move, bonus, ply, 1);
                         for (size_t j = 0; j < explored_quiets.count; j++) {
                             if (explored_quiets.list[j].data() == move.data()) continue;
                             history.update_quiet_hist(position.STM(), explored_quiets.list[j], hist::history_malus(depth));
