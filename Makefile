@@ -10,7 +10,7 @@ EVALFILE    ?= $(DEFAULT_NET)
 
 CXXFLAGS  += -DEVALFILE=\"$(EVALFILE)\"
 
-EXE     ?= Elegance
+EXE     ?= episteme
 TARGET  := $(BIN_DIR)/$(EXE)
 
 SRCS    := $(shell find $(SRC_DIR) -name '*.cpp')

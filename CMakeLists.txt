@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.0)
-project(Elegance)
+project(episteme)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-mavx2 -g -fsanitize=address,undefined,leak")
@@ -12,7 +12,7 @@ endif()
 set(CMAKE_CXX_STANDARD 23)
 set(SRC "${CMAKE_SOURCE_DIR}/src")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-add_executable(Elegance
+add_executable(episteme
     "${SRC}/engine/chess/position.cpp" 
     "${SRC}/engine/chess/move.cpp" 
     "${SRC}/engine/chess/movegen.cpp" 
@@ -30,4 +30,4 @@ add_executable(Elegance
 
 set(EVAL_BIN "${CMAKE_SOURCE_DIR}/256_v0_05.bin")
 
-target_compile_definitions(Elegance PRIVATE EVALFILE="${EVAL_BIN}")
+target_compile_definitions(episteme PRIVATE EVALFILE="${EVAL_BIN}")
