@@ -53,7 +53,7 @@ namespace episteme::search {
             }
 
             scored_move.score += history.get_quiet_hist(position.STM(), move).value;
-            if (ply > 0) scored_move.score += history.get_cont_hist(stack, src, move, *ply, 1).value;
+            if (*ply > 0) scored_move.score += history.get_cont_hist(stack, src, move, *ply, 1).value;
         }
 
         return scored_move;
