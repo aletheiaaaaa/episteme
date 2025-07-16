@@ -52,8 +52,8 @@ namespace episteme::search {
                 return scored_move;
             }
 
-            scored_move.score += history.get_quiet_hist(position.STM(), move).value;
-            if (*ply > 0) scored_move.score += history.get_cont_hist(stack, src, move, *ply, 1).value;
+            scored_move.score += history.get_quiet_hist(position.STM(), move);
+            scored_move.score += history.get_cont_hist(stack, src, move, *ply);
         }
 
         return scored_move;
@@ -243,7 +243,8 @@ namespace episteme::search {
 
                         int16_t bonus = hist::history_bonus(depth);
                         history.update_quiet_hist(position.STM(), move, bonus);
-                        if (ply > 0) history.update_cont_hist(stack, piece, move, bonus, ply, 1);
+                        history.update_cont_hist(stack, piece, move, bonus, ply);
+
                         for (size_t j = 0; j < explored_quiets.count; j++) {
                             if (explored_quiets.list[j].data() == move.data()) continue;
                             history.update_quiet_hist(position.STM(), explored_quiets.list[j], hist::history_malus(depth));

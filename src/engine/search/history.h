@@ -28,26 +28,34 @@ namespace episteme::hist {
 
     class Table {
         public:
-            [[nodiscard]] inline const Entry get_quiet_hist(Color stm, Move move) const {
-                return quiet_hist[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())];
+            [[nodiscard]] inline int16_t get_quiet_hist(Color stm, Move move) {
+                return quiet_hist[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())].value;
             }
 
-            [[nodiscard]] inline const Entry get_cont_hist(stack::Stack& stack, Piece piece, Move move, int16_t ply, int16_t diff) const {
-                Move prev_move = stack[ply - diff].move;
-                Piece prev_piece = stack[ply - diff].piece;
+            [[nodiscard]] inline int16_t get_cont_hist(stack::Stack& stack, Piece piece, Move move, int16_t ply) {
+                int16_t value = 0;
 
-                return cont_hist[piece_idx(piece)][sq_idx(move.to_square())][piece_idx(prev_piece)][sq_idx(prev_move.to_square())];
+                if (ply > 0) {
+                    Move prev_move = stack[ply - 1].move;
+                    Piece prev_piece = stack[ply - 1].piece;
+    
+                    value += cont_hist[piece_idx(piece)][sq_idx(move.to_square())][piece_idx(prev_piece)][sq_idx(prev_move.to_square())].value;    
+                }
+
+                return value;
             }
 
             inline void update_quiet_hist(Color stm, Move move, int16_t bonus) {
                 quiet_hist[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())].update(bonus);
             }
 
-            inline void update_cont_hist(stack::Stack& stack, Piece piece, Move move, int16_t bonus, int16_t ply, int16_t diff) {
-                Move prev_move = stack[ply - diff].move;
-                Piece prev_piece = stack[ply - diff].piece;
+            inline void update_cont_hist(stack::Stack& stack, Piece piece, Move move, int16_t bonus, int16_t ply) {
+                if (ply > 0) {
+                    Move prev_move = stack[ply - 1].move;
+                    Piece prev_piece = stack[ply - 1].piece;
 
-                cont_hist[piece_idx(piece)][sq_idx(move.to_square())][piece_idx(prev_piece)][sq_idx(prev_move.to_square())].update(bonus);
+                    cont_hist[piece_idx(piece)][sq_idx(move.to_square())][piece_idx(prev_piece)][sq_idx(prev_move.to_square())].update(bonus);
+                }
             }
 
             inline void reset() {
