@@ -58,6 +58,15 @@ namespace episteme::search {
         return scored_move;
     }
 
+    std::array<std::array<int16_t, 64>, 64> lmr_table{};
+    void init_lmr_table() {
+        for (int i = 1; i < 64; i++) {
+            for (int j = 1; j < 64; j++) {
+                lmr_table[i][j] = 0.5 + std::log(i) * std::log(j) / 3.0;
+            }
+        }
+    }
+
     template<bool PV_node>
     int32_t Worker::search(Position& position, Line& PV, int16_t depth, int16_t ply, int32_t alpha, int32_t beta, SearchLimits limits) {
         if (nodes % 2000 == 0 && limits.time_exceeded()) {
@@ -173,7 +182,7 @@ namespace episteme::search {
             int16_t new_depth = depth - 1;
 
             if (num_legal >= 4 && depth >= 3) {
-                int16_t reduction = 1 + !improving;
+                int16_t reduction = lmr_table[depth][num_legal] + !improving;
                 int16_t reduced = std::min(std::max(new_depth - reduction, 1), static_cast<int>(new_depth));
 
                 score = -search<false>(position, candidate, reduced, ply + 1, -alpha - 1, -alpha, limits);
