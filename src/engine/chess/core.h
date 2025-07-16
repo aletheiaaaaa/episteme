@@ -168,6 +168,10 @@ namespace episteme {
         return static_cast<uint16_t>(square);
     }
 
+    [[nodiscard]] inline uint16_t piece_idx(Piece piece) {
+        return static_cast<uint16_t>(piece);
+    }
+
     [[nodiscard]] inline uint16_t piece_type_idx(PieceType piece_type) {
         return static_cast<uint16_t>(piece_type);
     }
