@@ -171,7 +171,7 @@ namespace episteme::search {
                 if (should_stop) return 0;
 
                 if (score < new_beta) extension = 1;
-                else if (score >= beta && std::abs(score) < MATE - MAX_SEARCH_PLY) return score;
+                else if (score >= beta && std::abs(score) < MATE - MAX_SEARCH_PLY) return new_beta;
             }
 
             accumulator = eval::update(position, move, accumulator);
