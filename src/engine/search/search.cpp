@@ -80,14 +80,17 @@ namespace episteme::search {
             return quiesce(position, PV, ply, alpha, beta, limits);
         }
 
-        tt::Entry tt_entry = ttable.probe(position.zobrist());
-        if (ply > 0 && (tt_entry.depth >= depth
-            && ((tt_entry.node_type == tt::NodeType::PVNode)
-                || (tt_entry.node_type == tt::NodeType::AllNode && tt_entry.score <= alpha)
-                || (tt_entry.node_type == tt::NodeType::CutNode && tt_entry.score >= beta))
-            )
-        ) {
-            return tt_entry.score;
+        tt::Entry tt_entry{};
+        if (!stack[ply].excluded.data()) {
+            tt_entry = ttable.probe(position.zobrist());
+            if (ply > 0 && (tt_entry.depth >= depth
+                && ((tt_entry.node_type == tt::NodeType::PVNode)
+                    || (tt_entry.node_type == tt::NodeType::AllNode && tt_entry.score <= alpha)
+                    || (tt_entry.node_type == tt::NodeType::CutNode && tt_entry.score >= beta))
+                )
+            ) {
+                return tt_entry.score;
+            }    
         }
 
         constexpr bool is_PV = PV_node;
@@ -106,7 +109,7 @@ namespace episteme::search {
             }
         }
 
-        if (!in_check(position, position.STM())) {
+        if (!stack[ply].excluded.data() && !in_check(position, position.STM())) {
             if (!is_PV && depth <= 5 && static_eval >= beta + std::max(depth - improving, 0) * 100) return static_eval;
 
             if (!is_PV && depth >= 3) {
@@ -154,6 +157,20 @@ namespace episteme::search {
                 if (!is_PV && !eval::SEE(position, move, see_threshold)) continue;
             }
 
+            if (move.data() == stack[ply].excluded.data()) continue;
+
+            int16_t extension = 0;
+            if (ply > 0 && depth >= 8 && move.data() == tt_entry.move.data() && !stack[ply].excluded.data() && tt_entry.depth >= depth - 3 && tt_entry.node_type != tt::NodeType::AllNode) {
+                const int32_t new_beta = std::max(-INF + 1, tt_entry.score - depth * 2);
+                const int16_t new_depth = (depth - 1) / 2;
+
+                stack[ply].excluded = move;
+                int32_t score = search<false>(position, PV, new_depth, ply, new_beta - 1, new_beta, limits);
+                stack[ply].excluded = Move();
+                
+                if (score < new_beta) extension = 1;
+            }
+
             accumulator = eval::update(position, move, accumulator);
             accum_history.emplace_back(accumulator);
             position.make_move(move);
@@ -179,7 +196,7 @@ namespace episteme::search {
 
             Line candidate = {};
             int32_t score = 0;
-            int16_t new_depth = depth - 1;
+            int16_t new_depth = depth - 1 + extension;
 
             if (num_legal >= 4 && depth >= 3) {
                 int16_t reduction = lmr_table[depth][num_legal] + !improving;
@@ -232,13 +249,15 @@ namespace episteme::search {
 
         if (num_legal == 0) return in_check(position, position.STM()) ? (-MATE + ply) : 0;
 
-        ttable.add({
-            .hash = position.zobrist(),
-            .move = PV.moves[0],
-            .score = best,
-            .depth = static_cast<uint8_t>(depth),
-            .node_type = node_type
-        });
+        if (!stack[ply].excluded.data()) {
+            ttable.add({
+                .hash = position.zobrist(),
+                .move = PV.moves[0],
+                .score = best,
+                .depth = static_cast<uint8_t>(depth),
+                .node_type = node_type
+            });    
+        }
 
         return best;
     }
