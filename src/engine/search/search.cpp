@@ -167,8 +167,11 @@ namespace episteme::search {
                 stack[ply].excluded = move;
                 int32_t score = search<false>(position, PV, new_depth, ply, new_beta - 1, new_beta, limits);
                 stack[ply].excluded = Move();
-                
+
+                if (should_stop) return 0;
+
                 if (score < new_beta) extension = 1;
+                else if (score >= beta && std::abs(score) < MATE - MAX_SEARCH_PLY) return score;
             }
 
             accumulator = eval::update(position, move, accumulator);
