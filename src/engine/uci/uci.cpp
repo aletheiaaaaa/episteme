@@ -98,7 +98,7 @@ namespace episteme::uci {
     }
     
     auto bench(const std::string& args, search::Config& cfg) {
-        int depth = (args.empty()) ? 8 : std::stoi(args);
+        int depth = (args.empty()) ? 10 : std::stoi(args);
         if (!cfg.hash_size) cfg.hash_size = 32;
 
         search::Engine engine(cfg);
