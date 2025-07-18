@@ -253,7 +253,7 @@ namespace episteme::search {
 
                             int16_t malus = hist::history_malus(depth);
                             history.update_quiet_hist(position.STM(), explored_quiets.list[j], malus);
-                            history.update_cont_hist(stack, piece, move, malus, ply);
+                            history.update_cont_hist(stack, piece, explored_quiets.list[j], malus, ply);
                         }
                     }
 
