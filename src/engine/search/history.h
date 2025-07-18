@@ -10,16 +10,16 @@
 namespace episteme::hist {
     constexpr int MAX_HISTORY = 16384;
 
-    [[nodiscard]] inline int16_t history_bonus(int16_t depth) {
-        return static_cast<int16_t>(std::clamp(depth * 300, 0, 2500));
+    [[nodiscard]] inline int32_t history_bonus(int16_t depth) {
+        return static_cast<int32_t>(std::clamp(depth * 300, 0, 2500));
     }
 
-    [[nodiscard]] inline int16_t history_malus(int16_t depth) {
-        return -static_cast<int16_t>(std::clamp(depth * 300, 0, 1250));
+    [[nodiscard]] inline int32_t history_malus(int16_t depth) {
+        return -static_cast<int32_t>(std::clamp(depth * 300, 0, 1250));
     }
 
     struct Entry {
-        int16_t value = 0;
+        int32_t value = 0;
 
         inline void update(int16_t bonus) {
             value += bonus - value * std::abs(bonus) / MAX_HISTORY;
@@ -28,12 +28,12 @@ namespace episteme::hist {
 
     class Table {
         public:
-            [[nodiscard]] inline int16_t get_quiet_hist(Color stm, Move move) {
+            [[nodiscard]] inline int32_t get_quiet_hist(Color stm, Move move) {
                 return quiet_hist[color_idx(stm)][sq_idx(move.from_square())][sq_idx(move.to_square())].value;
             }
 
-            [[nodiscard]] inline int16_t get_cont_hist(stack::Stack& stack, Piece piece, Move move, int16_t ply) {
-                int16_t value = 0;
+            [[nodiscard]] inline int32_t get_cont_hist(stack::Stack& stack, Piece piece, Move move, int16_t ply) {
+                int32_t value = 0;
 
                 auto get_hist = [&](int16_t diff) {
                     int16_t ply_value = 0;
