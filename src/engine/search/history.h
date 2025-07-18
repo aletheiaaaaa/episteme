@@ -60,6 +60,7 @@ namespace episteme::hist {
 
             inline void reset() {
                 quiet_hist = {};
+                cont_hist = {};
             }
 
         private:
