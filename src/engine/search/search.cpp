@@ -120,6 +120,9 @@ namespace episteme::search {
                     Line null{};
                     int16_t reduction = 3 + improving;
 
+                    stack[ply].move = Move();
+                    stack[ply].piece = Piece::None;
+
                     position.make_null();
                     int32_t score = -search<false>(position, null, depth - reduction, ply + 1, -beta, -beta + 1, limits);
                     position.unmake_move();
