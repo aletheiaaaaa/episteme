@@ -38,8 +38,8 @@ namespace episteme::hist {
                 if (ply > 0) {
                     Move prev_move = stack[ply - 1].move;
                     Piece prev_piece = stack[ply - 1].piece;
-    
-                    value += cont_hist[piece_idx(piece)][sq_idx(move.to_square())][piece_idx(prev_piece)][sq_idx(prev_move.to_square())].value;    
+
+                    if (prev_piece != Piece::None) value += cont_hist[piece_idx(piece)][sq_idx(move.to_square())][piece_idx(prev_piece)][sq_idx(prev_move.to_square())].value;
                 }
 
                 return value;
@@ -54,7 +54,7 @@ namespace episteme::hist {
                     Move prev_move = stack[ply - 1].move;
                     Piece prev_piece = stack[ply - 1].piece;
 
-                    cont_hist[piece_idx(piece)][sq_idx(move.to_square())][piece_idx(prev_piece)][sq_idx(prev_move.to_square())].update(bonus);
+                    if (prev_piece != Piece::None) cont_hist[piece_idx(piece)][sq_idx(move.to_square())][piece_idx(prev_piece)][sq_idx(prev_move.to_square())].update(bonus);
                 }
             }
 
