@@ -250,7 +250,10 @@ namespace episteme::search {
 
                         for (size_t j = 0; j < explored_quiets.count; j++) {
                             if (explored_quiets.list[j].data() == move.data()) continue;
-                            history.update_quiet_hist(position.STM(), explored_quiets.list[j], hist::history_malus(depth));
+
+                            int16_t malus = hist::history_malus(depth);
+                            history.update_quiet_hist(position.STM(), explored_quiets.list[j], malus);
+                            history.update_cont_hist(stack, piece, move, malus, ply);
                         }
                     }
 
