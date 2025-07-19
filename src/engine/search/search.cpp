@@ -81,9 +81,6 @@ namespace episteme::search {
             return quiesce(position, PV, ply, alpha, beta, limits);
         }
 
-        stack[ply].move = Move();
-        stack[ply].piece = Piece::None;
-
         tt::Entry tt_entry{};
         if (!stack[ply].excluded.data()) {
             tt_entry = ttable.probe(position.zobrist());
@@ -146,6 +143,9 @@ namespace episteme::search {
         MoveList explored_quiets;
         tt::NodeType node_type = tt::NodeType::AllNode;
         int32_t num_legal = 0;
+
+        stack[ply].move = Move();
+        stack[ply].piece = Piece::None;
 
         for (size_t i = 0; i < move_list.count; i++) { 
             pick_move(move_list, i);
