@@ -81,6 +81,9 @@ namespace episteme::search {
             return quiesce(position, PV, ply, alpha, beta, limits);
         }
 
+        stack[ply].move = Move();
+        stack[ply].piece = Piece::None;
+
         tt::Entry tt_entry{};
         if (!stack[ply].excluded.data()) {
             tt_entry = ttable.probe(position.zobrist());

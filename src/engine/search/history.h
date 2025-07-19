@@ -3,6 +3,8 @@
 #include "../chess/move.h"
 #include "stack.h"
 
+#include <cassert>
+
 #include <array>
 #include <cstdint>
 #include <algorithm>
@@ -10,12 +12,12 @@
 namespace episteme::hist {
     constexpr int MAX_HISTORY = 16384;
 
-    [[nodiscard]] inline int32_t history_bonus(int16_t depth) {
-        return static_cast<int32_t>(std::clamp(depth * 300, 0, 2500));
+    [[nodiscard]] inline int16_t history_bonus(int16_t depth) {
+        return static_cast<int16_t>(std::clamp(depth * 300, 0, 2500));
     }
 
-    [[nodiscard]] inline int32_t history_malus(int16_t depth) {
-        return -static_cast<int32_t>(std::clamp(depth * 300, 0, 1250));
+    [[nodiscard]] inline int16_t history_malus(int16_t depth) {
+        return -static_cast<int16_t>(std::clamp(depth * 300, 0, 1250));
     }
 
     struct Entry {
@@ -41,7 +43,7 @@ namespace episteme::hist {
                         Move prev_move = stack[ply - diff].move;
                         Piece prev_piece = stack[ply - diff].piece;
 
-                        if (prev_piece != Piece::None) ply_value += cont_hist[piece_idx(piece)][sq_idx(move.to_square())][piece_idx(prev_piece)][sq_idx(prev_move.to_square())].value;
+                        if (prev_move.data()) ply_value += cont_hist[piece_idx(piece)][sq_idx(move.to_square())][piece_idx(prev_piece)][sq_idx(prev_move.to_square())].value;
                     }
                     return ply_value;
                 };
@@ -62,7 +64,7 @@ namespace episteme::hist {
                         Move prev_move = stack[ply - diff].move;
                         Piece prev_piece = stack[ply - diff].piece;
 
-                        if (prev_piece != Piece::None) cont_hist[piece_idx(piece)][sq_idx(move.to_square())][piece_idx(prev_piece)][sq_idx(prev_move.to_square())].update(bonus);
+                        if (prev_move.data()) cont_hist[piece_idx(piece)][sq_idx(move.to_square())][piece_idx(prev_piece)][sq_idx(prev_move.to_square())].update(bonus);
                     }
                 };
 
