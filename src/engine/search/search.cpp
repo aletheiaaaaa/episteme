@@ -201,6 +201,8 @@ namespace episteme::search {
             if (limits.node_exceeded(nodes)) {
                 should_stop = true;
                 position.unmake_move();
+                stack[ply] = stack::Entry();
+
                 return 0;
             };
 
@@ -227,6 +229,7 @@ namespace episteme::search {
             position.unmake_move();
             accum_history.pop_back();
             accumulator = accum_history.back();
+            stack[ply] = stack::Entry();
             
             if (should_stop) return 0;
             
