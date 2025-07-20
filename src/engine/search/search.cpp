@@ -45,12 +45,7 @@ namespace episteme::search {
             int32_t dst_val = move.move_type() == MoveType::EnPassant ? piece_vals[piece_type_idx(PieceType::Pawn)] : piece_vals[piece_type_idx(dst)];
 
             scored_move.score += dst_val * 10 - src_val;
-<<<<<<< HEAD
-            scored_move.score += (eval::SEE(position, move, 0) ? 100000 : -10000);
-
-=======
             scored_move.score += (eval::SEE(position, move, 0) ? 100000 : -100000);
->>>>>>> 34168e2 (increase malus)
         } else {
             if (stack[*ply].killer.data() == move.data()) {
                 scored_move.score = 800000;
