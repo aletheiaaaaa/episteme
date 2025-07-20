@@ -10,12 +10,8 @@
 namespace episteme::hist {
     constexpr int MAX_HISTORY = 16384;
 
-    [[nodiscard]] inline int16_t history_bonus(int16_t depth) {
+    [[nodiscard]] inline int16_t bonus(int16_t depth) {
         return static_cast<int16_t>(std::clamp(depth * 300, 0, 2500));
-    }
-
-    [[nodiscard]] inline int16_t history_malus(int16_t depth) {
-        return -static_cast<int16_t>(std::clamp(depth * 300, 0, 1250));
     }
 
     struct Entry {

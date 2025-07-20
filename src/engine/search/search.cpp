@@ -251,16 +251,15 @@ namespace episteme::search {
                     if (is_quiet) {
                         stack[ply].killer = move;
 
-                        int16_t bonus = hist::history_bonus(depth);
+                        int16_t bonus = hist::bonus(depth);
                         history.update_quiet_hist(position.STM(), move, bonus);
                         history.update_cont_hist(stack, piece, move, bonus, ply);
 
                         for (size_t j = 0; j < explored_quiets.count; j++) {
                             if (explored_quiets.list[j].data() == move.data()) continue;
 
-                            int16_t malus = hist::history_malus(depth);
-                            history.update_quiet_hist(position.STM(), explored_quiets.list[j], malus);
-                            history.update_cont_hist(stack, piece, explored_quiets.list[j], malus, ply);
+                            history.update_quiet_hist(position.STM(), explored_quiets.list[j], -bonus);
+                            history.update_cont_hist(stack, piece, explored_quiets.list[j], -bonus, ply);
                         }
                     }
 
