@@ -109,6 +109,8 @@ namespace episteme {
                 return state.hash;
             }
 
+            void reset_history();
+
             void from_FEN(const std::string& FEN);
             void from_startpos();
 

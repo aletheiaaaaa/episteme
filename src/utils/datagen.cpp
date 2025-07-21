@@ -58,6 +58,7 @@ namespace episteme::datagen {
             search::ScoredMove initial = engine.datagen_search(position);
             if (initial.score >= INITIAL_MAX) {
                 i--;
+                position.reset_history();
                 position.from_startpos();
                 continue;
             };
@@ -101,6 +102,7 @@ namespace episteme::datagen {
             games++;
             positions += formatter.write(stream, static_cast<uint8_t>(*wdl));
 
+            position.reset_history();
             position.from_startpos();
 
             if ((i + 1) % 16 == 0 || (i + 1) == workload) {
