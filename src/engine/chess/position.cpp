@@ -1,4 +1,6 @@
 #include "position.h"
+#include <iostream>
+#include <cstring>
 
 namespace episteme {
     Position::Position() : position_history{}, state{} {
@@ -317,11 +319,11 @@ namespace episteme {
     }
 
     bool Position::is_threefold() {
-        uint8_t rep_counter = 1;
+        uint8_t rep_counter = 0;
         for (PositionState prev_state : position_history) {
             if (prev_state.hash == state.hash) {
                 rep_counter++;
-                if (rep_counter == 3) return true;
+                if (rep_counter >= 3) return true;
             }
         }
         return false;
